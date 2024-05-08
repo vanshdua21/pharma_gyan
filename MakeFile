@@ -1,0 +1,5 @@
+
+bootstrap:
+	rm -rf venv
+	python3 -m venv venv
+	pip3 install -r server_config/pip/requirements.txt
