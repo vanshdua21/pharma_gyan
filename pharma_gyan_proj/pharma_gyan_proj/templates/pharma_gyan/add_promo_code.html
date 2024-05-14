@@ -1,0 +1,378 @@
+<link rel="stylesheet" media="screen, print" href="/static/css/datatables.bundle.css">
+<link rel="stylesheet" media="screen, print" href="/static/css/skin-master.css">
+<link rel="stylesheet" media="screen, print" href="/static/css/summernote.css?xyz=1">
+<script src="/static/js/datatables.bundle.js"></script>
+<script src="/static/js/datatables.export.js"></script>
+<script src="/static/js/underscore-1.6.0.min.js"></script>
+<!--<script src="/static/js/inputmask.bundle.js"></script>-->
+<script src="/static/js/summernote.js"></script>
+
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
+
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+
+    .rcWrapper {
+        width: 300px;
+        height: 230px;
+        padding: 0;
+        border: 2px solid black;
+        border-radius: 20px;
+        background-color: #eef7fd;
+    }
+
+    .rcHeader{
+        width: 100%;
+        height: 52px;
+        border-radius:20px 20px 0px 0px;
+        border: 1px solid;
+    }
+
+    /*.otpcheck{*/
+    /*    padding-left: 40px;*/
+    /*}*/
+    /*.emailCTA{*/
+    /*    margin-left: 7%;*/
+    /*    padding-top: 12px;*/
+    /*    border-top: 1px solid #1dc9b7;*/
+    /*}*/
+
+</style>
+
+
+<!--<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;">-->
+<!--  <div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;"><strong>Congratulations!</strong> <span id="success-text"></span>-->
+<!---->
+<!--    </div></div>-->
+
+<div id="success-div" style="display: none;">
+  <div class="panel-container show">
+    <div class="panel-content">
+      <div class="panel-tag" style="width:100%;float:left;">
+        <div style="float:left;">Congratulations! You have successfully saved Vehicle.</div>
+        <div style="clear:both;"></div>
+        <div style="float:left;margin-top:20px;">
+          <button class="btn btn-danger waves-effect waves-themed" onclick="window.location='<?=$baseUrl?>#books/admin/addVehicle?x='+Math.floor((Math.random() * 100000) + 1); ;">Add Another Vehicle</button>
+          <button style="margin-left:20px;" class="btn btn-warning waves-effect waves-themed" onclick="window.location='<?=$baseUrl?>#books/admin/viewVehicles'">View Vehicle</button>
+        </div>
+
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Add Promo Code
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                        <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                    </div>
+                </div>
+                <div class="panel-container show">
+                    <div style="display: flex"; class="panel-content">
+
+
+                        <div class="col-lg-4">
+                            <div class="p-20">
+                                <div action="#">
+
+
+                                    <div style="margin-bottom: 0.5rem"; class="form-group">
+                                        <label style="width: 100%"; class="form-label" for="mobile">Name</label>
+
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" id="vehicle_no" class="form-control">
+
+                                    </div>
+
+                                  <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                                    <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                                    </div>
+                                  </div>
+                                  <div id="err-div" style="display: none;margin-top:20px;"></div>
+                                  <div class="col-xl-6">
+                                    <div id="issues" class="alert alert-danger" role="alert" style="margin-top:20px; display: none;">
+                                      <strong>Oh snap!</strong>
+                                      <ul id="issue-items" style="margin-top:10px;">
+                                        <li>Issue 1</li>
+                                      </ul>
+                                    </div>
+                                  </div>
+                                    <div class="emailCTA">
+                                        <button class="btn  btn-small btn-success" onclick="addVehicle()" >Save</button>
+                                    </div>
+
+
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="p-20">
+                                <div action="#">
+
+
+                                    <div style="margin-bottom: 0.5rem"; class="form-group">
+                                        <label style="width: 100%"; class="form-label" for="mobile">Promo Code</label>
+
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" id="vehicle_no" class="form-control">
+
+                                    </div>
+
+                                  <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                                    <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                                    </div>
+                                  </div>
+                                  <div id="err-div" style="display: none;margin-top:20px;"></div>
+                                  <div class="col-xl-6">
+                                    <div id="issues" class="alert alert-danger" role="alert" style="margin-top:20px; display: none;">
+                                      <strong>Oh snap!</strong>
+                                      <ul id="issue-items" style="margin-top:10px;">
+                                        <li>Issue 1</li>
+                                      </ul>
+                                    </div>
+                                  </div>
+
+
+
+
+
+                                </div>
+                            </div>
+                        </div>
+
+<!--                        <div class="col-lg-6 rcWrapper">-->
+<!--                            <header class="rcHeader">-->
+<!--                                <img style="float: left" src="/static/img/sjImg.png" alt="Satyamev Jayate" width="40" height="50">-->
+<!--                                <h4 style="text-align: center; margin: 5px">UTTAR PRADESH TRANSPORT DEPARTMENT</h4>-->
+<!--                                <h4 style="text-align: center; margin: 5px">CERTIFICATE OF REGISTRATION</h4>-->
+<!--                            </header>-->
+<!--                            <img src="/static/img/chip.png" alt="Card Chip" width="70" height="40">-->
+<!--                            <div class="rowWrapper">-->
+<!--                                <div class="tittle">Reg. No.</div>-->
+<!--                                <div class="value">UK07BD0096</div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+<script type="text/javascript">
+
+    var baseUrl = '<?=$baseUrl?>';
+
+    $(document).ready(function() {
+
+
+        document.domain = 'santkripaequipment.com';
+
+
+        function initProgressBar() {
+
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+
+
+    });
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fa fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+
+    var lock = false;
+    function addVehicle(){
+      var vehicleno = /^[a-zA-Z0-9]{9,11}$/;
+      var vehicleNumber = $('#vehicle_no').val();
+      if(!(vehicleNumber && vehicleNumber.match(vehicleno))){
+        $("#issues").hide();
+        setError("vehicle");
+        $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add correct vehicle number ! </span></div>');
+        $("#err-div").show();
+
+        return;
+      }
+      setSuccess("vehicle");
+
+
+        lock = true;
+
+        initProgressBar();
+
+        $("#err-div").html('');
+        var barInterval = setInterval('incBar()',25);
+
+
+        $.ajax({
+            type : 'GET',
+            url : baseUrl+'books/admin/saveVehicle/'+ vehicleNumber,
+            success :function(data)
+            {
+
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                var result = eval('(' + data + ')');
+                console.log(result, "result");
+                if(result['result']=='success')
+                {
+                    $("#success-div").show();
+                    $("#success-text").html("Vehicle added Successfully");
+
+
+                    $("#main-form-div").hide();
+                  $("#progress-bar-div").hide();
+                    return;
+                }
+                else
+                {
+
+                  $("#issue-items").html("");
+                  console.log(result['info'], "result['info']")
+
+                  $("#issue-items").append(`<li>Error! ${result['info']}</li>`);
+
+                  $("#issues").fadeIn(500);
+                  lock = false;
+                  clearInterval(barInterval);
+                  $("#progress-bar-div").hide();
+                  return;
+                }
+
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+              $("#issue-items").html("");
+
+              $("#issue-items").append(`<li>Error! ${message}</li>`);
+
+              $("#issues").fadeIn(500);
+              $("#progress-bar-div").hide();
+              lock = false;
+              return;
+            }
+
+        });
+
+
+
+    }
+
+
+
+
+</script>
+
+

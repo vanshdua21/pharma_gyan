@@ -26,3 +26,10 @@ def dashboard(request):
 def get_user_tab_permissions(user):
     user_groups = [group.name for group in list(user.groups.all())]
     return user_groups
+
+
+def promo_code(request):
+    user = request.user
+
+    rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"user": user})
+    return HttpResponse(rendered_page)
