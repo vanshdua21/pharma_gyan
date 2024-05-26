@@ -1,0 +1,58 @@
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Promo Code Generator&lt;/title&gt;
+    &lt;script src="https://code.jquery.com/jquery-3.6.0.min.js"&gt;&lt;/script&gt;
+    &lt;style&gt;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        #promoContainer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #promoInput {
+            padding: 10px;
+            font-size: 16px;
+        }
+        #generateButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="promoContainer"&gt;
+        &lt;input type="text" id="promoInput" placeholder="Your promo code" readonly&gt;
+        &lt;button id="generateButton"&gt;Generate Promo Code&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        $(document).ready(function() {
+            $('#generateButton').click(function() {
+                // Function to generate a random promo code
+                function generatePromoCode(length) {
+                    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                    let promoCode = '';
+                    for (let i = 0; i &lt; length; i++) {
+                        const randomIndex = Math.floor(Math.random() * characters.length);
+                        promoCode += characters.charAt(randomIndex);
+                    }
+                    return promoCode;
+                }
+
+                // Generate a promo code of length 10
+                const promoCode = generatePromoCode(10);
+                
+                // Set the promo code in the input element
+                $('#promoInput').val(promoCode);
+            });
+        });
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;

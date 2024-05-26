@@ -27,7 +27,7 @@ SECRET_KEY = "2322be3ujbe38343403n4jkn"
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
+CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'phama_gyan_proj.middlewares.HttpRequestInterceptor.HttpRequestInterceptor'
 ]
 
 ROOT_URLCONF = 'pharma_gyan_proj.urls'

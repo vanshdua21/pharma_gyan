@@ -1,11 +1,11 @@
-<link rel="stylesheet" media="screen, print" href="/static/css/datatables.bundle.css">
-<link rel="stylesheet" media="screen, print" href="/static/css/skin-master.css">
-<link rel="stylesheet" media="screen, print" href="/static/css/summernote.css?xyz=1">
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/skin-master.css">
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css?xyz=1">
 <script src="/static/js/datatables.bundle.js"></script>
-<script src="/static/js/datatables.export.js"></script>
-<script src="/static/js/underscore-1.6.0.min.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+<script src="/static/pharma_gyan/js/underscore-1.6.0.min.js"></script>
 <!--<script src="/static/js/inputmask.bundle.js"></script>-->
-<script src="/static/js/summernote.js"></script>
+<script src="/static/pharma_gyan/js/summernote.js"></script>
 
 <style type="text/css">
     .form-field-custom{
@@ -114,28 +114,19 @@
                 </div>
                 <div class="panel-container show">
                     <div style="display: flex"; class="panel-content">
-
-<!--                        <div class="col-xl-10">-->
                         <div class="col-lg-5">
                             <div class="p-20">
-                                <div action="#">
 
 
                                     <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Name</label>
+                                        <label style="width: 100%"; class="form-label">Title</label>
 
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" id="vehicle_no" class="form-control">
+                                        <input type="text" id="title" class="form-control">
 
                                     </div>
-
-
-
-
-
-                                </div>
                             </div>
                         </div>
                         <div class="col-lg-5">
@@ -144,12 +135,11 @@
 
 
                                     <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Promo Code</label>
-
+                                        <label style="width: 100%"; class="form-label">Promo Code</label>
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" id="vehicle_no" class="form-control">
+                                        <input type="text" id="promoCode" class="form-control">
 
                                     </div>
 
@@ -175,23 +165,6 @@
                                 </div>
                             </div>
                         </div>
-<!--                        </div>-->
-
-<!--                        <div class="col-lg-6 rcWrapper">-->
-<!--                            <header class="rcHeader">-->
-<!--                                <img style="float: left" src="/static/img/sjImg.png" alt="Satyamev Jayate" width="40" height="50">-->
-<!--                                <h4 style="text-align: center; margin: 5px">UTTAR PRADESH TRANSPORT DEPARTMENT</h4>-->
-<!--                                <h4 style="text-align: center; margin: 5px">CERTIFICATE OF REGISTRATION</h4>-->
-<!--                            </header>-->
-<!--                            <img src="/static/img/chip.png" alt="Card Chip" width="70" height="40">-->
-<!--                            <div class="rowWrapper">-->
-<!--                                <div class="tittle">Reg. No.</div>-->
-<!--                                <div class="value">UK07BD0096</div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-
-
                     </div>
                     <div style="display: flex"; class="panel-content">
 
@@ -201,18 +174,15 @@
 
 
                                     <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Type</label>
+                                        <label style="width: 100%"; class="form-label">Discount Type</label>
 
                                     </div>
 
                                     <div class="form-group">
-                                        <select
-                    class="form-control select2"
-                    id="bankName"
-                    name="bankName"
-                    data-placeholder="Select promo code type"
-                    required
-                  ></select>
+                                    <select class="form-control select2" id="discountType" data-placeholder="Select promo code type" onchange="typeChanged()" style="placeholder: 'Please select an skill'">
+                                        <option value="flat">Flat</option>
+                                        <option value="percentage">Percentage</option>
+                                    </select>
 
                                     </div>
 
@@ -237,46 +207,28 @@
 
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-lg-5" id="flat-discount-div">
                         </div>
 
                     </div>
                     <div style="display: flex"; class="panel-content">
 
 <!--                        <div class="col-xl-10">-->
-                        <div class="col-lg-5">
-                            <div class="p-20">
-                                <div action="#">
-
-
-                                    <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Discount (Rs/%)</label>
-
-                                    </div>
-
-                                    <div class="form-group">
-                                        <input type="text" id="vehicle_no" class="form-control">
-
-                                    </div>
-
-
-
-
-
-                                </div>
-                            </div>
+                        <div class="col-lg-5" id="percentage-discount-div" style="display: none;">
                         </div>
-                        <div class="col-lg-5">
+                        <div class="col-lg-5"  id="max-discount-div" style="display: none;">
                             <div class="p-20">
                                 <div action="#">
 
 
                                     <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Max Discount (Rs)</label>
+                                        <label style="width: 100%"; class="form-label">Max Discount (Rs)</label>
 
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" id="vehicle_no" class="form-control">
+                                        <input type="text" id="max_discount" class="form-control">
 
                                     </div>
 
@@ -302,20 +254,6 @@
                                 </div>
                             </div>
                         </div>
-<!--                        </div>-->
-
-<!--                        <div class="col-lg-6 rcWrapper">-->
-<!--                            <header class="rcHeader">-->
-<!--                                <img style="float: left" src="/static/img/sjImg.png" alt="Satyamev Jayate" width="40" height="50">-->
-<!--                                <h4 style="text-align: center; margin: 5px">UTTAR PRADESH TRANSPORT DEPARTMENT</h4>-->
-<!--                                <h4 style="text-align: center; margin: 5px">CERTIFICATE OF REGISTRATION</h4>-->
-<!--                            </header>-->
-<!--                            <img src="/static/img/chip.png" alt="Card Chip" width="70" height="40">-->
-<!--                            <div class="rowWrapper">-->
-<!--                                <div class="tittle">Reg. No.</div>-->
-<!--                                <div class="value">UK07BD0096</div>-->
-<!--                            </div>-->
-<!--                        </div>-->
 
 
 
@@ -324,18 +262,18 @@
                     <div style="display: flex"; class="panel-content">
 
 <!--                        <div class="col-xl-10">-->
-                        <div class="col-lg-5">
+                        <div class="col-lg-5"  id="max-usage-div" style="display: none;">
                             <div class="p-20">
                                 <div action="#">
 
 
                                     <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Max Usage</label>
+                                        <label style="width: 100%"; class="form-label">Max Usage</label>
 
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" id="vehicle_no" class="form-control">
+                                        <input type="text" id="max_usage" class="form-control">
 
                                     </div>
 
@@ -346,18 +284,18 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-5">
+                        <div class="col-lg-5"  id="expiry-date-div" style="display: none;">
                             <div class="p-20">
                                 <div action="#">
 
 
                                     <div style="margin-bottom: 0.5rem"; class="form-group">
-                                        <label style="width: 100%"; class="form-label" for="mobile">Expiry Date</label>
+                                        <label style="width: 100%"; class="form-label">Expiry Date</label>
 
                                     </div>
 
                                     <div class="form-group">
-                                        <input type="text" id="vehicle_no" class="form-control">
+                                        <input type="date" id="expire_date" class="form-control">
 
                                     </div>
 
@@ -383,55 +321,22 @@
                                 </div>
                             </div>
                         </div>
-<!--                        </div>-->
-
-<!--                        <div class="col-lg-6 rcWrapper">-->
-<!--                            <header class="rcHeader">-->
-<!--                                <img style="float: left" src="/static/img/sjImg.png" alt="Satyamev Jayate" width="40" height="50">-->
-<!--                                <h4 style="text-align: center; margin: 5px">UTTAR PRADESH TRANSPORT DEPARTMENT</h4>-->
-<!--                                <h4 style="text-align: center; margin: 5px">CERTIFICATE OF REGISTRATION</h4>-->
-<!--                            </header>-->
-<!--                            <img src="/static/img/chip.png" alt="Card Chip" width="70" height="40">-->
-<!--                            <div class="rowWrapper">-->
-<!--                                <div class="tittle">Reg. No.</div>-->
-<!--                                <div class="value">UK07BD0096</div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-
-
                     </div>
                     <div style="display: flex"; class="panel-content">
 
 <!--                        <div class="col-xl-10">-->
-                        <div class="col-lg-5">
+                        <div class="col-lg-5" id="is-public-div" style="display: none;">
                             <div class="custom-control custom-checkbox otpcheck">
-                                        <input type="checkbox" class="custom-control-input" id="otp" value="0">
-                                        <label class="custom-control-label" for="otp" style="font-size: 15px;padding-left: 15px">Is Public</label>
+                                        <input type="checkbox" class="custom-control-input" id="is_public" value="0">
+                                        <label class="custom-control-label" style="font-size: 15px;padding-left: 15px">Is Public</label>
                                     </div>
                         </div>
-                        <div class="col-lg-5">
+                        <div class="col-lg-5" id="multi-usage-div" style="display: none;">
                             <div class="custom-control custom-checkbox otpcheck">
-                                        <input type="checkbox" class="custom-control-input" id="otp" value="0">
-                                        <label class="custom-control-label" for="otp" style="font-size: 15px;padding-left: 15px">Multi Usage</label>
+                                        <input type="checkbox" class="custom-control-input" id="multi_usage" value="0">
+                                        <label class="custom-control-label" style="font-size: 15px;padding-left: 15px">Multi Usage</label>
                                     </div>
                         </div>
-<!--                        </div>-->
-
-<!--                        <div class="col-lg-6 rcWrapper">-->
-<!--                            <header class="rcHeader">-->
-<!--                                <img style="float: left" src="/static/img/sjImg.png" alt="Satyamev Jayate" width="40" height="50">-->
-<!--                                <h4 style="text-align: center; margin: 5px">UTTAR PRADESH TRANSPORT DEPARTMENT</h4>-->
-<!--                                <h4 style="text-align: center; margin: 5px">CERTIFICATE OF REGISTRATION</h4>-->
-<!--                            </header>-->
-<!--                            <img src="/static/img/chip.png" alt="Card Chip" width="70" height="40">-->
-<!--                            <div class="rowWrapper">-->
-<!--                                <div class="tittle">Reg. No.</div>-->
-<!--                                <div class="value">UK07BD0096</div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-
 
                     </div>
                     <div>
@@ -452,10 +357,30 @@
                                     </div>
                                   </div>
                                     <div class="emailCTA">
-                                        <button class="btn  btn-small btn-success" onclick="addVehicle()" >Save</button>
+                                        <button class="btn  btn-small btn-success" onclick="addPromoCode()" >Save</button>
                                     </div>
                             </div>
                     </div>
+                    <div class="p-20" id="discount-div" style="display: none;">
+                                <div action="#">
+
+
+                                    <div style="margin-bottom: 0.5rem"; class="form-group">
+                                        <label style="width: 100%"; class="form-label"  id="discount-label">Discount (Rs/%)</label>
+
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" id="discount" class="form-control">
+
+                                    </div>
+
+
+
+
+
+                                </div>
+                            </div>
 
 
 
@@ -477,6 +402,7 @@
 </div>
 
 
+</div>
 </div>
 
 
@@ -532,11 +458,46 @@
         var currWidth = $("#progress-bar").width();
         $("#progress-bar").width(currWidth+50);
     }
+    function typeChanged(){
+    let discountType = $("#discountType").val();
+    if(discountType=="percentage"){
+        $("#percentage-discount-div").append($("#discount-div").show());
+        $("#discount-label").text("Discount (%)");
+        $("#percentage-discount-div").show();
+        $("#max-discount-div").show();
+        $("#max-usage-div").show();
+        $("#expiry-date-div").show();
+        $("#is-public-div").show();
+        $("#multi-usage-div").show();
+        $("#flat-discount-div").hide()
+    }
+    else{
+    $("#percentage-discount-div").hide();
+    $("#max-discount-div").hide();
+    $("#flat-discount-div").append($("#discount-div").show());
+    $("#discount-label").text("Discount (Rs)");
+    $("#flat-discount-div").show();
+    $("#max-usage-div").show();
+    $("#expiry-date-div").show();
+    $("#is-public-div").show();
+    $("#multi-usage-div").show();
+    }
+
+  }
 
     var lock = false;
-    function addVehicle(){
-      var vehicleno = /^[a-zA-Z0-9]{9,11}$/;
-      var vehicleNumber = $('#vehicle_no').val();
+    function addPromoCode(){
+      var promoData = {};
+      promoData['title'] = $('#title').val();
+      promoData['promo_code'] = $('#promoCode').val();
+      promoData['discount_type'] = $('#discountType').val();
+      promoData['discount'] = $('#discount').val();
+      promoData['max_discount'] = $('#max_discount').val();
+      promoData['max_usage'] = $('#max_usage').val();
+      promoData['expire_date'] = $('#expire_date').val();
+      promoData['is_public'] = $('#is_public').val();
+      promoData['multi_usage'] = $('#multi_usage').val();
+      console.log(promoData)
       if(!(vehicleNumber && vehicleNumber.match(vehicleno))){
         $("#issues").hide();
         setError("vehicle");
@@ -557,8 +518,9 @@
 
 
         $.ajax({
-            type : 'GET',
-            url : baseUrl+'books/admin/saveVehicle/'+ vehicleNumber,
+            type : 'POST',
+            url : baseUrl+'pharma_gyan/editor/upsertPromoCode/',
+            data : {'data':JSON.stringify(promoData)},
             success :function(data)
             {
 
@@ -621,5 +583,4 @@
 
 
 </script>
-
 

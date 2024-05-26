@@ -4,5 +4,7 @@ from pharma_gyan_proj.apps.pharma_gyan import views
 urlpatterns = [
     path('editor/', views.editor),
     path('editor/dashboard/', views.dashboard),
-    path('editor/promoCode', views.promo_code)
+    path('editor/promoCode', views.promo_code),
+    path('editor/viewPromoCode', views.view_promo_code),
+    path("editor/upsertPromoCode/", views.upsert_promo_code),
 ]
