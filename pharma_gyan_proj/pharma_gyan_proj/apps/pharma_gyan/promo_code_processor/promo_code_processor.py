@@ -68,7 +68,7 @@ def validate_promo_code_details(request_body):
         raise BadRequestException(method_name=method_name, reason="Discount type is incorrect")
 
     if (request_body.get('expiry_date') is None or request_body.get('expiry_date') == "" or
-            datetime.strptime(request_body.get('expiry_date'), "%Y-%m-%d %H:%M:%S").date() > datetime.utcnow()):
+            datetime.strptime(request_body.get('expiry_date'), "%Y-%m-%d %H:%M:%S").date() < datetime.utcnow()):
         raise BadRequestException(method_name=method_name, reason="Content text is not provided")
 
     validate_promo_code_title(request_body.get('title'))

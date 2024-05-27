@@ -7,4 +7,6 @@ urlpatterns = [
     path('editor/promoCode', views.promo_code),
     path('editor/viewPromoCode', views.view_promo_code),
     path("editor/upsertPromoCode/", views.upsert_promo_code),
+    path("editor/summernote/", views.summernote),
+    path("editor/saveSummernote/", views.save_summernote),
 ]

@@ -498,15 +498,15 @@
       promoData['is_public'] = $('#is_public').val();
       promoData['multi_usage'] = $('#multi_usage').val();
       console.log(promoData)
-      if(!(vehicleNumber && vehicleNumber.match(vehicleno))){
-        $("#issues").hide();
-        setError("vehicle");
-        $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add correct vehicle number ! </span></div>');
-        $("#err-div").show();
+<!--      if(!(vehicleNumber && vehicleNumber.match(vehicleno))){-->
+<!--        $("#issues").hide();-->
+<!--        setError("vehicle");-->
+<!--        $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add correct vehicle number ! </span></div>');-->
+<!--        $("#err-div").show();-->
 
-        return;
-      }
-      setSuccess("vehicle");
+<!--        return;-->
+<!--      }-->
+<!--      setSuccess("vehicle");-->
 
 
         lock = true;
@@ -516,10 +516,10 @@
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
 
-
+        console.log(JSON.stringify(promoData));
         $.ajax({
             type : 'POST',
-            url : baseUrl+'pharma_gyan/editor/upsertPromoCode/',
+            url : 'upsertPromoCode/',
             data : {'data':JSON.stringify(promoData)},
             success :function(data)
             {
