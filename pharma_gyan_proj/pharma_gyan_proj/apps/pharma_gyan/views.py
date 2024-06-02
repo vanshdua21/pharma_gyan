@@ -9,7 +9,19 @@ import logging
 from django.conf import settings
 from urllib.parse import unquote
 
+from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import validate_and_secure_login
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code
+
+
+
+@staff_member_required
+@user_passes_test(lambda u: u.is_staff and u.groups.filter(name='pharma_gyan').exists())
+def admin_login(request):
+    baseUrl = settings.BASE_PATH
+    rendered_page = render_to_string('pharma_gyan/login.html', {"baseUrl": baseUrl})
+    resp = HttpResponse(rendered_page)
+    resp.delete_cookie('access_token')
+    return resp
 
 
 @staff_member_required
@@ -22,6 +34,7 @@ def editor(request):
 
 @staff_member_required
 @user_passes_test(lambda u: u.is_staff and u.groups.filter(name='pharma_gyan').exists())
+@csrf_exempt
 def dashboard(request):
     rendered_page = render_to_string('pharma_gyan/dashboard.html', {})
     return HttpResponse(rendered_page)
@@ -87,4 +100,18 @@ def upsert_promo_code(request):
     request_body = json.loads(decoded_data)
     response = prepare_and_save_promo_code(request_body)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+
+@csrf_exempt
+def secure_login(request):
+    method_name = "secure_login"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    response = validate_and_secure_login(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    if status_code == http.HTTPStatus.OK:
+        resp = HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+        resp.set_cookie('access_token', response.get('access_token'))
+        return resp
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

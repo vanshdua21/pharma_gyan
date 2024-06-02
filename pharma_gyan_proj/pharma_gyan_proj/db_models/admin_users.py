@@ -1,5 +1,6 @@
 from pharma_gyan_proj.orm_models.admin_users_orm_model import pg_admin_users
-from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited
+from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
+    update, execute_query
 
 
 class admin_users_model:
@@ -20,4 +21,16 @@ class admin_users_model:
                                  relationships=relationships_list)
         if res is None or len(res) <= 0:
             return None
+        return res
+
+    def update_admin_users(self, filter_list, update_dict):
+        return update(self.engine, self.table, filter_list, update_dict)
+
+    def fetch_user_detail_by_access_token(self, access_token, curr_date_time):
+        query = f"""SELECT au.unique_id as user_uuid, au.first_name as first_name, au.middle_name as middle_name, 
+        au.last_name as last_name, au.email_id as email_id, au.mobile_number as mobile_number, au.user_name as 
+        user_name, au.expiry_time as user_expiry, au.permissions as admin_user_permission, us.access_token as 
+        access_token, us.expiry_time as session_expiry_time FROM admin_users au join user_sessions us on au.unique_id = 
+        us.user_uuid where us.access_token = '{access_token}' and us.expiry_time > '{curr_date_time}'"""
+        res = execute_query(self.engine, query)
         return res
