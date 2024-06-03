@@ -10,5 +10,6 @@ urlpatterns = [
     path("editor/upsertPromoCode/", views.upsert_promo_code),
     path("editor/summernote/", views.summernote),
     path("editor/saveSummernote/", views.save_summernote),
-    path("editor/secureLogin/", views.secure_login)
+    path("editor/secureLogin/", views.secure_login),
+    path("editor/dumpDatabase/", views.dump_database)
 ]

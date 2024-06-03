@@ -73,3 +73,14 @@ def set_user_in_active(unique_id):
     admin_users_model().update_admin_users(filter_list=filter_list, update_dict=dict(is_active=0))
 
     logger.debug(f"Exit {method_name}, Success")
+
+
+def download_database_dump():
+    method_name = "download_database_dump"
+    try:
+        admin_users_model().dump_database()
+    except Exception as e:
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)

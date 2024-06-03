@@ -1,3 +1,6 @@
+import subprocess
+
+from pharma_gyan_proj import settings
 from pharma_gyan_proj.orm_models.admin_users_orm_model import pg_admin_users
 from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
     update, execute_query
@@ -34,3 +37,7 @@ class admin_users_model:
         us.user_uuid where us.access_token = '{access_token}' and us.expiry_time > '{curr_date_time}'"""
         res = execute_query(self.engine, query)
         return res
+
+    def dump_database(self):
+        dump_command = f"mysqldump -u {settings.DATABASES[self.database]['USER']} -p{settings.DATABASES[self.database]['PASSWORD']} -h {settings.DATABASES[self.database]['HOST']} {settings.DATABASES[self.database]['NAME']} > {settings.DATABASES[self.database]['NAME']}.sql"
+        subprocess.run(dump_command, shell=True, check=True)
