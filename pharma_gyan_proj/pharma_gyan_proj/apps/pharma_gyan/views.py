@@ -4,12 +4,12 @@ from django.shortcuts import HttpResponse
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
-import requests
-import logging
 from django.conf import settings
 from urllib.parse import unquote
 
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code
+from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
+from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
 
 @staff_member_required
@@ -53,7 +53,6 @@ def summernote(request):
 
 @csrf_exempt
 def save_summernote(request):
-    print('Summernote Before decode', request.body)
     # Extract the byte string from the request body
     byte_string = request.body  # This will be in byte format: b'data=...'
 
@@ -65,13 +64,11 @@ def save_summernote(request):
 
     # URL-decode the data
     decoded_data = unquote(url_encoded_data)
-    print('Summernote After decode', decoded_data)
     return HttpResponse(json.dumps("{'data':'OK'}", default=str), status=http.HTTPStatus.OK, content_type="application/json")
 
 
 @csrf_exempt
 def upsert_promo_code(request):
-    print('Before decode', request.body)
     # Extract the byte string from the request body
     byte_string = request.body  # This will be in byte format: b'data=...'
 
@@ -83,8 +80,55 @@ def upsert_promo_code(request):
 
     # URL-decode the data
     decoded_data = unquote(url_encoded_data)
-    print('After decode', decoded_data)
     request_body = json.loads(decoded_data)
     response = prepare_and_save_promo_code(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+def addUser(request):
+    user = request.user
+    permissions = [(perm.name, perm.value) for perm in AdminUserPermissionType]
+    rendered_page = render_to_string('pharma_gyan/add_user.html', {"user": user, "permissions": permissions, "mode": "create"})
+    return HttpResponse(rendered_page)
+
+def editUser(request):
+    # Retrieve the id parameter from the query string
+    user_id = request.GET.get('id')
+    user = fetch_user_from_id(user_id)
+    if user is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No user with this ID")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    permissions = [(perm.name, perm.value) for perm in AdminUserPermissionType]
+    rendered_page = render_to_string('pharma_gyan/add_user.html', {"user": json.dumps(user, default=str), "permissions": permissions, "mode": "edit"})
+    return HttpResponse(rendered_page)
+
+def viewUsers(request):
+    users = fetch_and_prepare_users()
+    # Convert list of dictionaries to JSON
+    users_json = json.dumps(users)
+    rendered_page = render_to_string('pharma_gyan/view_users.html', {"users": users_json})
+    return HttpResponse(rendered_page)
+
+@csrf_exempt
+def upsertUser(request):
+    # Extract the byte string from the request body
+    byte_string = request.body  # This will be in byte format: b'data=...'
+
+    # Decode the byte string to a regular string
+    decoded_string = byte_string.decode('utf-8')  # Convert from bytes to string
+
+    # Parse the URL-encoded data
+    url_encoded_data = decoded_string.split('=', 1)[1]  # Get the part after 'data='
+
+    # URL-decode the data
+    decoded_data = unquote(url_encoded_data)
+    user = json.loads(decoded_data)
+    response = prepare_and_save_user(user)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
+def deleteUser(request, userId):
+    response = delete_user(userId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

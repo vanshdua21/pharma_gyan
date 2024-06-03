@@ -1,0 +1,375 @@
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
+
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+
+</style>
+
+
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+"><strong>Congratulations!</strong> <span id="success-text"></span>
+
+    </div></div>
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Add User
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                        <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                    </div>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+
+
+                        <div class="col-lg-9">
+                            <div class="p-20">
+                                <div action="#">
+
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="mobile">Username</label>
+                                        <input type="text" id="userName" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="pass">Password</label>
+                                        <input type="password" id="pass" class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="pass">Email</label>
+                                        <input type="email" id="email" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="mobile">Mobile</label>
+                                        <input type="text" id="mobile" class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="name">Display Name</label>
+                                        <input type="text" id="name" class="form-control">
+                                    </div>
+
+                                    <div class="permissionWrapper">
+                                        <div class="perHead">Permissions</div>
+                                        <div id="perm">
+                                            {% for perm_name, perm_value in permissions %}
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id={{perm_name}} value={{perm_name}}>
+                                                    <label class="custom-control-label" for={{perm_name}} style="font-size: 15px;padding-left: 15px">{{perm_value}}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="emailCTA">
+                                        <button class="btn  btn-small btn-success" onclick="addUser()" >Save</button>
+<!--                                        <button class="btn  btn-small btn-danger" onclick="window.history.back()" style="margin-left: 8px" >Cancel</button>-->
+                                    </div>
+
+
+
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div id="err-div" style="display: none;margin-top:20px;"></div>
+
+
+
+                    <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+<script type="text/javascript">
+
+    var baseUrl = '<?=$baseUrl?>';
+    var mode = "{{mode}}";
+    var currentCustomerData = {};
+
+
+    $(document).ready(function() {
+
+        function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+        if(mode=="edit"){
+            var currentCustomerData = JSON.parse('{{ user|escapejs }}');
+            console.log('Data-',currentCustomerData);
+            setEditMode(currentCustomerData);
+        }
+
+    });
+
+    function setEditMode(customerData){
+        $("#main_title").html('Edit User Data');
+
+        $("#mobile").val(customerData["mobile_number"]);
+        $("#pass").val(customerData["password"]);
+        $("#name").val(customerData["display_name"]);
+        $("#userName").val(customerData["user_name"]);
+        $("#email").val(customerData["email_id"]);
+
+
+        $('#perm input:checked').each(function() {
+            $('input:checkbox').attr('checked',false);
+        });
+
+        let permissions = customerData["permissions"];
+        for(let key in permissions){
+            if(permissions[key] == 1){
+                $("#"+key).attr("checked", true);
+            }
+        }
+
+        editUniqueId = customerData["unique_id"];
+        editId = customerData["id"];
+        is_active = customerData["is_active"];
+        ct = customerData["ct"];
+    }
+
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fa fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+
+    var lock = false;
+    function addUser(){
+        if(!($('#userName').val())){
+            setError("userName");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill User name ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("userName");
+
+        var phoneno = /^\d{10}$/;
+        let mblNumber = $('#mobile').val();
+        if(!(mblNumber && mblNumber.match(phoneno))){
+            setError("mobile");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add correct mobile number ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+        setSuccess("mobile");
+
+        if(!($('#pass').val())){
+            setError("pass");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill password ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("pass");
+
+        if(!($('#name').val())){
+            setError("name");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display name ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("name");
+
+
+        let emailId = $("#email").val();
+        if(emailId != '') {
+            if (validateEmail(emailId) == false) {
+                setError("email");
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please provide valid email ! </span></div>');
+                $("#err-div").show();
+
+                return;
+            } else {
+                setSuccess("email");
+            }
+        }
+
+        var selectedPerms = [];
+        $('#perm input:checked').each(function() {
+            selectedPerms.push($(this).val());
+        });
+
+
+        lock = true;
+
+        initProgressBar();
+
+        $("#err-div").html('');
+        var barInterval = setInterval('incBar()',25);
+        let data = {'phone':mblNumber,'displayName':($('#name').val()),'userName':($('#userName').val()), 'pass':($('#pass').val()),'email':emailId,'perm':JSON.stringify(selectedPerms)};
+        console.log(data);
+        if(mode=="edit"){
+            data['unique_id'] = editUniqueId;
+            data["id"] = editId;
+            data["is_active"] = is_active;
+            data["ct"] = ct;
+        }
+        $.ajax({
+            type : 'POST',
+            url : 'upsertUser/',
+            data : {'data':JSON.stringify(data)},
+            success :function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                console.log('Success', data);
+                if(data['result']=='SUCCESS')
+                {
+                    $("#success-div").show();
+                    if(mode == "edit"){
+                        $("#success-text").html("User edited Successfully");
+                    }else{
+                        $("#success-text").html("User added Successfully");
+                    }
+
+                    $("#main-form-div").hide();
+                    return;
+                }
+                else
+                {
+
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").show();
+                    $("#progress-bar-div").hide();
+
+                    return;
+                }
+
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+
+                return;
+            }
+
+        });
+
+
+
+    }
+
+    function validateEmail(email) {
+        // http://stackoverflow.com/a/46181/11236
+
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+
+
+
+</script>
+
+

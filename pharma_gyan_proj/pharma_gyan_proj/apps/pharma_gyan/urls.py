@@ -9,4 +9,9 @@ urlpatterns = [
     path("editor/upsertPromoCode/", views.upsert_promo_code),
     path("editor/summernote/", views.summernote),
     path("editor/saveSummernote/", views.save_summernote),
+    path("editor/addUser/", views.addUser),
+    path("editor/editUser/", views.editUser),
+    path("editor/viewUsers/", views.viewUsers),
+    path("editor/upsertUser/", views.upsertUser),
+    path("editor/deleteUser/<str:userId>/", views.deleteUser),
 ]

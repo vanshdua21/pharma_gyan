@@ -1,0 +1,202 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-hdr">
+                <h2>
+                    All <span class="fw-900"><i>Users</i></span>
+                </h2>
+                <div class="panel-toolbar">
+                    <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                    <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                    <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="panel-tag">
+                        <p>Below is a list of all users configured in the system</p>
+                    </div>
+                    <!-- datatable start -->
+                    <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                        <thead class="bg-primary-600">
+                        <tr>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                            <th>UserName</th>
+                            <th>Password</th>
+                            <th>Permissions</th>
+                            <th>Active</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+
+                        </tr>
+                        </thead>
+                        <tbody id="colors-data">
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Email</th>
+                                <th>UserName</th>
+                                <th>Password</th>
+                                <th>Permissions</th>
+                                <th>Active</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+    
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <!-- datatable end -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var data = JSON.parse('{{ users|escapejs }}');
+    var datatable;
+    $(document).ready(function()
+    {
+        data.forEach(item => {
+            if(item.is_active){
+                item.is_active = "YES"
+            }else{
+                item.is_active = "NO"
+            }
+        })
+        // initialize datatable
+        datatable = $('#dt-basic-example').dataTable(
+            {
+                responsive: true,
+                lengthChange: false,
+                data : data,
+                columns: [
+                    { data: "display_name" },
+                    { data: "mobile_number" },
+                    { data: "email_id" },
+                    { data: "user_name" },
+                    { data: "password" },
+                    { data: "permissions" },
+                    { data: "is_active" },
+                    { data: "edit"},
+                    { data: "del"}
+                ],
+                dom:
+                /*	--- Layout Structure
+                    --- Options
+                    l	-	length changing input control
+                    f	-	filtering input
+                    t	-	The table!
+                    i	-	Table information summary
+                    p	-	pagination control
+                    r	-	processing display element
+                    B	-	buttons
+                    R	-	ColReorder
+                    S	-	Select
+
+                    --- Markup
+                    < and >				- div element
+                    <"class" and >		- div with a class
+                    <"#id" and >		- div with an ID
+                    <"#id.class" and >	- div with an ID and a class
+
+                    --- Further reading
+                    https://datatables.net/reference/option/dom
+                    --------------------------------------
+                 */
+                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [
+                    /*{
+                        extend:    'colvis',
+                        text:      'Column Visibility',
+                        titleAttr: 'Col visibility',
+                        className: 'mr-sm-3'
+                    },*/
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        titleAttr: 'Generate CSV',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        titleAttr: 'Copy to clipboard',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm'
+                    }
+                ]
+            });
+
+    });
+
+
+    function editUser(id) {
+        window.open("#editUser?id=" + id, "_blank");
+    }
+
+    var lock = false;
+    var baseUrl = '<?=$baseUrl?>';
+
+    function delUser(id)
+    {
+        if(lock==true)
+            return;
+
+        var confirmDelete = confirm("Do you really want to delete this user?");
+        if(confirmDelete==false)
+            return;
+
+        lock = true;
+        $("#err-div").hide();
+        $("#success-div").hide();
+        $.post('/pharma_gyan/editor/deleteUser/' + id + '/',function(data)
+            {
+                lock=false;
+                if(data['result']=='SUCCESS')
+                {
+                    location.reload();
+                    return;
+                }
+                else
+                {
+                    alert('Error while deleting user');
+                    return;
+                }
+
+            }
+        )
+        ;
+    }
+
+
+</script>
