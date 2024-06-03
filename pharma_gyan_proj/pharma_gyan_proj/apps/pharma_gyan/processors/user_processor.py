@@ -72,8 +72,8 @@ def fetch_and_prepare_users():
             "password": user.password,
             "permissions": user.permissions,
             "is_active": user.is_active,
-            "edit": "<button id=\"edit-{}\" onclick=\"editUser('{}')\">Edit</button>".format(user.unique_id, user.unique_id),
-            "del": "<button id=\"del-{}\" onclick=\"delUser('{}')\">Delete</button>".format(user.unique_id, user.unique_id)
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editUser('{}')\">Edit</button>".format(user.unique_id, user.unique_id),
+            "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"delUser('{}')\">Delete</button>".format(user.unique_id, user.unique_id)
         })
     return users_list
 
