@@ -11,7 +11,7 @@ class pg_admin_users(Base, Orm_helper):
     mobile_number = Column("mobile_number", String)
     password = Column("password", String)
     permissions = Column("permissions", String)
-    is_active = Column("is_active", Boolean, default=1)
+    is_active = Column("is_active", Integer, default=1)
     user_name = Column("user_name", String)
     display_name = Column("display_name", String)
     created_by = Column("created_by", String)

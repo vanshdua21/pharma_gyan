@@ -48,7 +48,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'phama_gyan_proj.middlewares.HttpRequestInterceptor.HttpRequestInterceptor'
+    'pharma_gyan_proj.middlewares.HttpRequestInterceptor.HttpRequestInterceptor'
 ]
 
 ROOT_URLCONF = 'pharma_gyan_proj.urls'

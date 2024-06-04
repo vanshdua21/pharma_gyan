@@ -86,8 +86,8 @@
         <div style="float:left;">Congratulations! You have successfully saved Vehicle.</div>
         <div style="clear:both;"></div>
         <div style="float:left;margin-top:20px;">
-          <button class="btn btn-danger waves-effect waves-themed" onclick="window.location='<?=$baseUrl?>#books/admin/addVehicle?x='+Math.floor((Math.random() * 100000) + 1); ;">Add Another Vehicle</button>
-          <button style="margin-left:20px;" class="btn btn-warning waves-effect waves-themed" onclick="window.location='<?=$baseUrl?>#books/admin/viewVehicles'">View Vehicle</button>
+          <button class="btn btn-danger waves-effect waves-themed" onclick="window.location='{{ baseUrl }}/pharma_gyan/editor/#promoCode'">Add Another Promo Code</button>
+          <button style="margin-left:20px;" class="btn btn-warning waves-effect waves-themed" onclick="window.location='<?=$baseUrl?>#'">View Promo Code</button>
         </div>
 
       </div>
@@ -408,7 +408,8 @@
 
 <script type="text/javascript">
 
-    var baseUrl = '<?=$baseUrl?>';
+    var baseUrl = "{{ baseUrl }}";
+    console.log(baseUrl)
 
     $(document).ready(function() {
 
@@ -494,10 +495,9 @@
       promoData['discount'] = $('#discount').val();
       promoData['max_discount'] = $('#max_discount').val();
       promoData['max_usage'] = $('#max_usage').val();
-      promoData['expire_date'] = $('#expire_date').val();
+      promoData['expiry_date'] = $('#expire_date').val();
       promoData['is_public'] = $('#is_public').val();
       promoData['multi_usage'] = $('#multi_usage').val();
-      console.log(promoData)
 <!--      if(!(vehicleNumber && vehicleNumber.match(vehicleno))){-->
 <!--        $("#issues").hide();-->
 <!--        setError("vehicle");-->
@@ -516,11 +516,10 @@
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
 
-        console.log(JSON.stringify(promoData));
         $.ajax({
             type : 'POST',
             url : 'upsertPromoCode/',
-            data : {'data':JSON.stringify(promoData)},
+            data : JSON.stringify(promoData),
             success :function(data)
             {
 
@@ -528,12 +527,11 @@
                 clearInterval(barInterval);
                 $("#progress-bar").css({"width":"100%"});
 
-                var result = eval('(' + data + ')');
-                console.log(result, "result");
-                if(result['result']=='success')
+                console.log(data, "result");
+                if(data['result']=='SUCCESS')
                 {
                     $("#success-div").show();
-                    $("#success-text").html("Vehicle added Successfully");
+                    $("#success-text").html("Promo code added Successfully");
 
 
                     $("#main-form-div").hide();

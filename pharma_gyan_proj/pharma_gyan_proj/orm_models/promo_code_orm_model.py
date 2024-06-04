@@ -18,9 +18,8 @@ class pg_promo_code(Base, Orm_helper):
     is_public = Column("is_public", Integer, default=1)
     multi_usage = Column("multi_usage", Integer, default=1)
     created_by = Column("created_by", String)
-    approved_by = Column("approved_by", String)
-    creation_date = Column("CreationDate", DateTime, default=datetime.utcnow())
-    updation_date = Column("UpdationDate", TIMESTAMP,
+    ct = Column("ct", DateTime, default=datetime.utcnow())
+    ut = Column("ut", TIMESTAMP,
                            server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
     def __init__(self, data={}):

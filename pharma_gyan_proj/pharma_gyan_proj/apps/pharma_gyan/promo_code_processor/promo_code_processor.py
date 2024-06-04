@@ -8,6 +8,7 @@ from pharma_gyan_proj.apps.pharma_gyan.app_settings import MAX_ALLOWED_PROMO_COD
 from pharma_gyan_proj.common.comman import is_valid_alpha_numeric_space_under_score
 from pharma_gyan_proj.common.constants import TAG_FAILURE, TAG_SUCCESS, PromoCodeDiscountType
 from pharma_gyan_proj.db_models.promo_code_model import promo_code_model
+from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.orm_models.promo_code_orm_model import pg_promo_code
 from pharma_gyan_proj.exceptions.failure_exceptions import BadRequestException, InternalServerError
 
@@ -17,6 +18,8 @@ logger = logging.getLogger("apps")
 def prepare_and_save_promo_code(request_body):
     method_name = "prepare_and_save_promo_code"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
+
+    session = Session()
 
     validate_promo_code_details(request_body)
 
@@ -31,9 +34,18 @@ def prepare_and_save_promo_code(request_body):
     promo_code.expiry_date = request_body.get('expiry_date')
     promo_code.is_public = request_body.get('is_public', 0)
     promo_code.multi_usage = request_body.get('multi_usage', 0)
-    promo_code.created_by = request_body.user
+    promo_code.created_by = session.admin_user_session.user_name
 
-    save_or_update_promo_code(promo_code)
+    try:
+        db_res = promo_code_model().upsert(promo_code)
+        if not db_res.get("status"):
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="Unable to save campaign whatsapp content details!")
+        # prepare_and_save_activity_logs(wa_content)
+    except Exception as e:
+        logger.error(f"Error while saving or updating promo code Exception ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                    detailed_message="Error while saving or updating promo code!")
 
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
@@ -68,7 +80,7 @@ def validate_promo_code_details(request_body):
         raise BadRequestException(method_name=method_name, reason="Discount type is incorrect")
 
     if (request_body.get('expiry_date') is None or request_body.get('expiry_date') == "" or
-            datetime.strptime(request_body.get('expiry_date'), "%Y-%m-%d %H:%M:%S").date() < datetime.utcnow()):
+            datetime.strptime(request_body.get('expiry_date'), "%Y-%m-%d").date() < datetime.utcnow().date()):
         raise BadRequestException(method_name=method_name, reason="Content text is not provided")
 
     validate_promo_code_title(request_body.get('title'))
@@ -109,10 +121,10 @@ def validate_discount(discount, discount_type):
     logger.debug(f"Entry {method_name}, discount: {discount}")
     if discount is None:
         raise BadRequestException(method_name=method_name, reason="Discount is not provided")
-    if discount < 1:
+    if int(discount) < 1:
         raise BadRequestException(method_name=method_name,
                                   reason=F"Discount can't be less than 1")
-    if discount_type == PromoCodeDiscountType.percentage.value and discount > 100:
+    if discount_type == PromoCodeDiscountType.percentage.value and int(discount) > 100:
         raise BadRequestException(method_name=method_name,
                                   reason=F"Discount can't be greater than 100%")
     logger.debug(f"Exit {method_name}, Success")
