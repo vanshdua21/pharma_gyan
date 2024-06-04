@@ -36,7 +36,7 @@ def validate_and_secure_login(request_body):
                     detailed_message="Username or password is incorrect!")
     admin_users = admin_users[0]
 
-    if admin_users.expiry_time < cur_date_time:
+    if admin_users.expiry_time is not None and admin_users.expiry_time < cur_date_time:
         set_user_in_active(admin_users.unique_id)
         return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                     detailed_message="User Id expired!")

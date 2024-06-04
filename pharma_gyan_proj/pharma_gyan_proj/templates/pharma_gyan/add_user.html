@@ -153,7 +153,6 @@
     var mode = "{{mode}}";
     var currentCustomerData = {};
 
-
     $(document).ready(function() {
 
         function initProgressBar() {
@@ -168,7 +167,7 @@
         }
 
         if(mode=="edit"){
-            var currentCustomerData = JSON.parse('{{ user|escapejs }}');
+            currentCustomerData = JSON.parse('{{ user|escapejs }}');
             console.log('Data-',currentCustomerData);
             setEditMode(currentCustomerData);
         }
@@ -195,11 +194,6 @@
                 $("#"+key).attr("checked", true);
             }
         }
-
-        editUniqueId = customerData["unique_id"];
-        editId = customerData["id"];
-        is_active = customerData["is_active"];
-        ct = customerData["ct"];
     }
 
     function setError(domId,msg){
@@ -301,11 +295,16 @@
         let data = {'phone':mblNumber,'displayName':($('#name').val()),'userName':($('#userName').val()), 'pass':($('#pass').val()),'email':emailId,'perm':JSON.stringify(selectedPerms)};
         console.log(data);
         if(mode=="edit"){
+            editUniqueId = currentCustomerData["unique_id"];
+            editId = currentCustomerData["id"];
+            is_active = currentCustomerData["is_active"];
+            ct = currentCustomerData["ct"];
             data['unique_id'] = editUniqueId;
             data["id"] = editId;
             data["is_active"] = is_active;
             data["ct"] = ct;
         }
+        console.log(data);
         $.ajax({
             type : 'POST',
             url : 'upsertUser/',

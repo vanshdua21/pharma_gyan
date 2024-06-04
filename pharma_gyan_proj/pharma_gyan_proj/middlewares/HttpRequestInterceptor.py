@@ -11,6 +11,7 @@ from pharma_gyan_proj.exceptions.failure_exceptions import MethodPermissionValid
     OtpRequiredException
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.shortcuts import redirect
 
 import http
 import json
@@ -35,8 +36,8 @@ class HttpRequestInterceptor:
         if request.path not in [settings.LOGIN_PATH, settings.SECURE_LOGIN_PATH]:
             response = self.prehandle(request)
             if response is not None:
-                status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
-                return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+                baseUrl = settings.BASE_PATH
+                return redirect(baseUrl + '/pharma_gyan/editor/adminLogin')
 
         response = self.get_response(request)
 
