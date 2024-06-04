@@ -40,7 +40,7 @@ def prepare_and_save_promo_code(request_body):
         db_res = promo_code_model().upsert(promo_code)
         if not db_res.get("status"):
             return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                        detailed_message="Unable to save campaign whatsapp content details!")
+                        detailed_message="Unable to save promo code details!")
         # prepare_and_save_activity_logs(wa_content)
     except Exception as e:
         logger.error(f"Error while saving or updating promo code Exception ::{e}")
