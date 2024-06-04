@@ -9,7 +9,8 @@ from urllib.parse import unquote
 
 from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import validate_and_secure_login, \
     download_database_dump
-from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code
+from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
+    fetch_and_prepare_promo_code
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
@@ -54,9 +55,10 @@ def promo_code(request):
 
 
 def view_promo_code(request):
-    user = request.user
-
-    rendered_page = render_to_string('pharma_gyan/add_promo_code2.html', {"user": user})
+    users = fetch_and_prepare_promo_code()
+    # Convert list of dictionaries to JSON
+    users_json = json.dumps(users)
+    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"users": users_json})
     return HttpResponse(rendered_page)
 
 def summernote(request):

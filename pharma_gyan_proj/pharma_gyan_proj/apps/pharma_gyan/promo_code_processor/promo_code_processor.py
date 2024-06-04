@@ -129,6 +129,45 @@ def validate_discount(discount, discount_type):
                                   reason=F"Discount can't be greater than 100%")
     logger.debug(f"Exit {method_name}, Success")
 
+
+def fetch_and_prepare_promo_code():
+    method_name = "fetch_and_prepare_promo_code"
+    logger.debug(f"Entry {method_name}")
+
+    try:
+        promo_code = promo_code_model().get_details_by_filter_list([])
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching users InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching users ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if promo_code is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Promo code is not found. Please add promo code first!")
+    # Convert list of model instances to list of dictionaries
+    promo_code_list = []
+    for promo in promo_code:
+        promo_code_list.append({
+            "unique_id": promo.unique_id,
+            "title": promo.title,
+            "promo_code": promo.promo_code,
+            "discount_type": promo.discount_type,
+            "discount": promo.discount,
+            "max_discount": promo.max_discount,
+            "expiry_date": promo.expiry_date.strftime('%d %b %Y, %I:%M %p'),
+            "is_active": promo.is_active,
+            "is_public": promo.is_public,
+            "multi_usage": promo.multi_usage,
+            "created_by": promo.created_by,
+            "last_update": promo.ut.strftime('%d %b %Y, %I:%M %p'),
+            "usage_left": '∞' if promo.max_usage == 0 else f'{promo.max_usage - promo.current_usage}',
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editUser('{}')\">Edit</button>".format(promo.unique_id, promo.unique_id),
+            "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"delUser('{}')\">Delete</button>".format(promo.unique_id, promo.unique_id)
+        })
+    return promo_code_list
+
 # def prepare_and_save_activity_logs():
 #     activity_log_entity = CED_ActivityLog()
 #     activity_log_entity.data_source = DataSource.CONTENT.value,
