@@ -33,6 +33,7 @@ def prepare_and_save_promo_code(request_body):
     promo_code.max_usage = request_body.get('max_usage', 0)
     promo_code.expiry_date = request_body.get('expiry_date')
     promo_code.is_public = request_body.get('is_public', 0)
+    promo_code.current_usage = 0
     promo_code.multi_usage = request_body.get('multi_usage', 0)
     promo_code.created_by = session.admin_user_session.user_name
 
@@ -81,7 +82,8 @@ def validate_promo_code_details(request_body):
 
     if (request_body.get('expiry_date') is None or request_body.get('expiry_date') == "" or
             datetime.strptime(request_body.get('expiry_date'), "%Y-%m-%d").date() < datetime.utcnow().date()):
-        raise BadRequestException(method_name=method_name, reason="Content text is not provided")
+        raise BadRequestException(method_name=method_name,
+                                  reason="Expiry date is not provided/ less than current date !")
 
     validate_promo_code_title(request_body.get('title'))
     validate_promo_code(request_body.get('promo_code'))
@@ -163,10 +165,38 @@ def fetch_and_prepare_promo_code():
             "created_by": promo.created_by,
             "last_update": promo.ut.strftime('%d %b %Y, %I:%M %p'),
             "usage_left": '∞' if promo.max_usage == 0 else f'{promo.max_usage - promo.current_usage}',
-            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editUser('{}')\">Edit</button>".format(promo.unique_id, promo.unique_id),
-            "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"delUser('{}')\">Delete</button>".format(promo.unique_id, promo.unique_id)
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Edit</button>".format(promo.unique_id, promo.unique_id),
+            "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivatePromoCode('{}')\">Deactivate</button>".format(promo.unique_id, promo.unique_id)
         })
     return promo_code_list
+
+
+def fetch_promo_code_by_unique_id(unique_id):
+    filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+    try:
+        promo_code = promo_code_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching users InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching users ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if promo_code is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Promo code is not found. Please add promo code first!")
+    promo = promo_code[0]
+    promo_dict = {
+            "title": promo.title,
+            "unique_id": promo.unique_id,
+            "discount": promo.discount,
+            "max_discount": promo.max_discount,
+            "max_usage": promo.max_usage,
+            "expiry_date": promo.expiry_date.strftime('%d %b %Y, %I:%M %p'),
+            "is_public": promo.is_public,
+            "multi_usage": promo.multi_usage
+        }
+    return promo_dict
 
 # def prepare_and_save_activity_logs():
 #     activity_log_entity = CED_ActivityLog()

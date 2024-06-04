@@ -1,58 +1,444 @@
-&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-&lt;head&gt;
-    &lt;meta charset="UTF-8"&gt;
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-    &lt;title&gt;Promo Code Generator&lt;/title&gt;
-    &lt;script src="https://code.jquery.com/jquery-3.6.0.min.js"&gt;&lt;/script&gt;
-    &lt;style&gt;
-        body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-        #promoContainer {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #promoInput {
-            padding: 10px;
-            font-size: 16px;
-        }
-        #generateButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;div id="promoContainer"&gt;
-        &lt;input type="text" id="promoInput" placeholder="Your promo code" readonly&gt;
-        &lt;button id="generateButton"&gt;Generate Promo Code&lt;/button&gt;
-    &lt;/div&gt;
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
 
-    &lt;script&gt;
-        $(document).ready(function() {
-            $('#generateButton').click(function() {
-                // Function to generate a random promo code
-                function generatePromoCode(length) {
-                    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                    let promoCode = '';
-                    for (let i = 0; i &lt; length; i++) {
-                        const randomIndex = Math.floor(Math.random() * characters.length);
-                        promoCode += characters.charAt(randomIndex);
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+
+</style>
+
+
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+"><strong>Congratulations!</strong> <span id="success-text"></span>
+
+    </div>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddPC()>Add Another Promo Code</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewPC()>View Promo Codes</button></div>
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Add User
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                        <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                    </div>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+
+
+                        <div class="col-lg-9">
+                            <div class="p-20">
+                                <div action="#">
+
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="mobile">Title</label>
+                                        <input type="text" id="title" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Promo Code</label>
+                                        <input type="text" id="promoCode" class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" style="padding-right: 20px;">Discount Type</label>
+                                        <select class="form-control select2" id="discountType" onchange="typeChanged()">
+                                        <option value="flat">Flat</option>
+                                        <option value="percentage">Percentage</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="discount-div">
+                                        <label class="form-label" for="discount">Discount (%)</label>
+                                        <input type="text" id="discount" class="form-control">
+                                    </div>
+
+                                    <div class="form-group" id="maxDiscount-div">
+                                        <label class="form-label" for="maxDiscount">Max Discount (Rs)</label>
+                                        <input type="text" id="maxDiscount" class="form-control">
+                                    </div>
+                                    <div class="form-group" id="maxUsage-div">
+                                        <label class="form-label" for="maxUsage">Max Usage</label>
+                                        <input type="text" id="maxUsage" class="form-control">
+                                    </div>
+
+                                    <div class="form-group" id="expiryDate-div">
+                                        <label class="form-label" for="expiryDate">Expiry Date</label>
+                                        <input type="date" id="expiryDate" class="form-control">
+                                    </div>
+                                    <div style="display: flex; padding-bottom: 30px";>
+                                    <div class="custom-control custom-checkbox col-lg-5"  id="isPublic-div">
+                                        <input type="checkbox" class="custom-control-input" id="isPublic" value="0">
+                                        <label class="custom-control-label" for="isPublic" style="font-size: 15px;padding-left: 15px">Is Public</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox col-lg-5"  id="multiUsage-div">
+                                        <input type="checkbox" class="custom-control-input" id="multiUsage" value="0">
+                                        <label class="custom-control-label" for="multiUsage" style="font-size: 15px;padding-left: 15px">Multi Usage</label>
+                                    </div>
+                                        </div>
+
+                                    <div class="addPromoCode">
+                                        <button class="btn  btn-small btn-success" onclick="addPromoCode()" >Save</button>
+<!--                                        <button class="btn  btn-small btn-danger" onclick="window.history.back()" style="margin-left: 8px" >Cancel</button>-->
+                                    </div>
+
+
+
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div id="err-div" style="display: none;margin-top:20px;"></div>
+
+
+
+                    <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+<script type="text/javascript">
+
+    var baseUrl = "{{ baseUrl }}";
+    var mode = "{{mode}}";
+    var currentCustomerData = {};
+
+    $("#discount-div").hide();
+    $("#multiUsage-div").hide();
+    $("#maxUsage-div").hide();
+    $("#maxDiscount-div").hide();
+    $("#expiryDate-div").hide();
+    $("#isPublic-div").hide();
+
+
+    $(document).ready(function() {
+
+        function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+        if(mode=="edit"){
+            var currentCustomerData = JSON.parse('{{ user|escapejs }}');
+            console.log('Data-',currentCustomerData);
+            setEditMode(currentCustomerData);
+        }
+
+    });
+
+    function redirectToAddPC(){
+        window.location='#promoCode';
+    }
+
+    function redirectToViewPC(){
+        window.location='#viewPromoCode';
+    }
+
+    function setEditMode(customerData){
+        $("#main_title").html('Edit User Data');
+
+        $("#mobile").val(customerData["mobile_number"]);
+        $("#pass").val(customerData["password"]);
+        $("#name").val(customerData["display_name"]);
+        $("#userName").val(customerData["user_name"]);
+        $("#email").val(customerData["email_id"]);
+
+
+        $('#perm input:checked').each(function() {
+            $('input:checkbox').attr('checked',false);
+        });
+
+        let permissions = customerData["permissions"];
+        for(let key in permissions){
+            if(permissions[key] == 1){
+                $("#"+key).attr("checked", true);
+            }
+        }
+
+        editUniqueId = customerData["unique_id"];
+        editId = customerData["id"];
+        is_active = customerData["is_active"];
+        ct = customerData["ct"];
+    }
+
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fa fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+
+    function typeChanged(){
+    let discountType = $("#discountType").val();
+    if(discountType=="percentage"){
+        $("#discount").text("Discount (%)");
+        $("#discount-div").show();
+        $("#maxDiscount-div").show();
+        $("#maxUsage-div").show();
+        $("#expiryDate-div").show();
+        $("#isPublic-div").show();
+        $("#multiUsage-div").show();
+    }
+    else{
+    $("#maxDiscount-div").hide();
+    $("#discount").text("Discount (Rs)");
+    $("#discount-div").show();
+    $("#maxUsage-div").show();
+    $("#expiryDate-div").show();
+    $("#isPublic-div").show();
+    $("#multiUsage-div").show();
+    }
+
+  }
+
+    var lock = false;
+    function addPromoCode(){
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill title ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("title");
+
+        if(!($('#promoCode').val())){
+            setError("promoCode");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Promo Code ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+        setSuccess("promoCode");
+
+        if(!($('#discountType').val())){
+            setError("discountType");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select Discount Type ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("discountType");
+
+        if(!($('#discount').val())){
+            setError("discount");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display Discount ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("discount");
+
+
+        if(!($('#maxDiscount').val())){
+            var maxDiscount = 0;
+        }
+        else{
+        var maxDiscount = $('#maxDiscount').val();
+        }
+
+        setSuccess("maxDiscount");
+
+        if(!($('#maxUsage').val())){
+            var maxUsage = 0;
+        }
+        else{
+        var maxUsage = $('#maxUsage').val();
+        }
+        setSuccess("maxUsage");
+
+        if(!($('#expiryDate').val())){
+            setError("expiryDate");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display Expiry Date ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("expiryDate");
+
+        if ($('#isPublic').is(':checked')) {
+            isPublic = 1;
+        } else {
+            isPublic = 0;
+        }
+        setSuccess("isPublic");
+
+        if ($('#multiUsage').is(':checked')) {
+            multiUsage = 1;
+        } else {
+            multiUsage = 0;
+        }
+        setSuccess("multiUsage");
+
+        lock = true;
+
+        initProgressBar();
+
+        $("#err-div").html('');
+        var barInterval = setInterval('incBar()',25);
+        let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'is_public': isPublic, 'multi_usage': multiUsage};
+        console.log(data);
+        if(mode=="edit"){
+            data['unique_id'] = editUniqueId;
+            data["id"] = editId;
+            data["is_active"] = is_active;
+            data["ct"] = ct;
+        }
+        $.ajax({
+            type : 'POST',
+            url : 'upsertPromoCode/',
+            data : JSON.stringify(data),
+            success :function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                console.log('Success', data);
+                if(data['result']=='SUCCESS')
+                {
+                    $("#success-div").show();
+                    if(mode == "edit"){
+                        $("#success-text").html("Promo Code edited Successfully");
+                    }else{
+                        $("#success-text").html("Promo Code added Successfully");
                     }
-                    return promoCode;
+
+                    $("#main-form-div").hide();
+                    return;
+                }
+                else
+                {
+
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").show();
+                    $("#progress-bar-div").hide();
+
+                    return;
                 }
 
-                // Generate a promo code of length 10
-                const promoCode = generatePromoCode(10);
-                
-                // Set the promo code in the input element
-                $('#promoInput').val(promoCode);
-            });
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+
+                return;
+            }
+
         });
-    &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
+
+
+
+    }
+
+    function validateEmail(email) {
+        // http://stackoverflow.com/a/46181/11236
+
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+
+
+
+</script>
+
+

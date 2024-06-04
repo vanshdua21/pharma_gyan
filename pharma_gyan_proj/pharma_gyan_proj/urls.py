@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from django.conf.urls.static import static
-from django.contrib import admin
+# from django.contrib import admin
 from django.conf import settings
 from django.urls import path, include
 from pharma_gyan_proj import views
@@ -24,7 +24,7 @@ from pharma_gyan_proj.apps.pharma_gyan import urls as pharma_gyan_urls
 
 urlpatterns = [
     path(f'', views.home),
-    path(f'admin/', admin.site.urls),
+    # path(f'admin/', admin.site.urls),
     path(f"health/", views.health),
     path(f'pharma_gyan/', include(pharma_gyan_urls))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

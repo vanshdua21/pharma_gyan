@@ -2,7 +2,7 @@ import http
 import json
 from django.shortcuts import HttpResponse
 from django.template.loader import render_to_string
-from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
+# from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from urllib.parse import unquote
@@ -10,14 +10,11 @@ from urllib.parse import unquote
 from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import validate_and_secure_login, \
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
-    fetch_and_prepare_promo_code
+    fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
 
-
-@staff_member_required
-@user_passes_test(lambda u: u.is_staff and u.groups.filter(name='pharma_gyan').exists())
 def admin_login(request):
     baseUrl = settings.BASE_PATH
     rendered_page = render_to_string('pharma_gyan/login.html', {"baseUrl": baseUrl})
@@ -26,16 +23,12 @@ def admin_login(request):
     return resp
 
 
-@staff_member_required
-@user_passes_test(lambda u: u.is_staff and u.groups.filter(name='pharma_gyan').exists())
 def editor(request):
     rendered_page = render_to_string('pharma_gyan/base.html',
                                      {"tab_permissions": get_user_tab_permissions(request.user)})
     return HttpResponse(rendered_page)
 
 
-@staff_member_required
-@user_passes_test(lambda u: u.is_staff and u.groups.filter(name='pharma_gyan').exists())
 @csrf_exempt
 def dashboard(request):
     rendered_page = render_to_string('pharma_gyan/dashboard.html', {})
@@ -50,7 +43,20 @@ def get_user_tab_permissions(user):
 def promo_code(request):
     baseUrl = settings.BASE_PATH
 
-    rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"baseUrl": baseUrl})
+    rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"baseUrl": baseUrl, "mode": "create"})
+    return HttpResponse(rendered_page)
+
+
+def edit_promo_code(request):
+    baseUrl = settings.BASE_PATH
+    # Retrieve the id parameter from the query string
+    unique_id = request.GET.get('unique_id')
+    promo_code = fetch_promo_code_by_unique_id(unique_id)
+    if promo_code is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No promo code with this Id")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_promo_code.html',
+                                     {"promoCode": json.dumps(promo_code, default=str), "baseUrl": baseUrl, "mode": "edit"})
     return HttpResponse(rendered_page)
 
 

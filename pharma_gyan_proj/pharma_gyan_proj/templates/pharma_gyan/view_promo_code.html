@@ -195,26 +195,26 @@
     });
 
 
-    function editUser(id) {
-        window.open("#editUser?id=" + id, "_blank");
+    function editPromoCode(unique_id) {
+        window.open("#editPromoCode?unique_id=" + unique_id, "_blank");
     }
 
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
 
-    function delUser(id)
+    function deactivatePromoCode(id)
     {
         if(lock==true)
             return;
 
-        var confirmDelete = confirm("Do you really want to delete this user?");
-        if(confirmDelete==false)
+        var confirmDeactivate = confirm("Do you really want to deactivate this promo code?");
+        if(confirmDeactivate==false)
             return;
 
         lock = true;
         $("#err-div").hide();
         $("#success-div").hide();
-        $.post('/pharma_gyan/editor/deleteUser/' + id + '/',function(data)
+        $.post('/pharma_gyan/editor/deactivatePromoCode/' + id + '/',function(data)
             {
                 lock=false;
                 if(data['result']=='SUCCESS')
