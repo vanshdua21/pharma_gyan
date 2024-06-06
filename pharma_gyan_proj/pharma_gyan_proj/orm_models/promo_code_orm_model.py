@@ -4,9 +4,9 @@ from pharma_gyan_proj.orm_models.base_model import *
 class pg_promo_code(Base, Orm_helper):
     __tablename__ = 'promo_code'
 
-    id = Column("id", Integer, autoincrement=True, primary_key=True)
+    id = Column("id", Integer, autoincrement=True)
     title = Column("title", String)
-    unique_id = Column("unique_id", String)
+    unique_id = Column("unique_id", String, primary_key=True)
     promo_code = Column("promo_code", String)
     discount_type = Column("discount_type", String)
     discount = Column("discount", Integer)

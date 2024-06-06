@@ -1,5 +1,6 @@
 from pharma_gyan_proj.db_models.pharma_gyan import pg_promo_code
-from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited
+from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
+    update
 
 
 class promo_code_model:
@@ -21,3 +22,6 @@ class promo_code_model:
         if res is None or len(res) <= 0:
             return None
         return res
+
+    def update_by_filter_list(self, filter_list, update_dict):
+        return update(self.engine, self.table, filter_list, update_dict)

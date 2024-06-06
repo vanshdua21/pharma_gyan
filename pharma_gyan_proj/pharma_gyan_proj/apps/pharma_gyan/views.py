@@ -10,7 +10,7 @@ from urllib.parse import unquote
 from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import validate_and_secure_login, \
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
-    fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id
+    fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
@@ -167,5 +167,19 @@ def upsertUser(request):
 @csrf_exempt
 def deleteUser(request, userId):
     response = delete_user(userId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+
+@csrf_exempt
+def deactivate_promo_code(request, uniqueId):
+    response = deactivate_promo(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+
+@csrf_exempt
+def activate_promo_code(request, uniqueId):
+    response = activate_promo(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

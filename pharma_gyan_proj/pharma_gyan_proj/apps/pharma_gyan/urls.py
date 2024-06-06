@@ -18,4 +18,6 @@ urlpatterns = [
     path("editor/viewUsers/", views.viewUsers),
     path("editor/upsertUser/", views.upsertUser),
     path("editor/deleteUser/<str:userId>/", views.deleteUser),
+    path("editor/deactivatePromoCode/<str:uniqueId>/", views.deactivate_promo_code),
+    path("editor/activatePromoCode/<str:uniqueId>/", views.activate_promo_code),
 ]

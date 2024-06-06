@@ -23,8 +23,25 @@ def prepare_and_save_promo_code(request_body):
 
     validate_promo_code_details(request_body)
 
-    promo_code = pg_promo_code()
-    promo_code.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
+    if request_body.get('id') is not None:
+        filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
+        try:
+            promo_code = promo_code_model().get_details_by_filter_list(filter_list)
+        except InternalServerError as ey:
+            logger.error(
+                f"Error while fetching users InternalServerError ::{ey.reason}")
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+        except Exception as e:
+            logger.error(f"Error while fetching users ::{e}")
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+        if promo_code is None:
+            return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                        details_message="Promo code is not found. Please add promo code first!")
+        promo_code = promo_code[0]
+    else:
+        promo_code = pg_promo_code()
+        promo_code.current_usage = 0
+        promo_code.unique_id = uuid.uuid4().hex
     promo_code.title = request_body.get('title')
     promo_code.promo_code = request_body.get('promo_code')
     promo_code.discount_type = request_body.get('discount_type')
@@ -33,7 +50,6 @@ def prepare_and_save_promo_code(request_body):
     promo_code.max_usage = request_body.get('max_usage', 0)
     promo_code.expiry_date = request_body.get('expiry_date')
     promo_code.is_public = request_body.get('is_public', 0)
-    promo_code.current_usage = 0
     promo_code.multi_usage = request_body.get('multi_usage', 0)
     promo_code.created_by = session.admin_user_session.user_name
 
@@ -151,6 +167,12 @@ def fetch_and_prepare_promo_code():
     # Convert list of model instances to list of dictionaries
     promo_code_list = []
     for promo in promo_code:
+        if promo.is_active:
+            cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivatePromoCode('{}')\">Deactivate</button>".format(
+                promo.unique_id, promo.unique_id)
+        else:
+            cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activatePromoCode('{}')\">Activate</button>".format(
+                promo.unique_id, promo.unique_id)
         promo_code_list.append({
             "unique_id": promo.unique_id,
             "title": promo.title,
@@ -166,7 +188,7 @@ def fetch_and_prepare_promo_code():
             "last_update": promo.ut.strftime('%d %b %Y, %I:%M %p'),
             "usage_left": '∞' if promo.max_usage == 0 else f'{promo.max_usage - promo.current_usage}',
             "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Edit</button>".format(promo.unique_id, promo.unique_id),
-            "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivatePromoCode('{}')\">Deactivate</button>".format(promo.unique_id, promo.unique_id)
+            "cta": cta
         })
     return promo_code_list
 
@@ -188,7 +210,10 @@ def fetch_promo_code_by_unique_id(unique_id):
     promo = promo_code[0]
     promo_dict = {
             "title": promo.title,
+            "id": promo.id,
             "unique_id": promo.unique_id,
+            "promo_code": promo.promo_code,
+            "discount_type": promo.discount_type,
             "discount": promo.discount,
             "max_discount": promo.max_discount,
             "max_usage": promo.max_usage,
@@ -197,6 +222,48 @@ def fetch_promo_code_by_unique_id(unique_id):
             "multi_usage": promo.multi_usage
         }
     return promo_dict
+
+
+def deactivate_promo(unique_id):
+    method_name = "deactivate_promo"
+
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        promo_code_model().update_by_filter_list(filter_list, dict(is_active=0))
+    except Exception as e:
+        logger.error(f"Error while deleting user ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+
+def activate_promo(unique_id):
+    method_name = "activate_promo"
+
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        promo_code = promo_code_model().get_details_by_filter_list(filter_list)
+        if promo_code is None or len(promo_code) < 1:
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="Promo code id is incorrect!")
+        if promo_code[0].expiry_date.date() < datetime.utcnow().date():
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="Expire time will be greater than current date time!")
+        if (promo_code[0].max_usage > 0) and (promo_code[0].max_usage - promo_code[0].current_usage < 1):
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="No usage count left. First increase max usage!")
+        promo_code_model().update_by_filter_list(filter_list, dict(is_active=1))
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching users InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while deleting user ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
 
 # def prepare_and_save_activity_logs():
 #     activity_log_entity = CED_ActivityLog()

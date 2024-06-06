@@ -37,7 +37,7 @@
                             <th>Last Update Date</th>
                             <th>Usage Left</th>
                             <th>Edit</th>
-                            <th>Delete</th>
+                            <th>Call To Action</th>
 
                         </tr>
                         </thead>
@@ -59,7 +59,7 @@
                                 <th>Last Update Date</th>
                                 <th>Usage Left</th>
                                 <th>Edit</th>
-                                <th>Delete</th>
+                                <th>Call To Action</th>
 
                             </tr>
                         </tfoot>
@@ -124,7 +124,7 @@
                     { data: "last_update" },
                     { data: "usage_left" },
                     { data: "edit"},
-                    { data: "del"}
+                    { data: "cta"}
                 ],
                 dom:
                 /*	--- Layout Structure
@@ -224,13 +224,51 @@
                 }
                 else
                 {
-                    alert('Error while deleting user');
+                    alert('Error while deactivating promo code');
                     return;
                 }
 
             }
         )
         ;
+    }
+
+    function activatePromoCode(id)
+    {
+        if(lock==true)
+            return;
+
+        var confirmActivate = confirm("Do you really want to activate this promo code?");
+        if(confirmActivate==false)
+            return;
+
+        lock = true;
+        $("#err-div").hide();
+        $("#success-div").hide();
+        $.post('/pharma_gyan/editor/activatePromoCode/' + id + '/',function(data)
+            {
+                lock=false;
+                if(data['result']=='SUCCESS')
+                {
+                    location.reload();
+                    lock = false;
+                    return;
+                }
+                else
+                {
+                    alert('Error while activating promo code.');
+                    lock = false;
+                    return;
+                }
+
+            }
+        ).fail(function(jqXHR, textStatus, errorThrown) {
+                    result = jqXHR['responseJSON']
+                    console.log(result)
+                    alert("Error! "+result['detailed_message']);
+                    lock = false;
+                    return;
+        });
     }
 
 
