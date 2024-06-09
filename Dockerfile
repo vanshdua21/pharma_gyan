@@ -36,6 +36,7 @@ RUN \
  yum localinstall -y wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
  pip install --upgrade pip && \
  pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host=api.github.com supervisor --no-cache-dir && \
+ pip install --upgrade pip && \
  pip install --upgrade pip setuptools wheel && \
  mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs /etc/newrelic && \
  yum clean all
