@@ -34,7 +34,8 @@ RUN \
  yum install -y screen && \
  wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
  yum localinstall -y wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
- pip install supervisor && \
+ pip install --upgrade pip && \
+ pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host=api.github.com supervisor --no-cache-dir && \
  mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs /etc/newrelic && \
  yum clean all
 
@@ -43,6 +44,32 @@ ARG BUILD_ENV="uat"
 ENV BUILD_ENV=$BUILD_ENV
 
 EXPOSE 80
+
+
+RUN \
+ yum update -y nss \
+        nss-sysinit \
+        nss-tools \
+        systemd \
+        systemd-libs \
+        bind-license \
+        rpm \
+        rpm-build-libs \
+        rpm-python \
+        rpm-libs \
+        glib2 \
+        openldap \
+        gzip \
+        kernel \
+        kernel-headers \
+        binutils \
+        cyrus-sasl \
+        cyrus-sasl-lib \
+        kpartx \
+        curl \
+        libcurl \
+        libssh2
+
 
 RUN \
  cd /opt && \
