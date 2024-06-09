@@ -1,7 +1,17 @@
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
 <script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
 <script src="/static/pharma_gyan/js/datatables.export.js"></script>
-
+<!--added new changes-->
+    <!-- Include SweetAlert2 CSS with Bootstrap 4 theme -->
+    <!-- Other necessary CSS files -->
+    <link id="vendorsbundle" rel="stylesheet" media="screen, print" href="css/vendors.bundle.css">
+    <link id="appbundle" rel="stylesheet" media="screen, print" href="css/app.bundle.css">
+    <link id="myskin" rel="stylesheet" media="screen, print" href="css/skins/skin-master.css">
+    <link rel="stylesheet" media="screen, print" href="css/theme-demo.css">
+<!-- Include SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+<!-- Include SweetAlert2 JS -->
+<!--added new changes-->
 <div class="row">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
@@ -71,7 +81,7 @@
     </div>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
     var data = JSON.parse('{{ users|escapejs }}');
     var datatable;
@@ -104,6 +114,7 @@
                 item.max_discount = item.max_discount+' (Rs)'
             }
         })
+
         // initialize datatable
         datatable = $('#dt-basic-example').dataTable(
             {
@@ -201,75 +212,194 @@
 
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
+deactivatePromoCode
+<!--    function (id)-->
+<!--    {-->
+<!--        if(lock==true)-->
+<!--            return;-->
 
-    function deactivatePromoCode(id)
-    {
-        if(lock==true)
-            return;
+<!--        var confirmDeactivate = confirm("Do you really want to deactivate this promo code?");-->
+<!--        if(confirmDeactivate==false)-->
+<!--            return;-->
 
-        var confirmDeactivate = confirm("Do you really want to deactivate this promo code?");
-        if(confirmDeactivate==false)
-            return;
+<!--        lock = true;-->
+<!--        $("#err-div").hide();-->
+<!--        $("#success-div").hide();-->
+<!--        $.post('/pharma_gyan/editor/deactivatePromoCode/' + id + '/',function(data)-->
+<!--            {-->
+<!--                lock=false;-->
+<!--                if(data['result']=='SUCCESS')-->
+<!--                {-->
+<!--                    location.reload();-->
+<!--                    return;-->
+<!--                }-->
+<!--                else-->
+<!--                {-->
+<!--                    alert('Error while deactivating promo code');-->
+<!--                    return;-->
+<!--                }-->
 
-        lock = true;
-        $("#err-div").hide();
-        $("#success-div").hide();
-        $.post('/pharma_gyan/editor/deactivatePromoCode/' + id + '/',function(data)
-            {
-                lock=false;
-                if(data['result']=='SUCCESS')
-                {
-                    location.reload();
-                    return;
+<!--            }-->
+<!--        )-->
+<!--        ;-->
+<!--    }-->
+function deactivatePromoCode(id) {
+            if (lock == true) return;
+
+            // Create the SweetAlert2 mixin for custom styling
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+            // Display the confirmation dialog
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, deactivate it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true,
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    // Proceed with deactivation if confirmed
+                    lock = true;
+                    $('#err-div').hide();
+                    $('#success-div').hide();
+                    $.post('/pharma_gyan/editor/deactivatePromoCode/' + id + '/', function(data) {
+                        lock = false;
+                        if (data['result'] == 'SUCCESS') {
+                            swalWithBootstrapButtons.fire(
+                                'Deactivated!',
+                                'The promo code has been deactivated.',
+                                'success'
+                            ).then(function() {
+                                location.reload(); // Reload after showing success message
+                            });
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'Error',
+                                'Error while deactivating promo code',
+                                'error'
+                            );
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire(
+                        'Cancelled',
+                        'Your promo code is safe :)',
+                        'error'
+                    );
                 }
-                else
-                {
-                    alert('Error while deactivating promo code');
-                    return;
+            });
+        }
+<!--    function activatePromoCode(id)-->
+<!--    {-->
+<!--        if(lock==true)-->
+<!--            return;-->
+
+<!--        var confirmActivate = confirm("Do you really want to activate this promo code?");-->
+<!--        if(confirmActivate==false)-->
+<!--            return;-->
+
+<!--        lock = true;-->
+<!--        $("#err-div").hide();-->
+<!--        $("#success-div").hide();-->
+<!--        $.post('/pharma_gyan/editor/activatePromoCode/' + id + '/',function(data)-->
+<!--            {-->
+<!--                lock=false;-->
+<!--                if(data['result']=='SUCCESS')-->
+<!--                {-->
+<!--                    location.reload();-->
+<!--                    lock = false;-->
+<!--                    return;-->
+<!--                }-->
+<!--                else-->
+<!--                {-->
+<!--                    alert('Error while activating promo code.');-->
+<!--                    lock = false;-->
+<!--                    return;-->
+<!--                }-->
+
+<!--            }-->
+<!--        ).fail(function(jqXHR, textStatus, errorThrown) {-->
+<!--                    result = jqXHR['responseJSON']-->
+<!--                    console.log(result)-->
+<!--                    alert("Error! "+result['detailed_message']);-->
+<!--                    lock = false;-->
+<!--                    return;-->
+<!--        });-->
+<!--    }-->
+
+    function activatePromoCode(id) {
+            if (lock == true) return;
+
+            // Create the SweetAlert2 mixin for custom styling
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+
+            console.log('swalWithBootstrapButtons', swalWithBootstrapButtons); // Debugging
+
+            // Display the confirmation dialog
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to activate this promo code?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, activate it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    // Proceed with activation if confirmed
+                    lock = true;
+                    $('#err-div').hide();
+                    $('#success-div').hide();
+                    $.post('/pharma_gyan/editor/activatePromoCode/' + id + '/', function(data) {
+                        lock = false;
+                        if (data['result'] == 'SUCCESS') {
+                            swalWithBootstrapButtons.fire(
+                                'Activated!',
+                                'The promo code has been activated.',
+                                'success'
+                            ).then(function() {
+                                location.reload(); // Reload after showing success message
+                            });
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'Error',
+                                'Error while activating promo code',
+                                'error'
+                            );
+                        }
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        var result = jqXHR['responseJSON'];
+                        console.log(result);
+                        swalWithBootstrapButtons.fire(
+                            'Error',
+                            'Error while activating promo code: ' + result['detailed_message'],
+                            'error'
+                        );
+                        lock = false;
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire(
+                        'Cancelled',
+                        'Activation cancelled.',
+                        'error'
+                    );
                 }
+            });
+        }
 
-            }
-        )
-        ;
-    }
-
-    function activatePromoCode(id)
-    {
-        if(lock==true)
-            return;
-
-        var confirmActivate = confirm("Do you really want to activate this promo code?");
-        if(confirmActivate==false)
-            return;
-
-        lock = true;
-        $("#err-div").hide();
-        $("#success-div").hide();
-        $.post('/pharma_gyan/editor/activatePromoCode/' + id + '/',function(data)
-            {
-                lock=false;
-                if(data['result']=='SUCCESS')
-                {
-                    location.reload();
-                    lock = false;
-                    return;
-                }
-                else
-                {
-                    alert('Error while activating promo code.');
-                    lock = false;
-                    return;
-                }
-
-            }
-        ).fail(function(jqXHR, textStatus, errorThrown) {
-                    result = jqXHR['responseJSON']
-                    console.log(result)
-                    alert("Error! "+result['detailed_message']);
-                    lock = false;
-                    return;
-        });
-    }
 
 
 </script>

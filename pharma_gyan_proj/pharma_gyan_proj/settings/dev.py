@@ -1,3 +1,4 @@
+
 from .base import *
 root_path = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', '..'))
 bank = os.environ.get("BANK")
@@ -12,7 +13,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "pharma_gyan",
         "USER": "root",
-        "PASSWORD": "root",
+        "PASSWORD": "Testing@123",
         "HOST": "localhost",
         "PORT": 3306
     }
@@ -59,6 +60,5 @@ ROOT_URLCONF = 'pharma_gyan_proj.urls'
 # }
 
 BASE_PATH="http://127.0.0.1:8000"
-
 LOGIN_PATH="/pharma_gyan/editor/adminLogin"
 SECURE_LOGIN_PATH="/pharma_gyan/editor/secureLogin/"

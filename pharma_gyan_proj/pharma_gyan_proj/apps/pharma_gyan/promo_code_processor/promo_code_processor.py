@@ -11,6 +11,7 @@ from pharma_gyan_proj.db_models.promo_code_model import promo_code_model
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.orm_models.promo_code_orm_model import pg_promo_code
 from pharma_gyan_proj.exceptions.failure_exceptions import BadRequestException, InternalServerError
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger("apps")
 
@@ -22,6 +23,18 @@ def prepare_and_save_promo_code(request_body):
     session = Session()
 
     validate_promo_code_details(request_body)
+    try:
+        existing_promo_code = promo_code_model().get_promo_code_by_title(request_body.get('title'))
+        if existing_promo_code:
+            if request_body.get('id') is None or existing_promo_code.unique_id != request_body.get('unique_id'):
+                return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
+                            details_message="Duplicate promo code found. Please use a different promo code title.")
+    except InternalServerError as ey:
+        logger.error(f"Error while fetching promo code by title InternalServerError :: {ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching promo code by title :: {e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
 
     if request_body.get('id') is not None:
         filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
@@ -38,6 +51,10 @@ def prepare_and_save_promo_code(request_body):
             return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                         details_message="Promo code is not found. Please add promo code first!")
         promo_code = promo_code[0]
+        # existing_promo_code = promo_code_model().get_promo_code_by_title(request_body.get('title'))
+        # if existing_promo_code and (not promo_code or existing_promo_code.title != promo_code.title):
+        #      return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
+        #                  details_message="Duplicate promo code found. Please use a different promo code title.")
     else:
         promo_code = pg_promo_code()
         promo_code.current_usage = 0
