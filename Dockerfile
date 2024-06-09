@@ -94,8 +94,7 @@ COPY pharma_gyan_proj/server_config/newrelic/* /etc/newrelic/
 
 
 COPY pharma_gyan_proj/server_config/pip/requirements.txt /etc/pip/requirements.txt
-RUN pip install --upgrade pip && \
-     pip install -r /etc/pip/requirements.txt
+RUN /usr/local/python3.8/bin/pip3.8 install -r /etc/pip/requirements.txt
 # RUN if [ "$BUILD_ENV" = "prod" ] ; then sed -i "/app_name/s/pharma_gyan/pharma_gyan-${BANK_NAME}/g" /etc/newrelic/newrelic_pharma_gyan.ini ; else sed -i "/app_name/s/pharma_gyan/pharma_gyan-${BUILD_ENV}-${BANK_NAME}/g" /etc/newrelic/newrelic_pharma_gyan.ini ; fi
 
 COPY ./ /usr/local/pharma_gyan
