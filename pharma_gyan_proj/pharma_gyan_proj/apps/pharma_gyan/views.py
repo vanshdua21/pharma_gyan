@@ -183,3 +183,15 @@ def activate_promo_code(request, uniqueId):
     response = activate_promo(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+def addCourse(request):
+    user = request.user
+    rendered_page = render_to_string('pharma_gyan/add_course.html', {"user": user, "mode": "create"})
+    return HttpResponse(rendered_page)
+
+def viewCourses(request):
+    users = fetch_and_prepare_users()
+    # Convert list of dictionaries to JSON
+    users_json = json.dumps(users)
+    rendered_page = render_to_string('pharma_gyan/view_users.html', {"users": users_json})
+    return HttpResponse(rendered_page)
