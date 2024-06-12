@@ -43,7 +43,12 @@
 <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
 "><strong>Congratulations!</strong> <span id="success-text"></span>
 
-    </div></div>
+    </div>
+
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddUser()>Add Another User</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewUsers()>View Users</button></div>
+
+    </div>
 
 <div id="main-form-div">
     <div class="row">
@@ -173,6 +178,14 @@
         }
 
     });
+
+    function redirectToAddUser(){
+        window.location.reload();
+    }
+
+    function redirectToViewUsers(){
+        window.location='#viewUsers';
+    }
 
     function setEditMode(customerData){
         $("#main_title").html('Edit User Data');
