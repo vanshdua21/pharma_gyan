@@ -100,14 +100,16 @@
                                         <label class="form-label" for="maxDiscount">Max Discount (Rs)</label>
                                         <input type="text" id="maxDiscount" class="form-control">
                                     </div>
-                                    <div class="form-group" id="maxUsage-div">
-                                        <label class="form-label" for="maxUsage">Max Usage</label>
-                                        <input type="text" id="maxUsage" class="form-control">
-                                    </div>
+
 
                                     <div class="form-group" id="expiryDate-div">
                                         <label class="form-label required" for="expiryDate">Expiry Date</label>
                                         <input type="date" id="expiryDate" class="form-control">
+                                    </div>
+
+                                    <div class="form-group" id="maxUsage-div">
+                                        <label class="form-label" for="maxUsage">Max Usage</label>
+                                        <input type="text" id="maxUsage" class="form-control">
                                     </div>
 
                                     <div style="display: flex; padding-bottom: 30px";>
@@ -241,15 +243,15 @@
         console.log('Expiry Date Input Value:', expiryDateInput.val());
 
     if (customerData["discount_type"] === "percentage") {
+        $("#discount-div label").text("Discount (%)");
         $("#discount").val(customerData["discount"]);
         $("#maxDiscount").val(customerData["max_discount"]);
-<!--        $("#maxUsage").val(customerData["max_usage"]);-->
-        $("#discount").text("Discount (%)");
+<!--        $("#discount").text("Discount (%)");-->
         $("#maxDiscount-div").show();
     } else {
+        $("#discount-div label").text("Discount (Rs)");
         $("#discount").val(customerData["discount"]);
-<!--        $("#maxUsage").val(customerData["max_usage"]);-->
-        $("#discount").text("Discount (Rs)");
+<!--        $("#discount").text("Discount (Rs)");-->
         $("#maxDiscount-div").hide();
     }
     $("#maxUsage").val(customerData["max_usage"]);
@@ -266,8 +268,6 @@
     $("#discount-div").show();
     $("#maxUsage-div").show();
     $("#expiryDate-div").show();
-<!--    $("#isPublic-div").show();-->
-<!--    $("#multiUsage-div").show();-->
 
     editUniqueId = customerData["unique_id"];
     editId = customerData["id"];
@@ -309,10 +309,10 @@ function typeChanged() {
     $("#maxUsage-div").hide();
 
     if (discountType == "percentage") {
-        $("#discount").text("Discount (%)");
+      $("#discount-div label").text("Discount (%)");
         $("#maxDiscount-div").show();
     } else {
-        $("#discount").text("Discount (Rs)");
+     $("#discount-div label").text("Discount (Rs)");
         $("#maxDiscount-div").hide();
     }
 
