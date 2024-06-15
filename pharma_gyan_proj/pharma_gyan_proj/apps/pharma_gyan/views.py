@@ -14,6 +14,11 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
+from django.http import JsonResponse
+import json
+
+
+
 
 def admin_login(request):
     baseUrl = settings.BASE_PATH
@@ -55,6 +60,7 @@ def edit_promo_code(request):
     if promo_code is None:
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No promo code with this Id")
         return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    print(promo_code)
     rendered_page = render_to_string('pharma_gyan/add_promo_code.html',
                                      {"promoCode": json.dumps(promo_code, default=str), "baseUrl": baseUrl, "mode": "edit"})
     return HttpResponse(rendered_page)

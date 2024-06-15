@@ -25,3 +25,7 @@ class promo_code_model:
 
     def update_by_filter_list(self, filter_list, update_dict):
         return update(self.engine, self.table, filter_list, update_dict)
+
+    def get_promo_code_by_title(self, title):
+        filter_list = [{"column": "title", "value": title, "op": "=="}]
+        return self.get_details_by_filter_list(filter_list)
