@@ -8,6 +8,7 @@
     <link id="appbundle" rel="stylesheet" media="screen, print" href="css/app.bundle.css">
     <link id="myskin" rel="stylesheet" media="screen, print" href="css/skins/skin-master.css">
     <link rel="stylesheet" media="screen, print" href="css/theme-demo.css">
+
 <!-- Include SweetAlert2 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 <!-- Include SweetAlert2 JS -->
@@ -85,6 +86,7 @@
 <script type="text/javascript">
     var data = JSON.parse('{{ users|escapejs }}');
     var datatable;
+<!--    const Swal = require('sweetalert2');-->
     $(document).ready(function()
     {
         data.forEach(item => {

@@ -36,23 +36,12 @@
         width: 50%;
         padding: 8px;
     }
+     .required:after {
+    content:" *";
+    color: red;
+  }
 
 </style>
-<!--       <link id="vendorsbundle" rel="stylesheet" media="screen, print" href="css/vendors.bundle.css">-->
-<!--        <link id="appbundle" rel="stylesheet" media="screen, print" href="css/app.bundle.css">-->
-<!--        <link id="mytheme" rel="stylesheet" media="screen, print" href="#">-->
-<!--        <link id="myskin" rel="stylesheet" media="screen, print" href="css/skins/skin-master.css">-->
-<!--        &lt;!&ndash; Place favicon.ico in the root directory &ndash;&gt;-->
-<!--        <link rel="apple-touch-icon" sizes="180x180" href="img/favicon/apple-touch-icon.png">-->
-<!--        <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/favicon-32x32.png">-->
-<!--        <link rel="mask-icon" href="img/favicon/safari-pinned-tab.svg" color="#5bbad5">-->
-<!--        &lt;!&ndash; DEMO related CSS below &ndash;&gt;-->
-<!--        <link rel="stylesheet" media="screen, print" href="css/fa-brands.css">-->
-<!--        &lt;!&ndash; page related CSS below &ndash;&gt;-->
-<!--        <link rel="stylesheet" media="screen, print" href="css/formplugins/select2/select2.bundle.css">-->
-<!--        <script src="js/vendors.bundle.js"></script>-->
-<!--        <script src="js/app.bundle.js"></script>-->
-<!--        <script src="js/formplugins/select2/select2.bundle.js"></script>-->
 
 <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
 "><strong>Congratulations!</strong> <span id="success-text"></span>
@@ -85,16 +74,16 @@
 
 
                                     <div class="form-group">
-                                        <label class="form-label" for="title">Title</label>
+                                        <label class="form-label required" for="title">Title</label>
                                         <input type="text" id="title" class="form-control">
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label">Promo Code </label>
+                                        <label class="form-label required">Promo Code </label>
                                         <input type="text" id="promoCode" class="form-control">
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label" style="padding-right: 20px;">Discount Type</label>
+                                        <label class="form-label required" style="padding-right: 20px;">Discount Type</label>
                                         <select class="form-control select2" id="discountType" onchange="typeChanged()">
                                         <option value="" disabled selected class="select2">Choose the discount type</option>
                                         <option value="flat" class="select2">Flat</option>
@@ -103,7 +92,7 @@
                                     </div>
 
                                     <div class="form-group" id="discount-div">
-                                        <label class="form-label" for="discount">Discount (%)</label>
+                                        <label class="form-label required" for="discount">Discount (%)</label>
                                         <input type="text" id="discount" class="form-control">
                                     </div>
 
@@ -117,15 +106,15 @@
                                     </div>
 
                                     <div class="form-group" id="expiryDate-div">
-                                        <label class="form-label" for="expiryDate">Expiry Date</label>
+                                        <label class="form-label required" for="expiryDate">Expiry Date</label>
                                         <input type="date" id="expiryDate" class="form-control">
                                     </div>
 
                                     <div style="display: flex; padding-bottom: 30px";>
-                                    <div class="custom-control custom-checkbox col-lg-5"  id="isPublic-div">
-                                        <input type="checkbox" class="custom-control-input" id="isPublic" value="0">
-                                        <label class="custom-control-label" for="isPublic" style="font-size: 15px;padding-left: 15px">Is Public</label>
-                                    </div>
+<!--                                    <div class="custom-control custom-checkbox col-lg-5"  id="isPublic-div">-->
+<!--                                        <input type="checkbox" class="custom-control-input" id="isPublic" value="0">-->
+<!--                                        <label class="custom-control-label" for="isPublic" style="font-size: 15px;padding-left: 15px">Is Public</label>-->
+<!--                                    </div>-->
                                     <div class="custom-control custom-checkbox col-lg-5"  id="multiUsage-div">
                                         <input type="checkbox" class="custom-control-input" id="multiUsage" value="0">
                                         <label class="custom-control-label" for="multiUsage" style="font-size: 15px;padding-left: 15px">Multi Usage</label>
@@ -186,8 +175,6 @@
     $("#maxUsage-div").hide();
     $("#maxDiscount-div").hide();
     $("#expiryDate-div").hide();
-    $("#isPublic-div").hide();
-
 
     $(document).ready(function() {
 
@@ -208,6 +195,13 @@
             setEditMode(currentCustomerData);
 
         }
+         $("#multiUsage").change(function() {
+            if ($(this).is(':checked')) {
+                $("#maxUsage-div").show();
+            } else {
+                $("#maxUsage-div").hide();
+            }
+        });
 
     });
 
@@ -219,13 +213,13 @@
         window.location='#viewPromoCode';
     }
     function formatDateForInput(dateString) {
-        // Convert "08 Jun 2024, 12:00 AM" to "2024-06-08"
+
         let parts = dateString.split(/[\s,]+/); // Split by space or comma
         let day = parts[0].padStart(2, '0');
         let month = parts[1];
         let year = parts[2];
 
-        // Convert month name to number (assuming a short month name like "Jun")
+
         let monthNumber = new Date(Date.parse(month + " 1, 2000")).getMonth() + 1; // Add 1 because getMonth() returns 0-11
         monthNumber = monthNumber.toString().padStart(2, '0');
 
@@ -234,48 +228,46 @@
     function setEditMode(customerData){
        $("#main_title").html('Edit Promo Code');
 
-    $("#title").val(customerData["title"]);
-    $("#discountType").val(customerData["discount_type"]);
-    $("#promoCode").val(customerData["promo_code"]);
+        $("#title").val(customerData["title"]);
+        $("#discountType").val(customerData["discount_type"]);
+        $("#promoCode").val(customerData["promo_code"]);
 
-    const formattedDate = formatDateForInput(customerData["expiry_date"]);
-    console.log('Formatted Date:', formattedDate);
+        const formattedDate = formatDateForInput(customerData["expiry_date"]);
+        console.log('Formatted Date:', formattedDate);
 
-    let expiryDateInput = $("#expiryDate");
-    console.log('Expiry Date Input:', expiryDateInput);
-    expiryDateInput.val(formattedDate);
-    console.log('Expiry Date Input Value:', expiryDateInput.val());
+        let expiryDateInput = $("#expiryDate");
+        console.log('Expiry Date Input:', expiryDateInput);
+        expiryDateInput.val(formattedDate);
+        console.log('Expiry Date Input Value:', expiryDateInput.val());
 
     if (customerData["discount_type"] === "percentage") {
         $("#discount").val(customerData["discount"]);
         $("#maxDiscount").val(customerData["max_discount"]);
-        $("#maxUsage").val(customerData["max_usage"]);
+<!--        $("#maxUsage").val(customerData["max_usage"]);-->
         $("#discount").text("Discount (%)");
         $("#maxDiscount-div").show();
     } else {
         $("#discount").val(customerData["discount"]);
-        $("#maxUsage").val(customerData["max_usage"]);
+<!--        $("#maxUsage").val(customerData["max_usage"]);-->
         $("#discount").text("Discount (Rs)");
         $("#maxDiscount-div").hide();
     }
+    $("#maxUsage").val(customerData["max_usage"]);
 
-    if (customerData["is_public"]) {
-        $("#isPublic").attr("checked", true);
-    } else {
-        $("#isPublic").attr("checked", false);
-    }
 
-    if (customerData["multi_usage"]) {
+ if (customerData["multi_usage"]) {
         $("#multiUsage").attr("checked", true);
+        $("#maxUsage-div").show();
     } else {
         $("#multiUsage").attr("checked", false);
+        $("#maxUsage-div").hide();
     }
 
     $("#discount-div").show();
     $("#maxUsage-div").show();
     $("#expiryDate-div").show();
-    $("#isPublic-div").show();
-    $("#multiUsage-div").show();
+<!--    $("#isPublic-div").show();-->
+<!--    $("#multiUsage-div").show();-->
 
     editUniqueId = customerData["unique_id"];
     editId = customerData["id"];
@@ -308,28 +300,37 @@
         $("#progress-bar").width(currWidth+50);
     }
 
-    function typeChanged(){
+
+function typeChanged() {
     let discountType = $("#discountType").val();
-    if(discountType=="percentage"){
+
+    // Reset the multiUsage checkbox and hide maxUsage-div initially
+    $("#multiUsage").prop('checked', false);
+    $("#maxUsage-div").hide();
+
+    if (discountType == "percentage") {
         $("#discount").text("Discount (%)");
-        $("#discount-div").show();
         $("#maxDiscount-div").show();
-        $("#maxUsage-div").show();
-        $("#expiryDate-div").show();
-        $("#isPublic-div").show();
-        $("#multiUsage-div").show();
+    } else {
+        $("#discount").text("Discount (Rs)");
+        $("#maxDiscount-div").hide();
     }
-    else{
-    $("#maxDiscount-div").hide();
-    $("#discount").text("Discount (Rs)");
+
     $("#discount-div").show();
-    $("#maxUsage-div").show();
     $("#expiryDate-div").show();
     $("#isPublic-div").show();
     $("#multiUsage-div").show();
-    }
 
-  }
+    // Show maxUsage-div only if multiUsage is checked
+    $("#multiUsage").change(function() {
+        if ($(this).is(':checked')) {
+            $("#maxUsage-div").show();
+        } else {
+            $("#maxUsage-div").hide();
+        }
+    });
+}
+
 
     var lock = false;
     function addPromoCode(){
@@ -400,12 +401,7 @@
 
         setSuccess("expiryDate");
 
-        if ($('#isPublic').is(':checked')) {
-            isPublic = 1;
-        } else {
-            isPublic = 0;
-        }
-        setSuccess("isPublic");
+
 
         if ($('#multiUsage').is(':checked')) {
             multiUsage = 1;
@@ -420,7 +416,7 @@
 
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
-        let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'is_public': isPublic, 'multi_usage': multiUsage};
+        let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'multi_usage': multiUsage};
         console.log(data);
         if(mode=="edit"){
             data['unique_id'] = editUniqueId;
