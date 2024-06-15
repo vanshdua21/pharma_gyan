@@ -20,6 +20,8 @@ urlpatterns = [
     path("editor/deleteUser/<str:userId>/", views.deleteUser),
     path("editor/deactivatePromoCode/<str:uniqueId>/", views.deactivate_promo_code),
     path("editor/activatePromoCode/<str:uniqueId>/", views.activate_promo_code),
+    path("editor/mediaDropzone/", views.media_dropzone),
+    path("editor/addMedia/", views.add_media),
     path("editor/addCourse/", views.addCourse),
     path("editor/viewCourses/", views.viewCourses),
 ]

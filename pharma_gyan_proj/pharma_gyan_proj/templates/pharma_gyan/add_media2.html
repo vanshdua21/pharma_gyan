@@ -1,0 +1,516 @@
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
+
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+
+</style>
+
+
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+"><strong>Congratulations!</strong> <span id="success-text"></span>
+
+    </div>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddPC()>Add Another Promo Code</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewPC()>View Promo Codes</button></div>
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Add Promo Code
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                        <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                    </div>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+
+
+                        <div class="panel-tag">
+                            Dropzone does not handle your file uploads on the server. You have to implement the code to receive and store the file yourself. See the section Server side implementation for more information.
+                        </div>
+                        <div class="modal-body">
+        <form name="image-upload-form" id="image-upload-form" class="smart-form" action="addMedia/" target="image-upload-frame" enctype="multipart/form-data" method="post">
+          <fieldset style="padding-top:0px;">
+            <label class="label" style="font-weight: bold;margin-bottom: 20px;font-size: 20px; display: block;">Upload Product Image</label>
+            <label class="input input-file" for="file">
+              <div class="button"><input type="file" style="width: 80%; onchange="this.parentNode.nextSibling.value = this.value" name="image-file" id="image-file"></div>
+            </label>
+            <input type="hidden" name="sku_code" id="sku_code"/>
+
+
+          </fieldset>
+
+        </form>
+
+        <div id="image-err-div" style="display: none;margin-top:20px;padding:10px;"></div>
+
+        <div style="text-align: center;margin-top:15px;"><button class="btn btn-primary" onclick="uploadImage();">Upload File</button></div>
+
+
+
+        <div id="image-progress-bar-div" style="margin-top:20px;width:94%;margin-left:3%;display:none;" class="progress progress-striped active">
+          <div id="image-progress-bar" class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+          </div>
+        </div>
+
+        <iframe id="image-upload-frame" name="image-upload-frame" style="display: none;"></iframe>
+
+
+
+      </div>
+
+
+
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div id="err-div" style="display: none;margin-top:20px;"></div>
+
+
+
+                    <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+<script type="text/javascript">
+
+    var baseUrl = "{{ baseUrl }}";
+    var mode = "{{mode}}";
+    var currentCustomerData = {};
+
+    $("#discount-div").hide();
+    $("#multiUsage-div").hide();
+    $("#maxUsage-div").hide();
+    $("#maxDiscount-div").hide();
+    $("#expiryDate-div").hide();
+    $("#isPublic-div").hide();
+
+
+    $(document).ready(function() {
+
+        function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+        if(mode=="edit"){
+            var currentCustomerData = JSON.parse('{{ promoCode|escapejs }}');
+            console.log('Data-',currentCustomerData);
+            setEditMode(currentCustomerData);
+        }
+
+    });
+
+    function redirectToAddPC(){
+        location.reload();
+    }
+
+    function redirectToViewPC(){
+        window.location='#viewPromoCode';
+    }
+
+    function setEditMode(customerData){
+        $("#main_title").html('Edit Promo Code');
+
+        $("#title").val(customerData["title"]);
+        $("#discountType").val(customerData["discount_type"]);
+        $("#promoCode").val(customerData["promo_code"]);
+
+        if(discountType=="percentage"){
+        $("#discount").val(customerData["discount"]);
+        $("#maxDiscount").val(customerData["max_discount"]);
+        $("#maxUsage").val(customerData["max_usage"]);
+        $("#expiryDate").val(customerData["expiry_date"]);
+        if (customerData["is_public"]){
+        $("#isPublic").attr("checked", true);
+        }
+        else{
+        $("#isPublic").attr("checked", false);
+        }
+        if (customerData["multi_usage"]){
+        $("#multiUsage").attr("checked", true);
+        }
+        else{
+        $("#multiUsage").attr("checked", false);
+        }
+        $("#discount").text("Discount (%)");
+        $("#discount-div").show();
+        $("#maxDiscount-div").show();
+        $("#maxUsage-div").show();
+        $("#expiryDate-div").show();
+        $("#isPublic-div").show();
+        $("#multiUsage-div").show();
+        }
+        else{
+        $("#discount").val(customerData["discount"]);
+        $("#maxUsage").val(customerData["max_usage"]);
+        $("#expiryDate").val(customerData["expiry_date"]);
+        if (customerData["is_public"]){
+        $("#isPublic").attr("checked", true);
+        }
+        else{
+        $("#isPublic").attr("checked", false);
+        }
+        if (customerData["multi_usage"]){
+        $("#multiUsage").attr("checked", true);
+        }
+        else{
+        $("#multiUsage").attr("checked", false);
+        }
+        $("#maxDiscount-div").hide();
+        $("#discount").text("Discount (Rs)");
+        $("#discount-div").show();
+        $("#maxUsage-div").show();
+        $("#expiryDate-div").show();
+        $("#isPublic-div").show();
+        $("#multiUsage-div").show();
+        }
+
+        editUniqueId = customerData["unique_id"];
+        editId = customerData["id"];
+    }
+
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fa fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+
+    function typeChanged(){
+    let discountType = $("#discountType").val();
+    if(discountType=="percentage"){
+        $("#discount").text("Discount (%)");
+        $("#discount-div").show();
+        $("#maxDiscount-div").show();
+        $("#maxUsage-div").show();
+        $("#expiryDate-div").show();
+        $("#isPublic-div").show();
+        $("#multiUsage-div").show();
+    }
+    else{
+    $("#maxDiscount-div").hide();
+    $("#discount").text("Discount (Rs)");
+    $("#discount-div").show();
+    $("#maxUsage-div").show();
+    $("#expiryDate-div").show();
+    $("#isPublic-div").show();
+    $("#multiUsage-div").show();
+    }
+
+  }
+
+    var lock = false;
+    function addPromoCode(){
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill title ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("title");
+
+        if(!($('#promoCode').val())){
+            setError("promoCode");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Promo Code ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+        setSuccess("promoCode");
+
+        if(!($('#discountType').val())){
+            setError("discountType");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select Discount Type ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("discountType");
+
+        if(!($('#discount').val())){
+            setError("discount");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display Discount ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("discount");
+
+
+        if(!($('#maxDiscount').val())){
+            var maxDiscount = 0;
+        }
+        else{
+        var maxDiscount = $('#maxDiscount').val();
+        }
+
+        setSuccess("maxDiscount");
+
+        if(!($('#maxUsage').val())){
+            var maxUsage = 0;
+        }
+        else{
+        var maxUsage = $('#maxUsage').val();
+        }
+        setSuccess("maxUsage");
+
+        if(!($('#expiryDate').val())){
+            setError("expiryDate");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display Expiry Date ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("expiryDate");
+
+        if ($('#isPublic').is(':checked')) {
+            isPublic = 1;
+        } else {
+            isPublic = 0;
+        }
+        setSuccess("isPublic");
+
+        if ($('#multiUsage').is(':checked')) {
+            multiUsage = 1;
+        } else {
+            multiUsage = 0;
+        }
+        setSuccess("multiUsage");
+
+        lock = true;
+
+        initProgressBar();
+
+        $("#err-div").html('');
+        var barInterval = setInterval('incBar()',25);
+        let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'is_public': isPublic, 'multi_usage': multiUsage};
+        console.log(data);
+        if(mode=="edit"){
+            data['unique_id'] = editUniqueId;
+            data['id'] = editId;
+        }
+        $.ajax({
+            type : 'POST',
+            url : 'upsertPromoCode/',
+            data : JSON.stringify(data),
+            success :function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                console.log('Success', data);
+                if(data['result']=='SUCCESS')
+                {
+                    $("#success-div").show();
+                    if(mode == "edit"){
+                        $("#success-text").html("Promo Code edited Successfully");
+                    }else{
+                        $("#success-text").html("Promo Code added Successfully");
+                    }
+
+                    $("#main-form-div").hide();
+                    return;
+                }
+                else
+                {
+
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").show();
+                    $("#progress-bar-div").hide();
+
+                    return;
+                }
+
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseJSON ? data.responseJSON['details_message'] : 'some error occured while saving, please contact administrator !';
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+
+                return;
+            }
+
+        });
+
+
+
+    }
+    function uploadImage()
+  {
+
+    if(imagelock==true)
+      return;
+
+    $("#image-err-div").html('');
+    $("#image-err-div").hide();
+
+    if($("#image-file").val()=="")
+    {
+      $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a file to upload!</span></div>');
+      $("#image-err-div").show();
+
+      return;
+    }
+
+    if(checkFileExtension("image-file")==false)
+    {
+      $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a image type file to upload!</span></div>');
+      $("#image-err-div").show();
+
+      return;
+    }
+
+    var imagelock = true;
+    initImageProgressBar();
+    $("#image-err-div").html('');
+    barImageInterval = setInterval('incImageBar()',25);
+    $("#image-upload-form").submit();
+
+  }
+  function checkFileExtension(fileObjId)
+  {
+    var fup = document.getElementById(fileObjId);
+    var fileName = fup.value;
+
+    var ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+    if(ext == "jpeg" || ext == "jpg" || ext == "JPG" || ext == "JPEG" || ext == "png" || ext == "PNG" || ext == "gif" || ext == "GIF" || ext == "pdf"|| ext == "PDF")
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  function initImageProgressBar()
+  {
+
+    document.getElementById("image-progress-bar").style.width='20%';
+    $("#image-progress-bar-div").show();
+
+  }
+
+  function incImageBar()
+  {
+    var currWidth = $("#image-progress-bar").width();
+    $("#image-progress-bar").width(currWidth+50);
+  }
+
+    function validateEmail(email) {
+        // http://stackoverflow.com/a/46181/11236
+
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
+
+
+
+</script>
+
+

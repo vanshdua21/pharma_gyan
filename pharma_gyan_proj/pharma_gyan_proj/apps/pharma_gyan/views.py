@@ -1,5 +1,8 @@
 import http
 import json
+import os
+
+import boto3
 from django.shortcuts import HttpResponse
 from django.template.loader import render_to_string
 # from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
@@ -11,7 +14,7 @@ from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import vali
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
-from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
+from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
 from django.http import JsonResponse
@@ -38,6 +41,38 @@ def editor(request):
 def dashboard(request):
     rendered_page = render_to_string('pharma_gyan/dashboard.html', {})
     return HttpResponse(rendered_page)
+
+
+@csrf_exempt
+def media_dropzone(request):
+    rendered_page = render_to_string('pharma_gyan/add_media2.html', {})
+    return HttpResponse(rendered_page)
+
+
+@csrf_exempt
+def add_media(request):
+    if request.method == 'POST' and request.FILES.get('image-file'):
+        upload = request.FILES['image-file']
+        file_url = save_file_to_s3(upload)
+        return HttpResponse(json.dumps(dict(result=TAG_SUCCESS, data=dict(file_url=file_url)), default=str), status=http.HTTPStatus.OK, content_type="application/json")
+    else:
+        return HttpResponse(json.dumps(dict(result=TAG_FAILURE), default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
+
+def save_file_to_s3(file):
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
+        aws_secret_access_key="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",
+        region_name="ap-south-1"
+    )
+
+    file_name = file.name
+
+    s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
+
+    # s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
+    s3_url = f"https://s3-ap-south-1.amazonaws.com/pharma-gyan-test-media/{file_name}"
+    return s3_url
 
 
 def get_user_tab_permissions(user):
