@@ -9,12 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-from pathlib import Path
-import pymysql
-pymysql.version_info = (1, 4, 6, 'final', 0)  # Example version info
 
-# Replace MySQLdb with pymysql in Django's database backend
-pymysql.install_as_MySQLdb()
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -77,20 +72,10 @@ WSGI_APPLICATION = 'pharma_gyan_proj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'pharma_gyan',
-        'USER': 'root',
-        'PASSWORD':'Testing@123',
-        'HOST':'localhost',
-        'PORT':'3306'
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -135,5 +120,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-

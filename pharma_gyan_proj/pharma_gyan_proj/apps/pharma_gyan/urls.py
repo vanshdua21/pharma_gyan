@@ -1,6 +1,6 @@
 from django.urls import path, include
 from pharma_gyan_proj.apps.pharma_gyan import views
-from .views import upsert_promo_code
+
 urlpatterns = [
     path('editor/adminLogin', views.admin_login),
     path('editor/', views.editor),
