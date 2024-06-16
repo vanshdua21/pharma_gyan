@@ -367,7 +367,7 @@
 
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
-        let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'is_public': isPublic, 'multi_usage': multiUsage};
+        let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'multi_usage': multiUsage};
         console.log(data);
         if(mode=="edit"){
             data['unique_id'] = editUniqueId;

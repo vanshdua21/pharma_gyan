@@ -15,7 +15,6 @@ class pg_promo_code(Base, Orm_helper):
     max_usage = Column("max_usage", Integer)
     current_usage = Column("current_usage", Integer)
     is_active = Column("is_active", Integer, default=1)
-    is_public = Column("is_public", Integer, default=1)
     multi_usage = Column("multi_usage", Integer, default=1)
     created_by = Column("created_by", String)
     ct = Column("ct", DateTime, default=datetime.utcnow())
