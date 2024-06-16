@@ -70,6 +70,17 @@ RUN \
         libcurl \
         libssh2
 
+# Install required development tools
+RUN yum groupinstall -y "Development Tools"
+RUN yum install -y python3 python3-devel
+
+# Install pip and upgrade it along with setuptools and wheel
+RUN python3 -m ensurepip
+RUN pip3 install --upgrade pip setuptools wheel
+
+# Install greenlet
+RUN pip3 install greenlet
+
 
 RUN \
  cd /opt && \
