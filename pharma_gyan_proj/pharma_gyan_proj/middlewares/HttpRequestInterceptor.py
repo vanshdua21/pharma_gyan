@@ -33,7 +33,7 @@ class HttpRequestInterceptor:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path not in [settings.LOGIN_PATH, settings.SECURE_LOGIN_PATH]:
+        if request.path not in [settings.LOGIN_PATH, settings.SECURE_LOGIN_PATH] and "static" not in request.path:
             response = self.prehandle(request)
             if response is not None:
                 baseUrl = settings.BASE_PATH
