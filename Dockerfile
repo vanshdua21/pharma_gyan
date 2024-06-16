@@ -66,7 +66,19 @@ COPY pharma_gyan_proj/server_config/uwsgi/pharma_gyan_uwsgi.ini /etc/pharma_gyan
 COPY pharma_gyan_proj/server_config/nginx/pharma_gyan.conf /etc/nginx/conf.d/pharma_gyan.conf
 COPY pharma_gyan_proj/server_config/newrelic/* /etc/newrelic/
 
-ADD https://example.com/path/to/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl /tmp/
+# Install EPEL repository for additional packages
+RUN yum install -y epel-release
+
+# Install required development tools and dependencies
+RUN yum groupinstall -y "Development Tools"
+RUN yum install -y python3 python3-devel libffi-devel openssl-devel
+
+# Install pip and upgrade it along with setuptools and wheel
+RUN python3 -m ensurepip
+RUN pip3 install --upgrade pip setuptools wheel
+
+# Add and install greenlet wheel file
+COPY greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl /tmp/
 RUN pip3 install /tmp/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl
 
 
