@@ -66,6 +66,9 @@ COPY pharma_gyan_proj/server_config/uwsgi/pharma_gyan_uwsgi.ini /etc/pharma_gyan
 COPY pharma_gyan_proj/server_config/nginx/pharma_gyan.conf /etc/nginx/conf.d/pharma_gyan.conf
 COPY pharma_gyan_proj/server_config/newrelic/* /etc/newrelic/
 
+ADD https://example.com/path/to/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl /tmp/
+RUN pip3 install /tmp/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl
+
 
 COPY pharma_gyan_proj/server_config/pip/requirements.txt /etc/pip/requirements.txt
 RUN /usr/local/python3.8/bin/pip3.8 install -r /etc/pip/requirements.txt
