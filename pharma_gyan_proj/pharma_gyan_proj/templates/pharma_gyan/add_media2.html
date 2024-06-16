@@ -469,37 +469,89 @@
     initImageProgressBar();
     $("#image-err-div").html('');
     barImageInterval = setInterval('incImageBar()',25);
-    $("#image-upload-form").submit();
+<!--    console.log("Submitting form to URL:", $("#image-upload-form").attr("action"));-->
 
+<!--    $("#image-upload-form").submit();-->
+     var formData = new FormData($('#image-upload-form')[0]);
+        $.ajax({
+            url: 'addMedia/',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                imagelock = false;
+                clearInterval(barImageInterval);
+                $("#image-progress-bar").css({"width": "100%"});
+                console.log('Success', data);
+            if (data.result.toUpperCase() === 'SUCCESS') {
+                $("#success-div").show();
+                $("#success-text").html("Image uploaded successfully: " + data.data.file_url);
+            } else {
+                $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Upload failed, please try again.</span></div>');
+                $("#image-err-div").show();
+                $("#image-progress-bar-div").hide();
+            }
+            },
+            error: function (err) {
+                imagelock = false;
+                clearInterval(barImageInterval);
+                $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Upload failed, please try again.</span></div>');
+                $("#image-err-div").show();
+                $("#image-progress-bar-div").hide();
+            }
+        });
   }
-  function checkFileExtension(fileObjId)
-  {
-    var fup = document.getElementById(fileObjId);
-    var fileName = fup.value;
+<!--  function checkFileExtension(fileObjId)-->
+<!--  {-->
+<!--    var fup = document.getElementById(fileObjId);-->
+<!--    var fileName = fup.value;-->
 
-    var ext = fileName.substring(fileName.lastIndexOf('.') + 1);
-    if(ext == "jpeg" || ext == "jpg" || ext == "JPG" || ext == "JPEG" || ext == "png" || ext == "PNG" || ext == "gif" || ext == "GIF" || ext == "pdf"|| ext == "PDF")
-    {
-      return true;
+<!--    var ext = fileName.substring(fileName.lastIndexOf('.') + 1);-->
+<!--    if(ext == "jpeg" || ext == "jpg" || ext == "JPG" || ext == "JPEG" || ext == "png" || ext == "PNG" || ext == "gif" || ext == "GIF" || ext == "pdf"|| ext == "PDF")-->
+<!--    {-->
+<!--      return true;-->
+<!--    }-->
+<!--    else-->
+<!--    {-->
+<!--      return false;-->
+<!--    }-->
+<!--  }-->
+<!--  function initImageProgressBar()-->
+<!--  {-->
+
+<!--    document.getElementById("image-progress-bar").style.width='20%';-->
+<!--    $("#image-progress-bar-div").show();-->
+
+<!--  }-->
+
+<!--  function incImageBar()-->
+<!--  {-->
+<!--    var currWidth = $("#image-progress-bar").width();-->
+<!--    $("#image-progress-bar").width(currWidth+50);-->
+<!--  }-->
+        function checkFileExtension(fileId) {
+        var allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+        var fileInput = document.getElementById(fileId);
+        var fileName = fileInput.value;
+        var fileExtension = fileName.split('.').pop().toLowerCase();
+        return allowedExtensions.includes(fileExtension);
     }
-    else
-    {
-      return false;
+
+    function initImageProgressBar() {
+        $("#image-progress-bar").css({"width": "0%"});
+        $("#image-progress-bar-div").show();
     }
-  }
-  function initImageProgressBar()
-  {
-
-    document.getElementById("image-progress-bar").style.width='20%';
-    $("#image-progress-bar-div").show();
-
-  }
-
-  function incImageBar()
-  {
-    var currWidth = $("#image-progress-bar").width();
-    $("#image-progress-bar").width(currWidth+50);
-  }
+    function incImageBar() {
+        var width = parseInt($("#image-progress-bar").css('width').replace("px", ""));
+        var pWidth = parseInt($("#image-progress-bar-div").css('width').replace("px", ""));
+        var nWidth = (width + 3) % pWidth;
+        var percent = nWidth / pWidth;
+        $("#image-progress-bar").css({"width": nWidth + "px"});
+        if (percent > 0.9) {
+            clearInterval(barImageInterval);
+        }
+    }
 
     function validateEmail(email) {
         // http://stackoverflow.com/a/46181/11236

@@ -1,5 +1,6 @@
 import http
 import json
+import mimetypes
 import os
 
 import boto3
@@ -17,7 +18,7 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 import json
 
 
@@ -50,14 +51,51 @@ def media_dropzone(request):
 
 
 @csrf_exempt
+#bellow function for image upload only
 def add_media(request):
     if request.method == 'POST' and request.FILES.get('image-file'):
         upload = request.FILES['image-file']
         file_url = save_file_to_s3(upload)
-        return HttpResponse(json.dumps(dict(result=TAG_SUCCESS, data=dict(file_url=file_url)), default=str), status=http.HTTPStatus.OK, content_type="application/json")
+        return JsonResponse({'result': 'success', 'data': {'file_url': file_url}}, status=200)
     else:
-        return HttpResponse(json.dumps(dict(result=TAG_FAILURE), default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
+        return JsonResponse({'result': 'failure'}, status=400)
 
+#below func for both video and image :
+# def add_media(request):
+#     if request.method == 'POST':
+#         file = request.FILES.get('file')
+#         if file:
+#             # Check file size
+#             if file.size > 5 * 1024 * 1024:  # 5MB limit
+#                 return HttpResponseBadRequest("File size exceeds 5MB limit.")
+#
+#             # Determine file type
+#             file_type = mimetypes.guess_type(file.name)[0]
+#
+#             # Upload file to S3
+#             file_url = save_file_to_s3(file, file_type)
+#
+#             # Return response
+#             return JsonResponse({'result': 'success', 'data': {'file_url': file_url, 'file_type': file_type}})
+#         else:
+#             return JsonResponse({'result': 'failure', 'message': 'No file found in request.'}, status=400)
+#
+#     return HttpResponseBadRequest("Method not allowed.")
+# def save_file_to_s3(file):
+#     s3_client = boto3.client(
+#         's3',
+#         aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
+#         aws_secret_access_key="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",
+#         region_name="ap-south-1"
+#     )
+#
+#     file_name = file.name
+#
+#     s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
+#
+#     s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
+#     # s3_url = f"https://s3-ap-south-1.amazonaws.com/pharma-gyan-test-media/{file_name}"
+#     return s3_url
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
@@ -70,10 +108,8 @@ def save_file_to_s3(file):
 
     s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
 
-    # s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
-    s3_url = f"https://s3-ap-south-1.amazonaws.com/pharma-gyan-test-media/{file_name}"
+    s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
     return s3_url
-
 
 def get_user_tab_permissions(user):
     user_groups = [group.name for group in list(user.groups.all())]
