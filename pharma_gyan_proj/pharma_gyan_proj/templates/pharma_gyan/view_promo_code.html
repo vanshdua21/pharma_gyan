@@ -41,7 +41,6 @@
                             <th>Discount</th>
                             <th>Max Discount</th>
                             <th>Multi Usage</th>
-                            <th>Public</th>
                             <th>Active</th>
                             <th>Created By</th>
                             <th>Expiry Date</th>
@@ -63,7 +62,6 @@
                                 <th>Discount</th>
                                 <th>Max Discount</th>
                                 <th>Multi Usage</th>
-                                <th>Public</th>
                                 <th>Active</th>
                                 <th>Created By</th>
                                 <th>Expiry Date</th>
@@ -95,11 +93,6 @@
             }else{
                 item.is_active = "NO"
             }
-            if(item.is_public){
-                item.is_public = "YES"
-            }else{
-                item.is_public = "NO"
-            }
             if(item.multi_usage){
                 item.multi_usage = "YES"
             }else{
@@ -130,7 +123,6 @@
                     { data: "discount" },
                     { data: "max_discount" },
                     { data: "multi_usage" },
-                    { data: "is_public" },
                     { data: "is_active" },
                     { data: "created_by" },
                     { data: "expiry_date" },

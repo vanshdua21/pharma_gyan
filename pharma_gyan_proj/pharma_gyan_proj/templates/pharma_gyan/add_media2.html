@@ -53,7 +53,7 @@
             <div id="panel-1" class="panel">
                 <div class="panel-hdr">
                     <h2 id="main_title">
-                        Add User
+                        Add Promo Code
                     </h2>
                     <div class="panel-toolbar">
                         <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
@@ -65,60 +65,40 @@
                     <div class="panel-content">
 
 
-                        <div class="col-lg-9">
-                            <div class="p-20">
-                                <div action="#">
+                        <div class="panel-tag">
+                            Dropzone does not handle your file uploads on the server. You have to implement the code to receive and store the file yourself. See the section Server side implementation for more information.
+                        </div>
+                        <div class="modal-body">
+        <form name="image-upload-form" id="image-upload-form" class="smart-form" action="addMedia/" target="image-upload-frame" enctype="multipart/form-data" method="post">
+          <fieldset style="padding-top:0px;">
+            <label class="label" style="font-weight: bold;margin-bottom: 20px;font-size: 20px; display: block;">Upload Product Image</label>
+            <label class="input input-file" for="file">
+              <div class="button"><input type="file" style="width: 80%; onchange="this.parentNode.nextSibling.value = this.value" name="image-file" id="image-file"></div>
+            </label>
+            <input type="hidden" name="sku_code" id="sku_code"/>
 
 
-                                    <div class="form-group">
-                                        <label class="form-label" for="mobile">Title</label>
-                                        <input type="text" id="title" class="form-control">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Promo Code</label>
-                                        <input type="text" id="promoCode" class="form-control">
-                                    </div>
+          </fieldset>
 
-                                    <div class="form-group">
-                                        <label class="form-label" style="padding-right: 20px;">Discount Type</label>
-                                        <select class="form-control select2" id="discountType" onchange="typeChanged()">
-                                        <option value="flat">Flat</option>
-                                        <option value="percentage">Percentage</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group" id="discount-div">
-                                        <label class="form-label" for="discount">Discount (%)</label>
-                                        <input type="text" id="discount" class="form-control">
-                                    </div>
+        </form>
 
-                                    <div class="form-group" id="maxDiscount-div">
-                                        <label class="form-label" for="maxDiscount">Max Discount (Rs)</label>
-                                        <input type="text" id="maxDiscount" class="form-control">
-                                    </div>
-                                    <div class="form-group" id="maxUsage-div">
-                                        <label class="form-label" for="maxUsage">Max Usage</label>
-                                        <input type="text" id="maxUsage" class="form-control">
-                                    </div>
+        <div id="image-err-div" style="display: none;margin-top:20px;padding:10px;"></div>
 
-                                    <div class="form-group" id="expiryDate-div">
-                                        <label class="form-label" for="expiryDate">Expiry Date</label>
-                                        <input type="date" id="expiryDate" class="form-control">
-                                    </div>
-                                    <div style="display: flex; padding-bottom: 30px";>
-                                    <div class="custom-control custom-checkbox col-lg-5"  id="isPublic-div">
-                                        <input type="checkbox" class="custom-control-input" id="isPublic" value="0">
-                                        <label class="custom-control-label" for="isPublic" style="font-size: 15px;padding-left: 15px">Is Public</label>
-                                    </div>
-                                    <div class="custom-control custom-checkbox col-lg-5"  id="multiUsage-div">
-                                        <input type="checkbox" class="custom-control-input" id="multiUsage" value="0">
-                                        <label class="custom-control-label" for="multiUsage" style="font-size: 15px;padding-left: 15px">Multi Usage</label>
-                                    </div>
-                                        </div>
+        <div style="text-align: center;margin-top:15px;"><button class="btn btn-primary" onclick="uploadImage();">Upload File</button></div>
 
-                                    <div class="addPromoCode">
-                                        <button class="btn  btn-small btn-success" onclick="addPromoCode()" >Save</button>
-<!--                                        <button class="btn  btn-small btn-danger" onclick="window.history.back()" style="margin-left: 8px" >Cancel</button>-->
-                                    </div>
+
+
+        <div id="image-progress-bar-div" style="margin-top:20px;width:94%;margin-left:3%;display:none;" class="progress progress-striped active">
+          <div id="image-progress-bar" class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+          </div>
+        </div>
+
+        <iframe id="image-upload-frame" name="image-upload-frame" style="display: none;"></iframe>
+
+
+
+      </div>
 
 
 
@@ -186,7 +166,7 @@
         }
 
         if(mode=="edit"){
-            var currentCustomerData = JSON.parse('{{ user|escapejs }}');
+            var currentCustomerData = JSON.parse('{{ promoCode|escapejs }}');
             console.log('Data-',currentCustomerData);
             setEditMode(currentCustomerData);
         }
@@ -194,7 +174,7 @@
     });
 
     function redirectToAddPC(){
-        window.location='#promoCode';
+        location.reload();
     }
 
     function redirectToViewPC(){
@@ -202,30 +182,52 @@
     }
 
     function setEditMode(customerData){
-        $("#main_title").html('Edit User Data');
+        $("#main_title").html('Edit Promo Code');
 
-        $("#mobile").val(customerData["mobile_number"]);
-        $("#pass").val(customerData["password"]);
-        $("#name").val(customerData["display_name"]);
-        $("#userName").val(customerData["user_name"]);
-        $("#email").val(customerData["email_id"]);
+        $("#title").val(customerData["title"]);
+        $("#discountType").val(customerData["discount_type"]);
+        $("#promoCode").val(customerData["promo_code"]);
 
-
-        $('#perm input:checked').each(function() {
-            $('input:checkbox').attr('checked',false);
-        });
-
-        let permissions = customerData["permissions"];
-        for(let key in permissions){
-            if(permissions[key] == 1){
-                $("#"+key).attr("checked", true);
-            }
+        if(discountType=="percentage"){
+        $("#discount").val(customerData["discount"]);
+        $("#maxDiscount").val(customerData["max_discount"]);
+        $("#maxUsage").val(customerData["max_usage"]);
+        $("#expiryDate").val(customerData["expiry_date"]);
+        if (customerData["multi_usage"]){
+        $("#multiUsage").attr("checked", true);
+        }
+        else{
+        $("#multiUsage").attr("checked", false);
+        }
+        $("#discount").text("Discount (%)");
+        $("#discount-div").show();
+        $("#maxDiscount-div").show();
+        $("#maxUsage-div").show();
+        $("#expiryDate-div").show();
+        $("#isPublic-div").show();
+        $("#multiUsage-div").show();
+        }
+        else{
+        $("#discount").val(customerData["discount"]);
+        $("#maxUsage").val(customerData["max_usage"]);
+        $("#expiryDate").val(customerData["expiry_date"]);
+        if (customerData["multi_usage"]){
+        $("#multiUsage").attr("checked", true);
+        }
+        else{
+        $("#multiUsage").attr("checked", false);
+        }
+        $("#maxDiscount-div").hide();
+        $("#discount").text("Discount (Rs)");
+        $("#discount-div").show();
+        $("#maxUsage-div").show();
+        $("#expiryDate-div").show();
+        $("#isPublic-div").show();
+        $("#multiUsage-div").show();
         }
 
         editUniqueId = customerData["unique_id"];
         editId = customerData["id"];
-        is_active = customerData["is_active"];
-        ct = customerData["ct"];
     }
 
     function setError(domId,msg){
@@ -371,9 +373,7 @@
         console.log(data);
         if(mode=="edit"){
             data['unique_id'] = editUniqueId;
-            data["id"] = editId;
-            data["is_active"] = is_active;
-            data["ct"] = ct;
+            data['id'] = editId;
         }
         $.ajax({
             type : 'POST',
@@ -415,7 +415,7 @@
                 lock=false;
                 clearInterval(barInterval);
 
-                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                var message = data.responseJSON ? data.responseJSON['details_message'] : 'some error occured while saving, please contact administrator !';
                 $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
                 $("#err-div").show();
                 $("#progress-bar-div").hide();
@@ -428,6 +428,66 @@
 
 
     }
+    function uploadImage()
+  {
+
+    if(imagelock==true)
+      return;
+
+    $("#image-err-div").html('');
+    $("#image-err-div").hide();
+
+    if($("#image-file").val()=="")
+    {
+      $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a file to upload!</span></div>');
+      $("#image-err-div").show();
+
+      return;
+    }
+
+    if(checkFileExtension("image-file")==false)
+    {
+      $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a image type file to upload!</span></div>');
+      $("#image-err-div").show();
+
+      return;
+    }
+
+    var imagelock = true;
+    initImageProgressBar();
+    $("#image-err-div").html('');
+    barImageInterval = setInterval('incImageBar()',25);
+    $("#image-upload-form").submit();
+
+  }
+  function checkFileExtension(fileObjId)
+  {
+    var fup = document.getElementById(fileObjId);
+    var fileName = fup.value;
+
+    var ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+    if(ext == "jpeg" || ext == "jpg" || ext == "JPG" || ext == "JPEG" || ext == "png" || ext == "PNG" || ext == "gif" || ext == "GIF" || ext == "pdf"|| ext == "PDF")
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  function initImageProgressBar()
+  {
+
+    document.getElementById("image-progress-bar").style.width='20%';
+    $("#image-progress-bar-div").show();
+
+  }
+
+  function incImageBar()
+  {
+    var currWidth = $("#image-progress-bar").width();
+    $("#image-progress-bar").width(currWidth+50);
+  }
 
     function validateEmail(email) {
         // http://stackoverflow.com/a/46181/11236
