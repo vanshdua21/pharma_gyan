@@ -11,7 +11,7 @@ RUN yum install -y libffi-devel openssl-devel
 # Install pip and upgrade it along with setuptools and wheel
 RUN python3 -m ensurepip
 RUN pip3 install --upgrade pip setuptools wheel
-
+RUN pip3 install greenlet --verbose
 # Install greenlet
 RUN pip3 install greenlet
 
