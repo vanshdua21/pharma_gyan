@@ -1,19 +1,5 @@
 FROM centos:7
 LABEL maintainer="Vansh Team"
-# Install required development tools
-RUN yum groupinstall -y "Development Tools"
-RUN yum install -y python3 python3-devel
-
-# Install additional dependencies that might be needed
-RUN yum install -y epel-release
-RUN yum install -y libffi-devel openssl-devel
-
-# Install pip and upgrade it along with setuptools and wheel
-RUN python3 -m ensurepip
-RUN pip3 install --upgrade pip setuptools wheel
-RUN pip3 install greenlet --verbose
-# Install greenlet
-RUN pip3 install greenlet
 
 RUN \
  yum install -y epel-release && \
@@ -46,11 +32,11 @@ RUN \
                 libtool-ltdl-devel && \
  yum install -y nginx && \
  yum install -y screen && \
- wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
- yum localinstall -y wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
  pip install --upgrade pip && \
  pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host=api.github.com supervisor --no-cache-dir && \
- mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs /etc/newrelic && \
+
+
+ mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs && \
  yum clean all
 
 WORKDIR /usr/local/pharma_gyan/
@@ -58,31 +44,6 @@ ARG BUILD_ENV="uat"
 ENV BUILD_ENV=$BUILD_ENV
 
 EXPOSE 80
-
-
-RUN \
- yum update -y nss \
-        nss-sysinit \
-        nss-tools \
-        systemd \
-        systemd-libs \
-        bind-license \
-        rpm \
-        rpm-build-libs \
-        rpm-python \
-        rpm-libs \
-        glib2 \
-        openldap \
-        gzip \
-        kernel \
-        kernel-headers \
-        binutils \
-        cyrus-sasl \
-        cyrus-sasl-lib \
-        kpartx \
-        curl \
-        libcurl \
-        libssh2
 
 RUN \
  cd /opt && \
