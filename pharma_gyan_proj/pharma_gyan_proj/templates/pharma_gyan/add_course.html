@@ -41,9 +41,13 @@
 
 
 <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
-"><strong>Congratulations!</strong> <span id="success-text"></span>
-
-    </div></div>
+    "><strong>Congratulations!</strong> <span id="success-text"></span>
+    
+        </div>
+    
+        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewCourses()>View courses</button>
+    
+        </div>
 
 <div id="main-form-div">
     <div class="row">
@@ -65,27 +69,30 @@
 
                         <div class="col-lg-9">
                             <div class="p-20">
-                                <div action="#">
+                                <div id="uploadForm">
 
 
                                     <div class="form-group">
-                                        <label class="form-label" for="mobile">Title</label>
+                                        <label class="form-label" for="title">Title</label>
                                         <input type="text" id="title" class="form-control">
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label" for="pass">Description</label>
+                                        <label class="form-label" for="desc">Description</label>
                                         <input type="text" id="desc" class="form-control">
                                     </div>
 
-                                    <div class="custom-file">
-                                        <label class="form-label" for="image-file">Image</label>
-                                        <input type="file" class="custom-file-input" name="image-file" id="image-file">
-                                        <label class="custom-file-label" for="customFile">Choose file</label>
+                                    <div class="form-group">
+                                        <label class="form-label" for="pic">Course Thumbnail</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" name="image-file" id="image-file" accept=".jpg, .jpeg, .png, .gif">
+                                            <label class="custom-file-label" for="image-file">Upload Image</label>
+                                        </div>
                                     </div>
+
+                                    
 
                                     <div class="emailCTA">
                                         <button class="btn  btn-small btn-success" onclick="addCourse()" >Save</button>
-<!--                                        <button class="btn  btn-small btn-danger" onclick="window.history.back()" style="margin-left: 8px" >Cancel</button>-->
                                     </div>
 
                                 </div>
@@ -149,6 +156,10 @@
 
     });
 
+    function redirectToViewCourses(){
+        window.location='#viewCourses';
+    }
+
     function setEditMode(customerData){
         $("#main_title").html('Edit User Data');
 
@@ -200,65 +211,25 @@
 
     var lock = false;
     function addCourse(){
-        if(!($('#userName').val())){
-            setError("userName");
-            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill User name ! </span></div>');
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Title ! </span></div>');
             $("#err-div").show();
 
             return;
         }
 
-        setSuccess("userName");
+        setSuccess("title");
 
-        var phoneno = /^\d{10}$/;
-        let mblNumber = $('#mobile').val();
-        if(!(mblNumber && mblNumber.match(phoneno))){
-            setError("mobile");
-            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add correct mobile number ! </span></div>');
-            $("#err-div").show();
-
-            return;
-        }
-        setSuccess("mobile");
-
-        if(!($('#pass').val())){
-            setError("pass");
-            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill password ! </span></div>');
+        if(!($('#desc').val())){
+            setError("desc");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Description ! </span></div>');
             $("#err-div").show();
 
             return;
         }
 
-        setSuccess("pass");
-
-        if(!($('#name').val())){
-            setError("name");
-            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display name ! </span></div>');
-            $("#err-div").show();
-
-            return;
-        }
-
-        setSuccess("name");
-
-
-        let emailId = $("#email").val();
-        if(emailId != '') {
-            if (validateEmail(emailId) == false) {
-                setError("email");
-                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please provide valid email ! </span></div>');
-                $("#err-div").show();
-
-                return;
-            } else {
-                setSuccess("email");
-            }
-        }
-
-        var selectedPerms = [];
-        $('#perm input:checked').each(function() {
-            selectedPerms.push($(this).val());
-        });
+        setSuccess("desc");
 
 
         lock = true;
@@ -267,8 +238,16 @@
 
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
-        let data = {'phone':mblNumber,'displayName':($('#name').val()),'userName':($('#userName').val()), 'pass':($('#pass').val()),'email':emailId,'perm':JSON.stringify(selectedPerms)};
-        console.log(data);
+        var title = document.getElementById('title').value;
+        var description = document.getElementById('desc').value;
+        var imageFile = document.getElementById('image-file').files[0];
+
+        let formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('image', imageFile);
+
+        let data = {'title':title, 'description':description,'image':imageFile};
         if(mode=="edit"){
             editUniqueId = currentCustomerData["unique_id"];
             editId = currentCustomerData["id"];
@@ -279,11 +258,13 @@
             data["is_active"] = is_active;
             data["ct"] = ct;
         }
-        console.log(data);
+        console.log(formData);
         $.ajax({
             type : 'POST',
-            url : 'upsertUser/',
-            data : {'data':JSON.stringify(data)},
+            url : 'upsertCourse/',
+            data : formData,
+            processData: false,
+            contentType: false,
             success :function(data)
             {
                 lock=false;
@@ -295,9 +276,9 @@
                 {
                     $("#success-div").show();
                     if(mode == "edit"){
-                        $("#success-text").html("User edited Successfully");
+                        $("#success-text").html("Course edited Successfully");
                     }else{
-                        $("#success-text").html("User added Successfully");
+                        $("#success-text").html("Course added Successfully");
                     }
 
                     $("#main-form-div").hide();
@@ -339,6 +320,57 @@
 
         var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
+    }
+
+    var imagelock = false;
+    function uploadImage()
+    {
+
+        if(imagelock==true)
+            return;
+
+        $("#image-err-div").html('');
+        $("#image-err-div").hide();
+
+        if($("#image-file").val()=="")
+        {
+            $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a file to upload!</span></div>');
+            $("#image-err-div").show();
+
+            return;
+        }
+
+        if(checkFileExtension("image-file")==false)
+        {
+            $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a image type file to upload!</span></div>');
+            $("#image-err-div").show();
+
+            return;
+        }
+
+        imagelock = true;
+        initImageProgressBar();
+        $("#image-err-div").html('');
+        barImageInterval = setInterval('incImageBar()',25);
+        $("#image-upload-form").submit();
+
+    }
+
+
+    function checkFileExtension(fileObjId)
+    {
+        var fup = document.getElementById(fileObjId);
+        var fileName = fup.value;
+
+        var ext = fileName.substring(fileName.lastIndexOf('.') + 1);
+        if(ext == "jpeg" || ext == "jpg" || ext == "JPG" || ext == "JPEG" || ext == "png" || ext == "PNG" || ext == "gif" || ext == "GIF" || ext == "pdf"|| ext == "PDF")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
