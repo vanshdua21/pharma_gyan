@@ -32,11 +32,11 @@ RUN \
                 libtool-ltdl-devel && \
  yum install -y nginx && \
  yum install -y screen && \
- wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
- yum localinstall -y wkhtmltox-0.12.6-1.centos7.x86_64.rpm && \
  pip install --upgrade pip && \
  pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host=api.github.com supervisor --no-cache-dir && \
- mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs /etc/newrelic && \
+
+
+ mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs && \
  yum clean all
 
 WORKDIR /usr/local/pharma_gyan/
@@ -44,32 +44,6 @@ ARG BUILD_ENV="uat"
 ENV BUILD_ENV=$BUILD_ENV
 
 EXPOSE 80
-
-
-RUN \
- yum update -y nss \
-        nss-sysinit \
-        nss-tools \
-        systemd \
-        systemd-libs \
-        bind-license \
-        rpm \
-        rpm-build-libs \
-        rpm-python \
-        rpm-libs \
-        glib2 \
-        openldap \
-        gzip \
-        kernel \
-        kernel-headers \
-        binutils \
-        cyrus-sasl \
-        cyrus-sasl-lib \
-        kpartx \
-        curl \
-        libcurl \
-        libssh2
-
 
 RUN \
  cd /opt && \
@@ -91,6 +65,21 @@ COPY pharma_gyan_proj/server_config/uwsgi/uwsgi_params /etc/nginx/conf.d/uwsgi_p
 COPY pharma_gyan_proj/server_config/uwsgi/pharma_gyan_uwsgi.ini /etc/pharma_gyan_uwsgi.ini
 COPY pharma_gyan_proj/server_config/nginx/pharma_gyan.conf /etc/nginx/conf.d/pharma_gyan.conf
 COPY pharma_gyan_proj/server_config/newrelic/* /etc/newrelic/
+
+# Install EPEL repository for additional packages
+RUN yum install -y epel-release
+
+# Install required development tools and dependencies
+RUN yum groupinstall -y "Development Tools"
+RUN yum install -y python3 python3-devel libffi-devel openssl-devel
+
+# Install pip and upgrade it along with setuptools and wheel
+RUN python3 -m ensurepip
+RUN pip3 install --upgrade pip setuptools wheel
+
+# Add and install greenlet wheel file
+COPY greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl /tmp/
+RUN pip3 install /tmp/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl
 
 
 COPY pharma_gyan_proj/server_config/pip/requirements.txt /etc/pip/requirements.txt

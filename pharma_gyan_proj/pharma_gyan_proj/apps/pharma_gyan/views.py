@@ -18,6 +18,9 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, prepare_and_save_course, process_activate_course, process_deactivate_course
+
+import boto3
 
 import json
 from django.http import JsonResponse
@@ -281,8 +284,54 @@ def addCourse(request):
     return HttpResponse(rendered_page)
 
 def viewCourses(request):
-    users = fetch_and_prepare_users()
+    courses = fetch_and_prepare_courses()
     # Convert list of dictionaries to JSON
-    users_json = json.dumps(users)
-    rendered_page = render_to_string('pharma_gyan/view_users.html', {"users": users_json})
+    courses_json = json.dumps(courses)
+    rendered_page = render_to_string('pharma_gyan/view_courses.html', {"courses": courses_json})
     return HttpResponse(rendered_page)
+
+@csrf_exempt
+def upsertCourse(request):
+    title = request.POST.get('title')
+    description = request.POST.get('description')
+    image_file = request.FILES.get('image')
+    
+    imageUrl = save_file_to_s3(image_file)
+    # Collect the data in a dictionary
+    course = {
+        'title': title,
+        'description': description,
+        'imageUrl': imageUrl,  # This is the uploaded file
+    }
+    
+    response = prepare_and_save_course(course)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+def save_file_to_s3(file):
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
+        aws_secret_access_key="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",
+        region_name="ap-south-1"
+    )
+
+    file_name = file.name
+
+    s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
+
+    s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
+    return s3_url
+
+@csrf_exempt
+def deactivate_course(request, uniqueId):
+    response = process_deactivate_course(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+
+@csrf_exempt
+def activate_course(request, uniqueId):
+    response = process_activate_course(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

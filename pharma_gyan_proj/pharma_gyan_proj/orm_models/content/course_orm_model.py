@@ -7,9 +7,10 @@ class pg_course(Base, Orm_helper):
     id = Column("id", Integer, autoincrement=True)
     unique_id = Column("unique_id", String, primary_key=True)
     title = Column("title", String)
-    description = Column("description", text)
+    description = Column("description", String)
     thumbnail_url = Column("thumbnail_url", String)
     created_by = Column("created_by", String)
+    is_active = Column("is_active", Integer, default=1)
     ct = Column("ct", DateTime, default=datetime.utcnow())
 
     def __init__(self, data={}):

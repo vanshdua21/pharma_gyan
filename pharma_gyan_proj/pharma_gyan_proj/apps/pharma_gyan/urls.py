@@ -24,4 +24,7 @@ urlpatterns = [
     path("editor/addMedia/", views.add_media),
     path("editor/addCourse/", views.addCourse),
     path("editor/viewCourses/", views.viewCourses),
+    path("editor/upsertCourse/", views.upsertCourse),
+    path("editor/deactivateCourse/<str:uniqueId>/", views.deactivate_course),
+    path("editor/activateCourse/<str:uniqueId>/", views.activate_course),
 ]

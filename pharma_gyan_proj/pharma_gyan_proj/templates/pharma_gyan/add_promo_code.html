@@ -113,10 +113,6 @@
                                     </div>
 
                                     <div style="display: flex; padding-bottom: 30px";>
-<!--                                    <div class="custom-control custom-checkbox col-lg-5"  id="isPublic-div">-->
-<!--                                        <input type="checkbox" class="custom-control-input" id="isPublic" value="0">-->
-<!--                                        <label class="custom-control-label" for="isPublic" style="font-size: 15px;padding-left: 15px">Is Public</label>-->
-<!--                                    </div>-->
                                     <div class="custom-control custom-checkbox col-lg-5"  id="multiUsage-div">
                                         <input type="checkbox" class="custom-control-input" id="multiUsage" value="0">
                                         <label class="custom-control-label" for="multiUsage" style="font-size: 15px;padding-left: 15px">Multi Usage</label>
@@ -238,20 +234,16 @@
         console.log('Formatted Date:', formattedDate);
 
         let expiryDateInput = $("#expiryDate");
-        console.log('Expiry Date Input:', expiryDateInput);
         expiryDateInput.val(formattedDate);
-        console.log('Expiry Date Input Value:', expiryDateInput.val());
 
     if (customerData["discount_type"] === "percentage") {
         $("#discount-div label").text("Discount (%)");
         $("#discount").val(customerData["discount"]);
         $("#maxDiscount").val(customerData["max_discount"]);
-<!--        $("#discount").text("Discount (%)");-->
         $("#maxDiscount-div").show();
     } else {
         $("#discount-div label").text("Discount (Rs)");
         $("#discount").val(customerData["discount"]);
-<!--        $("#discount").text("Discount (Rs)");-->
         $("#maxDiscount-div").hide();
     }
     $("#maxUsage").val(customerData["max_usage"]);
@@ -268,6 +260,7 @@
     $("#discount-div").show();
     $("#maxUsage-div").show();
     $("#expiryDate-div").show();
+    $("#multiUsage-div").show();
 
     editUniqueId = customerData["unique_id"];
     editId = customerData["id"];
@@ -318,7 +311,6 @@ function typeChanged() {
 
     $("#discount-div").show();
     $("#expiryDate-div").show();
-    $("#isPublic-div").show();
     $("#multiUsage-div").show();
 
     // Show maxUsage-div only if multiUsage is checked
