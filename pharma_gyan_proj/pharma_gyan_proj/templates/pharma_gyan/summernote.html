@@ -34,7 +34,6 @@
 </div>
 </div>
 	<script src="/static/pharma_gyan/js/summernote.js"></script>
-
 <script>
     var interval;
 
@@ -60,33 +59,106 @@
     };
 
     // Function to handle image upload
-    function uploadImage(file) {
-        let data = new FormData();
-        data.append("image-file", file);
+    function uploadImages(files) {
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
 
-	$.ajax({
-		url: 'addMedia/',  // Check this URL path
-		cache: false,
-		contentType: false,
-		processData: false,
-		data: data,
-		type: "POST",
-		success: function(response) {
-			console.log("Image upload successful:", response);
-			if (response.result === 'success') {
-				let imgNode = $('<img>').attr('src', response.data.file_url);
-				$('.js-summernote').summernote('insertNode', imgNode[0]);
-				localStorage.setItem('uploadedImageURL', response.data.file_url);
-			} else {
-				console.log("Image upload failed");
-			}
-		},
-		error: function(xhr, textStatus, errorThrown) {
-			console.log("Image upload failed:", textStatus, errorThrown);
-		}
-	});
+            // Check if filename is valid (only alphanumeric, underscores, dots, and dashes)
+            if (!validateFilename(file.name)) {
+                alert("Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.");
+                console.log("Invalid filename:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File size exceeds 5MB limit.");
+                console.log("File size exceeds 5MB limit:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            let data = new FormData();
+            data.append("image-file", file);
+
+            $.ajax({
+                url: 'addMedia/',  // Check this URL path
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "POST",
+                success: function(response) {
+                    if (response.result === 'success') {
+                        let imgNode = $('<img>').attr('src', response.data.file_urls[0]);
+                        $('.js-summernote').summernote('insertNode', imgNode[0]);
+
+                        // Manage multiple URLs in localStorage
+                        var uploadedImageURLs = JSON.parse(localStorage.getItem('uploadedImageURLs')) || [];
+                        response.data.file_urls.forEach(url => {
+                            uploadedImageURLs.push(url);
+                        });
+                        localStorage.setItem('uploadedImageURLs', JSON.stringify(uploadedImageURLs));
+                    } else {
+                        console.log("Image upload failed");
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.log("Image upload failed:", textStatus, errorThrown);
+                }
+            });
+        }
     }
 
+    // Function to handle video upload
+    function uploadVideos(files) {
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            // Check if filename is valid (only alphanumeric, underscores, dots, and dashes)
+            if (!validateFilename(file.name)) {
+                alert("Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.");
+                console.log("Invalid filename:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File size exceeds 5MB limit.");
+                console.log("File size exceeds 5MB limit:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            let data = new FormData();
+            data.append("video-file", file);
+
+            $.ajax({
+                url: 'addMedia/',  // Check this URL path
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "POST",
+                success: function(response) {
+                    if (response.result === 'success') {
+                        let videoNode = $('<video controls>').attr('src', response.data.file_urls[0]);
+                        $('.js-summernote').summernote('insertNode', videoNode[0]);
+
+                        // Manage multiple URLs in localStorage
+                        var uploadedVideoURLs = JSON.parse(localStorage.getItem('uploadedVideoURLs')) || [];
+                        response.data.file_urls.forEach(url => {
+                            uploadedVideoURLs.push(url);
+                        });
+                        localStorage.setItem('uploadedVideoURLs', JSON.stringify(uploadedVideoURLs));
+                    } else {
+                        console.log("Video upload failed");
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.log("Video upload failed:", textStatus, errorThrown);
+                }
+            });
+        }
+    }
 
     // Function to save Summernote data via AJAX
     function saveSummernoteData() {
@@ -104,7 +176,34 @@
         });
     }
 
-  		$(document).ready(function () {
+    // Validate filename (only alphanumeric, underscores, dots, and dashes allowed)
+    function validateFilename(filename) {
+        return /^[a-zA-Z0-9_.-]*$/.test(filename);
+    }
+
+    $(document).ready(function () {
+        // Custom video button
+        var videoButton = function (context) {
+            var ui = $.summernote.ui;
+
+            // create button
+            var button = ui.button({
+                contents: '<i class="note-icon-video"/>',
+                tooltip: 'Upload Video',
+                click: function () {
+                    var fileInput = $('<input type="file" accept="video/*" multiple>');
+                    fileInput.trigger('click');
+
+                    fileInput.on('change', function() {
+                        var files = this.files;
+                        uploadVideos(files);
+                    });
+                }
+            });
+
+            return button.render();   // return button as jquery object
+        };
+
         // Initialize Summernote
         $('.js-summernote').summernote({
             height: 500,
@@ -121,17 +220,18 @@
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['height', ['height']],
                 ['table', ['table']],
-                ['insert', [ 'link','picture','video']],
+                ['insert', ['picture', 'videoUpload']], // Add the custom button here
                 ['view', ['fullscreen', 'codeview', 'help']]
             ],
+            buttons: {
+                videoUpload: videoButton  // Define the custom button
+            },
             callbacks: {
                 onImageUpload: function(files) {
-                    for (let i = 0; i < files.length; i++) {
-                        uploadImage(files[i]);
-                    }
+                    uploadImages(files);
                 },
-                onInit: function(e) {
-                    $('.js-summernote').summernote("code", localStorage.getItem("summernoteData"));
+                onMediaDelete: function(target) {
+                    deleteMedia(target[0].src);  // Define deleteMedia function as needed
                 },
                 onChange: function(contents, $editable) {
                     clearInterval(interval);
@@ -140,62 +240,39 @@
             }
         });
 
+        // Attach event listener for the custom button to upload media
+        document.querySelector("#panel-1 .note-editor .modal-footer input").addEventListener('click', function() {
+            let input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = 'image/*,video/*'; // Allow both images and videos
+            input.onchange = function(event) {
+                let files = event.target.files;
+                let imageFiles = [];
+                let videoFiles = [];
 
-
-
-        // Load emojis
-        $.ajax({
-            url: 'https://api.github.com/emojis',
-            async: false
-        }).then(function(data) {
-            window.emojis = Object.keys(data);
-            window.emojiUrls = data;
-        });
-
-        // Initialize emoji example
-        $(".js-hint2emoji").summernote({
-            height: 100,
-            toolbar: false,
-            placeholder: 'type starting with : and any alphabet',
-            hint: {
-                match: /:([\-+\w]+)$/,
-                search: function(keyword, callback) {
-                    callback($.grep(emojis, function(item) {
-                        return item.indexOf(keyword) === 0;
-                    }));
-                },
-                template: function(item) {
-                    var content = emojiUrls[item];
-                    return '<img src="' + content + '" width="20" /> :' + item + ':';
-                },
-                content: function(item) {
-                    var url = emojiUrls[item];
-                    if (url) {
-                        return $('<img />').attr('src', url).css('width', 20)[0];
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i].type.startsWith('image/')) {
+                        imageFiles.push(files[i]);
+                    } else if (files[i].type.startsWith('video/')) {
+                        videoFiles.push(files[i]);
                     }
-                    return '';
                 }
-            }
-        });
 
-        // Initialize mentions example
-        $(".js-hint2mention").summernote({
-            height: 100,
-            toolbar: false,
-            placeholder: "type starting with @",
-            hint: {
-                mentions: ['jayden', 'sam', 'alvin', 'david'],
-                match: /\B@(\w*)$/,
-                search: function(keyword, callback) {
-                    callback($.grep(this.mentions, function(item) {
-                        return item.indexOf(keyword) == 0;
-                    }));
-                },
-                content: function(item) {
-                    return '@' + item;
+                if (imageFiles.length > 0) {
+                    uploadImages(imageFiles);
                 }
-            }
+
+                if (videoFiles.length > 0) {
+                    uploadVideos(videoFiles);
+                }
+            };
+            input.click();
         });
     });
+
 </script>
+
+
+
 

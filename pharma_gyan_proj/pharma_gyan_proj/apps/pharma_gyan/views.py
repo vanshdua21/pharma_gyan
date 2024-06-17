@@ -1,8 +1,9 @@
 import http
-import json
-import mimetypes
-import os
+import logging
 
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 import boto3
 from django.shortcuts import HttpResponse
 from django.template.loader import render_to_string
@@ -18,8 +19,14 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 
-from django.http import JsonResponse, HttpResponseBadRequest
 import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import re
+
+def validate_filename(filename):
+    # Check if filename contains only alphanumeric characters and underscores
+    return re.match(r'^[\w.-]+$', filename)
 
 
 
@@ -51,36 +58,43 @@ def media_dropzone(request):
 
 
 @csrf_exempt
-#bellow function for image upload only
+#upload video and images:
 def add_media(request):
-    if request.method == 'POST' and request.FILES.get('image-file'):
-        upload = request.FILES['image-file']
-        file_url = save_file_to_s3(upload)
-        return JsonResponse({'result': 'success', 'data': {'file_url': file_url}}, status=200)
+    image_size_limit = 5 * 1024 * 1024  # 5 MB in bytes
+    video_size_limit = 5 * 1024 * 1024  # 5 MB in bytes
+
+    if request.method == 'POST' and (request.FILES.getlist('image-file') or request.FILES.getlist('video-file')):
+        uploaded_files = request.FILES.getlist('image-file') + request.FILES.getlist('video-file')
+        file_urls = []
+        for file in uploaded_files:
+            if file.size > image_size_limit and file.content_type.startswith('image/'):
+                return JsonResponse({'result': 'failure', 'error': 'Image size exceeds 5MB limit'}, status=400)
+            elif file.size > video_size_limit and file.content_type.startswith('video/'):
+                return JsonResponse({'result': 'failure', 'error': 'Video size exceeds 5MB limit'}, status=400)
+
+            if not validate_filename(file.name):
+                return JsonResponse({'result': 'failure',
+                                     'error': 'Invalid filename. Only alphanumeric characters, underscores, dots, and dashes are allowed.'},
+                                    status=400)
+
+            file_url = save_file_to_s3(file)  # Implement save_file_to_s3 function
+            file_urls.append(file_url)
+
+        return JsonResponse({'result': 'success', 'data': {'file_urls': file_urls}}, status=200)
     else:
         return JsonResponse({'result': 'failure'}, status=400)
 
-#below func for both video and image :
+#bellow function for image upload only
 # def add_media(request):
-#     if request.method == 'POST':
-#         file = request.FILES.get('file')
-#         if file:
-#             # Check file size
-#             if file.size > 5 * 1024 * 1024:  # 5MB limit
-#                 return HttpResponseBadRequest("File size exceeds 5MB limit.")
-#
-#             # Determine file type
-#             file_type = mimetypes.guess_type(file.name)[0]
-#
-#             # Upload file to S3
-#             file_url = save_file_to_s3(file, file_type)
-#
-#             # Return response
-#             return JsonResponse({'result': 'success', 'data': {'file_url': file_url, 'file_type': file_type}})
-#         else:
-#             return JsonResponse({'result': 'failure', 'message': 'No file found in request.'}, status=400)
-#
-#     return HttpResponseBadRequest("Method not allowed.")
+#     if request.method == 'POST' and request.FILES.getlist('image-file'):
+#         uploaded_files = request.FILES.getlist('image-file')
+#         file_urls = []
+#         for file in uploaded_files:
+#             file_url = save_file_to_s3(file)
+#             file_urls.append(file_url)
+#         return JsonResponse({'result': 'success', 'data': {'file_urls': file_urls}}, status=200)
+#     else:
+#         return JsonResponse({'result': 'failure'}, status=400)
 # def save_file_to_s3(file):
 #     s3_client = boto3.client(
 #         's3',
@@ -96,6 +110,7 @@ def add_media(request):
 #     s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
 #     # s3_url = f"https://s3-ap-south-1.amazonaws.com/pharma-gyan-test-media/{file_name}"
 #     return s3_url
+#bellow for image
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
@@ -110,7 +125,6 @@ def save_file_to_s3(file):
 
     s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
     return s3_url
-
 def get_user_tab_permissions(user):
     user_groups = [group.name for group in list(user.groups.all())]
     return user_groups
