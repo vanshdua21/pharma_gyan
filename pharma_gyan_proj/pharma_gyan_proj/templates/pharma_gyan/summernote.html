@@ -1,58 +1,80 @@
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css">
 
+<style>
+    .form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        margin-top: 10px; /* Adjust margin as needed */
+    }
+
+    .form-group label {
+        margin-right: 10px; /* Adjust spacing between label and input */
+        white-space: nowrap; /* Prevent the label from wrapping */
+    }
+
+    .form-group input {
+        flex-grow: 1; /* Allow the input to grow and take available space */
+    }
+
+    .panel-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
 <div id="main-form-div">
     <div class="row">
         <div class="col-xl-12">
-             <div class="row">
-	<div class="col-xl-12">
-		<div id="panel-1" class="panel">
-			<div class="panel-hdr">
-				<h2>
-					Enter the Chapter Content here
-				</h2>
-				<div class="panel-toolbar">
-					<button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
-					<button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
-					<button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
-				</div>
-			</div>
-			<div class="panel-container show">
-				<div class="panel-content">
-					<div class="js-summernote" id="saveToLocal"></div>
-					<div class="mt-3">
-						<button class="btn  btn-small btn-success" onclick="saveSummernoteData()" >Save</button>
-					</div>
+            <div class="row">
+                <div class="col-xl-12">
+                    <div id="panel-1" class="panel">
+                        <div class="panel-hdr">
+                            <div class="form-group">
+                                <label for="title"><strong>Enter Chapter name here</strong></label>
+                                <input type="text" id="title" class="form-control">
+                            </div>
+                            <div class="panel-toolbar">
+                                <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                                <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                                <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                            </div>
+                        </div>
+                        <div class="panel-container show">
+                            <div class="panel-content">
+                                <div class="js-summernote" id="saveToLocal"></div>
+                                <div class="mt-3">
+                                    <button class="btn btn-small btn-success" onclick="saveSummernoteData()">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-</div>
-
-
-</div>
-</div>
-	<script src="/static/pharma_gyan/js/summernote.js"></script>
+<script src="/static/pharma_gyan/js/summernote.js"></script>
 <script>
     var interval;
 
     // Save to local storage
-    var saveToLocal = function() {
+    var saveToLocal = function () {
         localStorage.setItem('summernoteData', $('#saveToLocal').summernote("code"));
         console.log("Saved to local storage");
     };
 
     // Remove from local storage
-    var removeFromLocal = function() {
+    var removeFromLocal = function () {
         localStorage.removeItem("summernoteData");
         $('#saveToLocal').summernote('reset');
         console.log("Removed from local storage");
     };
 
     // Timer function for auto-save
-    var timer = function() {
-        interval = setInterval(function() {
+    var timer = function () {
+        interval = setInterval(function () {
             saveToLocal();
             clearInterval(interval);
         }, 3000);
@@ -87,9 +109,9 @@
                 processData: false,
                 data: data,
                 type: "POST",
-                success: function(response) {
+                success: function (response) {
                     if (response.result === 'success') {
-                        let imgNode = $('<img>').attr('src', response.data.file_urls[0]);
+                        let imgNode = $('<img>').attr('src', response.data.file_urls[0]).css('width', '50%'); // Set initial width to 50%
                         $('.js-summernote').summernote('insertNode', imgNode[0]);
 
                         // Manage multiple URLs in localStorage
@@ -102,7 +124,7 @@
                         console.log("Image upload failed");
                     }
                 },
-                error: function(xhr, textStatus, errorThrown) {
+                error: function (xhr, textStatus, errorThrown) {
                     console.log("Image upload failed:", textStatus, errorThrown);
                 }
             });
@@ -138,9 +160,9 @@
                 processData: false,
                 data: data,
                 type: "POST",
-                success: function(response) {
+                success: function (response) {
                     if (response.result === 'success') {
-                        let videoNode = $('<video controls>').attr('src', response.data.file_urls[0]);
+                        let videoNode = $('<video controls>').attr('src', response.data.file_urls[0]).css('width', '50%'); // Set initial width to 50%
                         $('.js-summernote').summernote('insertNode', videoNode[0]);
 
                         // Manage multiple URLs in localStorage
@@ -153,7 +175,7 @@
                         console.log("Video upload failed");
                     }
                 },
-                error: function(xhr, textStatus, errorThrown) {
+                error: function (xhr, textStatus, errorThrown) {
                     console.log("Video upload failed:", textStatus, errorThrown);
                 }
             });
@@ -163,14 +185,19 @@
     // Function to save Summernote data via AJAX
     function saveSummernoteData() {
         var data = $('#saveToLocal').summernote("code");
+        var title = $('#title').val(); // Get the value of the input field
+		console.log('title',title);
         $.ajax({
             type: 'POST',
             url: 'saveSummernote/',
-            data: {'data': data},
-            success: function() {
+            data: {
+                'data': data,
+                'title': title // Include the title in the request data
+            },
+            success: function () {
                 console.log("Save Success");
             },
-            error: function() {
+            error: function () {
                 console.log("Save Failed");
             }
         });
@@ -194,7 +221,7 @@
                     var fileInput = $('<input type="file" accept="video/*" multiple>');
                     fileInput.trigger('click');
 
-                    fileInput.on('change', function() {
+                    fileInput.on('change', function () {
                         var files = this.files;
                         uploadVideos(files);
                     });
@@ -204,75 +231,61 @@
             return button.render();   // return button as jquery object
         };
 
-        // Initialize Summernote
-        $('.js-summernote').summernote({
-            height: 500,
-            tabsize: 2,
-            placeholder: "Type here...",
-            dialogsFade: true,
-            toolbar: [
-                ['style', ['style']],
-                ['font', ['strikethrough', 'superscript', 'subscript']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['fontsize', ['fontsize']],
-                ['fontname', ['fontname']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['height', ['height']],
-                ['table', ['table']],
-                ['insert', ['picture', 'videoUpload']], // Add the custom button here
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ],
-            buttons: {
-                videoUpload: videoButton  // Define the custom button
-            },
-            callbacks: {
-                onImageUpload: function(files) {
-                    uploadImages(files);
-                },
-                onMediaDelete: function(target) {
-                    deleteMedia(target[0].src);  // Define deleteMedia function as needed
-                },
-                onChange: function(contents, $editable) {
-                    clearInterval(interval);
-                    timer();
+        // Custom image button
+        var imageButton = function (context) {
+            var ui = $.summernote.ui;
+
+            // create button
+            var button = ui.button({
+                contents: '<i class="note-icon-picture"/>',
+                tooltip: 'Upload Image',
+                click: function () {
+                    var fileInput = $('<input type="file" accept="image/*" multiple>');
+                    fileInput.trigger('click');
+
+                    fileInput.on('change', function () {
+                        var files = this.files;
+                        uploadImages(files);
+                    });
                 }
-            }
-        });
+            });
 
-        // Attach event listener for the custom button to upload media
-        document.querySelector("#panel-1 .note-editor .modal-footer input").addEventListener('click', function() {
-            let input = document.createElement('input');
-            input.type = 'file';
-            input.multiple = true;
-            input.accept = 'image/*,video/*'; // Allow both images and videos
-            input.onchange = function(event) {
-                let files = event.target.files;
-                let imageFiles = [];
-                let videoFiles = [];
+            return button.render();   // return button as jquery object
+        };
 
-                for (let i = 0; i < files.length; i++) {
-                    if (files[i].type.startsWith('image/')) {
-                        imageFiles.push(files[i]);
-                    } else if (files[i].type.startsWith('video/')) {
-                        videoFiles.push(files[i]);
+        if (!$('.js-summernote').data('summernote')) {
+            $('.js-summernote').summernote({
+                height: 500,
+                tabsize: 2,
+                placeholder: "Type here...",
+                dialogsFade: true,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontsize', ['fontsize']],
+                    ['fontname', ['fontname']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ['table', ['table']],
+                    ['insert', ['customImage', 'videoUpload']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                buttons: {
+                    videoUpload: videoButton,
+                    customImage: imageButton
+                },
+                callbacks: {
+                    onImageUpload: function (files) {
+                        uploadImages(files);
+                    },
+                    onChange: function (contents, $editable) {
+                        clearInterval(interval);
+                        timer();
                     }
                 }
-
-                if (imageFiles.length > 0) {
-                    uploadImages(imageFiles);
-                }
-
-                if (videoFiles.length > 0) {
-                    uploadVideos(videoFiles);
-                }
-            };
-            input.click();
-        });
+            });
+        }
     });
-
 </script>
-
-
-
-

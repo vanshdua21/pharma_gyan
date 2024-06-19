@@ -19,20 +19,17 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, prepare_and_save_course, process_activate_course, process_deactivate_course
-
 import boto3
-
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
-
+# import uuid
+# from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
+# from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import save_summernote_content, upsert_summernote_content
 def validate_filename(filename):
     # Check if filename contains only alphanumeric characters and underscores
     return re.match(r'^[\w.-]+$', filename)
-
-
-
 
 def admin_login(request):
     baseUrl = settings.BASE_PATH
@@ -87,33 +84,6 @@ def add_media(request):
     else:
         return JsonResponse({'result': 'failure'}, status=400)
 
-#bellow function for image upload only
-# def add_media(request):
-#     if request.method == 'POST' and request.FILES.getlist('image-file'):
-#         uploaded_files = request.FILES.getlist('image-file')
-#         file_urls = []
-#         for file in uploaded_files:
-#             file_url = save_file_to_s3(file)
-#             file_urls.append(file_url)
-#         return JsonResponse({'result': 'success', 'data': {'file_urls': file_urls}}, status=200)
-#     else:
-#         return JsonResponse({'result': 'failure'}, status=400)
-# def save_file_to_s3(file):
-#     s3_client = boto3.client(
-#         's3',
-#         aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
-#         aws_secret_access_key="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",
-#         region_name="ap-south-1"
-#     )
-#
-#     file_name = file.name
-#
-#     s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
-#
-#     s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
-#     # s3_url = f"https://s3-ap-south-1.amazonaws.com/pharma-gyan-test-media/{file_name}"
-#     return s3_url
-#bellow for image
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
@@ -161,27 +131,50 @@ def view_promo_code(request):
     rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"users": users_json})
     return HttpResponse(rendered_page)
 
-def summernote(request):
-    user = request.user
 
+def summernote(request):
+    user = settings.BASE_PATH
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user})
     return HttpResponse(rendered_page)
 
+# @csrf_exempt
+# def save_summernote(request):
+#     # Extract the byte string from the request body
+#     byte_string = request.body  # This will be in byte format: b'data=...'
+#
+#     # Decode the byte string to a regular string
+#     decoded_string = byte_string.decode('utf-8')  # Convert from bytes to string
+#
+#     # Parse the URL-encoded data
+#     url_encoded_data = decoded_string.split('=', 1)[1]  # Get the part after 'data='
+#
+#     # URL-decode the data
+#     decoded_data = unquote(url_encoded_data)
+#     return HttpResponse(json.dumps("{'data':'OK'}", default=str), status=http.HTTPStatus.OK, content_type="application/json")
 @csrf_exempt
 def save_summernote(request):
-    # Extract the byte string from the request body
-    byte_string = request.body  # This will be in byte format: b'data=...'
+    if request.method == 'POST':
+        try:
+            request_body = json.loads(request.body.decode("utf-8"))
+            result = save_summernote_content(request_body)
+            return JsonResponse(result)
+        except Exception as e:
+            logger.error(f"Error in save_summernote: {e}")
+            return JsonResponse({"status_code": 500, "result": "failure", "detailed_message": str(e)})
+    else:
+        return JsonResponse({"status_code": 405, "result": "failure", "detailed_message": "Method not allowed"})
 
-    # Decode the byte string to a regular string
-    decoded_string = byte_string.decode('utf-8')  # Convert from bytes to string
-
-    # Parse the URL-encoded data
-    url_encoded_data = decoded_string.split('=', 1)[1]  # Get the part after 'data='
-
-    # URL-decode the data
-    decoded_data = unquote(url_encoded_data)
-    return HttpResponse(json.dumps("{'data':'OK'}", default=str), status=http.HTTPStatus.OK, content_type="application/json")
-
+# def upsert_summernote(request):
+#     if request.method == 'POST':
+#         try:
+#             request_body = json.loads(request.body.decode("utf-8"))
+#             result = upsert_summernote_content(request_body)
+#             return JsonResponse(result)
+#         except Exception as e:
+#             logger.error(f"Error in upsert_summernote: {e}")
+#             return JsonResponse({"status_code": 500, "result": "failure", "detailed_message": str(e)})
+#     else:
+#         return JsonResponse({"status_code": 405, "result": "failure", "detailed_message": "Method not allowed"})
 
 @csrf_exempt
 def upsert_promo_code(request):
@@ -295,7 +288,7 @@ def upsertCourse(request):
     title = request.POST.get('title')
     description = request.POST.get('description')
     image_file = request.FILES.get('image')
-    
+
     imageUrl = save_file_to_s3(image_file)
     # Collect the data in a dictionary
     course = {
@@ -303,7 +296,7 @@ def upsertCourse(request):
         'description': description,
         'imageUrl': imageUrl,  # This is the uploaded file
     }
-    
+
     response = prepare_and_save_course(course)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

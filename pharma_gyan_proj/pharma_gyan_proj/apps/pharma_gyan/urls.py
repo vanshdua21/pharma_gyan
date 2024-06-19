@@ -1,5 +1,7 @@
-from django.urls import path, include
+from django.urls import path,include
 from pharma_gyan_proj.apps.pharma_gyan import views
+
+
 
 urlpatterns = [
     path('editor/adminLogin', views.admin_login),

@@ -1,6 +1,4 @@
 from pharma_gyan_proj.orm_models.base_model import *
-
-
 class pg_chapter(Base, Orm_helper):
     __tablename__ = 'chapter'
 
