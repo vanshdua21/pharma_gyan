@@ -36,6 +36,36 @@
         width: 50%;
         padding: 8px;
     }
+    .add{
+        border-style: dashed;
+        padding: 40px 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    .pill {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        background-color: #007bff;
+        color: white;
+        border-radius: 1rem;
+        cursor: pointer;
+    }
+    .add-button {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
 
 </style>
 
@@ -89,14 +119,29 @@
                                         </div>
                                     </div>
 
-                                    
+                                    <!-- Image preview area -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="title">Image Preview:</label>
+                                        <img id="image-preview" src="#" alt="Image Preview" style="height: 150px;width: 130px;">
+                                    </div>
+                                    <!-- <div id="image-preview">
+                                        <label>Image Preview:</label>
+                                    </div> -->
 
-                                    <div class="emailCTA">
-                                        <button class="btn  btn-small btn-success" onclick="addCourse()" >Save</button>
+                                    <div class="form-group">
+                                        <label class="form-label" for="sem-count">Semester Count</label>
+                                        <select id="sem-count" class="form-control" onchange="handleSemesterChange(event)">
+                                            <option value="">Select Semester Count</option>
+                                            <!-- Options will be populated here by JavaScript -->
+                                        </select>
                                     </div>
 
                                 </div>
                             </div>
+                        </div>
+
+                        <div id="accordion-container" class="accordion accordion-hover col-lg-12" style="margin-top: 15px;">
+                            <!-- Dynamic accordion items will be inserted here -->
                         </div>
 
 
@@ -112,22 +157,41 @@
                         </div>
                     </div>
 
-
-
-
-
-
-
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-
+<!-- Modal center Large -->
+<div class="modal fade" id="semesterModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Subject</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="semesterForm">
+                    <div class="form-group">
+                        <label for="subTitle">Title</label>
+                        <input type="text" class="form-control" id="subTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subDesc">Description</label>
+                        <input type="text" class="form-control" id="subDesc" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveDetails()">Save changes</button>
+            </div>
+        </div>
+    </div>
 </div>
-
 
 <script type="text/javascript">
 
@@ -154,7 +218,284 @@
             setEditMode(currentCustomerData);
         }
 
+        const semCountSelect = document.getElementById('sem-count');
+        // Populate the dropdown with options from 1 to 10
+        for (let i = 1; i <= 10; i++) {
+            let option = document.createElement('option');
+            option.value = i;
+            option.text = i;
+            semCountSelect.appendChild(option);
+        }
+
+        // Load the saved data from local storage
+        loadSavedData();
+
+        // Add event listeners to title and description inputs
+        document.getElementById('title').addEventListener('input', saveCourseData);
+        document.getElementById('desc').addEventListener('input', saveCourseData);
+        document.getElementById('image-file').addEventListener('change', handleImageUpload);
     });
+
+    function handleImageUpload(event) {
+        const imageFile = event.target.files[0];
+        if (!imageFile) return;
+
+        // Convert the image to base64
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            const base64String = reader.result;
+            localStorage.setItem('courseImage', base64String);
+            const imagePreview = document.getElementById('image-preview');
+            imagePreview.src = base64String;
+            imagePreview.style.display = 'block'; // Show the image element
+            const imageLabel = document.querySelector('.custom-file-label');
+            imageLabel.textContent = 'Image Selected'; // Update label text to indicate an image is selected
+        };
+        reader.readAsDataURL(imageFile);
+    }
+
+    function saveCourseData() {
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('desc').value;
+
+        // Save title and description to localStorage
+        localStorage.setItem('courseTitle', title);
+        localStorage.setItem('courseDescription', description);
+    }
+
+    function handleSemesterChange(event) {
+        const selectedValue = parseInt(event.target.value);
+        const accordionContainer = document.getElementById('accordion-container');
+        const currentAccordions = accordionContainer.getElementsByClassName('card');
+        const currentCount = currentAccordions.length;
+
+        if (selectedValue > currentCount) {
+            // Add new accordions
+            for (let i = currentCount + 1; i <= selectedValue; i++) {
+                let newAccordion = document.createElement('div');
+                newAccordion.className = 'card';
+                newAccordion.innerHTML = `
+                    <div class="card-header">
+                        <a href="javascript:void(0);" class="card-title" data-toggle="collapse" data-target="#js_demo_accordion-${i}a" aria-expanded="false">
+                            Semester ${i}
+                            <span class="ml-auto">
+                                <span class="collapsed-reveal">
+                                    <i class="fal fa-chevron-up fs-xl"></i>
+                                </span>
+                                <span class="collapsed-hidden">
+                                    <i class="fal fa-chevron-down fs-xl"></i>
+                                </span>
+                            </span>
+                        </a>
+                    </div>
+                    <div id="js_demo_accordion-${i}a" class="collapse" data-parent="#accordion-container">
+                        <div class="card-body" id="card-body-${i}">
+                            <h3 style="display: flex; justify-content: center;">
+                                <div class="add" onclick="openModal(${i})">
+                                    <p>Click here to add subjects</p>
+                                    <p><i class="fal fa-plus-circle"></i></p>
+                                </div>
+                            </h3>
+                        </div>
+                    </div>`;
+                accordionContainer.appendChild(newAccordion);
+            }
+        } else if (selectedValue < currentCount) {
+            // Remove accordions after confirmation
+            if (confirm('Are you sure you want to remove the last few semesters? This action cannot be undone.')) {
+                for (let i = currentCount; i > selectedValue; i--) {
+                    accordionContainer.removeChild(currentAccordions[i - 1]);
+                }
+            } else {
+                // Revert to the previous value
+                event.target.value = currentCount;
+            }
+        }
+
+        saveData();
+    }
+
+    let currentSemesterId = 0;
+    let editPillElement = null;
+
+    function openModal(semesterId, title = '', description = '') {
+        currentSemesterId = semesterId;
+        document.getElementById('subTitle').value = title;
+        document.getElementById('subDesc').value = description;
+        $('#semesterModal').modal('show');
+    }
+
+    function saveDetails() {
+        const title = document.getElementById('subTitle').value;
+        const description = document.getElementById('subDesc').value;
+        const cardBody = document.getElementById(`card-body-${currentSemesterId}`);
+        
+        if (editPillElement) {
+            // If editing, update the existing pill
+            editPillElement.innerHTML = `<strong>${title}</strong>: ${description}`;
+            editPillElement.dataset.title = title;
+            editPillElement.dataset.description = description;
+            editPillElement = null;
+        } else {
+            // If adding new, create a new pill
+            const newPill = document.createElement('div');
+            newPill.className = 'pill';
+            newPill.innerHTML = `<strong>${title}</strong>`;
+            newPill.dataset.title = title;
+            newPill.dataset.description = description;
+            newPill.onclick = function() { editPill(newPill, title, description); };
+            cardBody.insertBefore(newPill, cardBody.querySelector('.add-button'));
+
+            // Insert the new pill before the add-button, if it exists
+            const addButton = cardBody.querySelector('.add-button');
+            if (addButton) {
+                cardBody.insertBefore(newPill, addButton);
+            } else {
+                cardBody.appendChild(newPill);
+            }
+        }
+
+        // Remove the initial "Click here to add subjects" element if it exists
+        const initialAddElement = cardBody.querySelector('h3');
+        if (initialAddElement) {
+            cardBody.removeChild(initialAddElement);
+        }
+
+        // Add a new "add subject" button if it doesn't exist
+        if (!cardBody.querySelector('.add-button')) {
+            const addButton = document.createElement('div');
+            addButton.className = 'add-button';
+            addButton.innerHTML = '+';
+            addButton.onclick = function() { openModal(currentSemesterId); };
+            cardBody.appendChild(addButton);
+        }
+
+        $('#semesterModal').modal('hide');
+        saveData();
+    }
+
+    function editPill(pill, title, description) {
+        editPillElement = pill;
+        currentSemesterId = pill.parentElement.id.split('-')[2];
+        openModal(currentSemesterId, title, description);
+    }
+
+    function saveData() {
+        const accordionContainer = document.getElementById('accordion-container');
+        const semesters = [];
+
+        accordionContainer.querySelectorAll('.card').forEach((card, index) => {
+            const semesterId = index + 1;
+            const cardBody = card.querySelector(`#card-body-${semesterId}`);
+            const subjects = [];
+
+            cardBody.querySelectorAll('.pill').forEach(pill => {
+                subjects.push({
+                    title: pill.dataset.title,
+                    description: pill.dataset.description
+                });
+            });
+
+            semesters.push({
+                semesterId: semesterId,
+                subjects: subjects
+            });
+        });
+
+        localStorage.setItem('semesters', JSON.stringify(semesters));
+    }
+
+    function loadSavedData() {
+        // Load course title, description, and image from localStorage
+        const courseTitle = localStorage.getItem('courseTitle');
+        const courseDescription = localStorage.getItem('courseDescription');
+        const courseImage = localStorage.getItem('courseImage');
+
+        // Set course title and description
+        if (courseTitle) {
+            document.getElementById('title').value = courseTitle;
+        }
+        if (courseDescription) {
+            document.getElementById('desc').value = courseDescription;
+        }
+
+        // Display the uploaded image if available
+        if (courseImage) {
+            const imageLabel = document.querySelector('.custom-file-label');
+            imageLabel.textContent = 'Image Selected'; // Update label text to indicate an image is selected
+
+            // You can also display the image itself if needed
+            // For example, create an <img> element and set its src to courseImage
+            const imagePreview = document.getElementById('image-preview');
+            imagePreview.src = courseImage;
+            imagePreview.style.display = 'block'; // Show the image element
+        }
+
+        const savedData = JSON.parse(localStorage.getItem('semesters')); 
+        if (!savedData) return;
+
+        const accordionContainer = document.getElementById('accordion-container');
+        const semCountSelect = document.getElementById('sem-count');
+        semCountSelect.value = savedData.length;
+        
+        savedData.forEach(data => {
+            let newAccordion = document.createElement('div');
+            newAccordion.className = 'card';
+            newAccordion.innerHTML = `
+                <div class="card-header">
+                    <a href="javascript:void(0);" class="card-title" data-toggle="collapse" data-target="#js_demo_accordion-${data.semesterId}a" aria-expanded="false">
+                        Semester ${data.semesterId}
+                        <span class="ml-auto">
+                            <span class="collapsed-reveal">
+                                <i class="fal fa-chevron-up fs-xl"></i>
+                            </span>
+                            <span class="collapsed-hidden">
+                                <i class="fal fa-chevron-down fs-xl"></i>
+                            </span>
+                        </span>
+                    </a>
+                </div>
+                <div id="js_demo_accordion-${data.semesterId}a" class="collapse" data-parent="#accordion-container">
+                    <div class="card-body" id="card-body-${data.semesterId}">
+                        <h3 style="display: flex; justify-content: center;">
+                            <div class="add" onclick="openModal(${data.semesterId})">
+                                <p>Click here to add subjects</p>
+                                <p><i class="fal fa-plus-circle"></i></p>
+                            </div>
+                        </h3>
+                    </div>
+                </div>`;
+            accordionContainer.appendChild(newAccordion);
+
+            const cardBody = newAccordion.querySelector(`#card-body-${data.semesterId}`);
+            data.subjects.forEach(subject => {
+                const newPill = document.createElement('div');
+                newPill.className = 'pill';
+                newPill.innerHTML = `<strong>${subject.title}</strong>: ${subject.description}`;
+                newPill.dataset.title = subject.title;
+                newPill.dataset.description = subject.description;
+                newPill.onclick = function() { editPill(newPill, subject.title, subject.description); };
+                cardBody.appendChild(newPill);
+            });
+
+            // Remove the initial "Click here to add subjects" element if there are subjects
+            if (data.subjects.length > 0) {
+                const initialAddElement = cardBody.querySelector('h3');
+                if (initialAddElement) {
+                    cardBody.removeChild(initialAddElement);
+                }
+            }
+
+            // Add a new "add subject" button if it doesn't exist
+            if (!cardBody.querySelector('.add-button')) {
+                const addButton = document.createElement('div');
+                addButton.className = 'add-button';
+                addButton.innerHTML = '+';
+                addButton.onclick = function() { openModal(data.semesterId); };
+                cardBody.appendChild(addButton);
+            }
+        });
+    }
 
     function redirectToViewCourses(){
         window.location='#viewCourses';
@@ -310,71 +651,7 @@
             }
 
         });
-
-
-
     }
-
-    function validateEmail(email) {
-        // http://stackoverflow.com/a/46181/11236
-
-        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(email);
-    }
-
-    var imagelock = false;
-    function uploadImage()
-    {
-
-        if(imagelock==true)
-            return;
-
-        $("#image-err-div").html('');
-        $("#image-err-div").hide();
-
-        if($("#image-file").val()=="")
-        {
-            $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a file to upload!</span></div>');
-            $("#image-err-div").show();
-
-            return;
-        }
-
-        if(checkFileExtension("image-file")==false)
-        {
-            $("#image-err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select a image type file to upload!</span></div>');
-            $("#image-err-div").show();
-
-            return;
-        }
-
-        imagelock = true;
-        initImageProgressBar();
-        $("#image-err-div").html('');
-        barImageInterval = setInterval('incImageBar()',25);
-        $("#image-upload-form").submit();
-
-    }
-
-
-    function checkFileExtension(fileObjId)
-    {
-        var fup = document.getElementById(fileObjId);
-        var fileName = fup.value;
-
-        var ext = fileName.substring(fileName.lastIndexOf('.') + 1);
-        if(ext == "jpeg" || ext == "jpg" || ext == "JPG" || ext == "JPEG" || ext == "png" || ext == "PNG" || ext == "gif" || ext == "GIF" || ext == "pdf"|| ext == "PDF")
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-
-
 
 </script>
 
