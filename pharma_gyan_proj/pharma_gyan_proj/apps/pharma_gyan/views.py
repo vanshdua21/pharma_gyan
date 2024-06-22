@@ -1,6 +1,8 @@
 import http
 import logging
 
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
+
 # Configure logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -24,9 +26,8 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import re
-# import uuid
-# from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
-# from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import save_summernote_content, upsert_summernote_content
+from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
+
 def validate_filename(filename):
     # Check if filename contains only alphanumeric characters and underscores
     return re.match(r'^[\w.-]+$', filename)
@@ -87,8 +88,8 @@ def add_media(request):
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
-        aws_access_key_id="",
-        aws_secret_access_key="",
+        aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
+        aws_secret_access_key="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",
         region_name="ap-south-1"
     )
 
@@ -152,29 +153,14 @@ def summernote(request):
 #     decoded_data = unquote(url_encoded_data)
 #     return HttpResponse(json.dumps("{'data':'OK'}", default=str), status=http.HTTPStatus.OK, content_type="application/json")
 @csrf_exempt
-def save_summernote(request):
-    if request.method == 'POST':
-        try:
-            request_body = json.loads(request.body.decode("utf-8"))
-            result = save_summernote_content(request_body)
-            return JsonResponse(result)
-        except Exception as e:
-            logger.error(f"Error in save_summernote: {e}")
-            return JsonResponse({"status_code": 500, "result": "failure", "detailed_message": str(e)})
-    else:
-        return JsonResponse({"status_code": 405, "result": "failure", "detailed_message": "Method not allowed"})
+def upsert_Save_chapter(request):
+    method_name = "upsert_promo_code"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    response = prepare_and_save_chapter(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
-# def upsert_summernote(request):
-#     if request.method == 'POST':
-#         try:
-#             request_body = json.loads(request.body.decode("utf-8"))
-#             result = upsert_summernote_content(request_body)
-#             return JsonResponse(result)
-#         except Exception as e:
-#             logger.error(f"Error in upsert_summernote: {e}")
-#             return JsonResponse({"status_code": 500, "result": "failure", "detailed_message": str(e)})
-#     else:
-#         return JsonResponse({"status_code": 405, "result": "failure", "detailed_message": "Method not allowed"})
 
 @csrf_exempt
 def upsert_promo_code(request):

@@ -44,7 +44,12 @@
                             <div class="panel-content">
                                 <div class="js-summernote" id="saveToLocal"></div>
                                 <div class="mt-3">
-                                    <button class="btn btn-small btn-success" onclick="saveSummernoteData()">Save</button>
+
+                                <div class="custom-control custom-checkbox col-lg-5" >
+                                        <input type="checkbox" class="custom-control-input" id="markAsFree" value="0">
+                                        <label class="custom-control-label" for="markAsFree" style="font-size: 15px;padding-left: 15px">Mark as free</label>
+                                </div>
+                                    <button class="btn btn-small btn-success mt-3" onclick="saveSummernoteData()">Save</button>
                                 </div>
                             </div>
                         </div>
@@ -183,26 +188,30 @@
     }
 
     // Function to save Summernote data via AJAX
-    function saveSummernoteData() {
-        var data = $('#saveToLocal').summernote("code");
-        var title = $('#title').val(); // Get the value of the input field
-		console.log('title',title);
-        $.ajax({
-            type: 'POST',
-            url: 'saveSummernote/',
-            data: {
-                'data': data,
-                'title': title // Include the title in the request data
-            },
-            success: function () {
-                console.log("Save Success");
-            },
-            error: function () {
-                console.log("Save Failed");
-            }
-        });
-    }
+        function saveSummernoteData() {
+    var content = $('#saveToLocal').summernote("code");
+    var title = $('#title').val();
+    var is_free = $('#markAsFree').is(':checked');
 
+        console.log('Title:', title);
+        console.log('Is Free:', is_free);
+
+    $.ajax({
+        type: 'POST',
+        url: '/pharma_gyan/editor/upsertSaveChapter/',
+        data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free}),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function (response) {
+            console.log("Save Success:", response);
+            // Handle success response as needed
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.error("Save Failed:", textStatus, errorThrown);
+            // Handle error response as needed
+        }
+    });
+}
     // Validate filename (only alphanumeric, underscores, dots, and dashes allowed)
     function validateFilename(filename) {
         return /^[a-zA-Z0-9_.-]*$/.test(filename);
