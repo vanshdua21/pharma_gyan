@@ -25,14 +25,20 @@ def prepare_and_save_course(request_body):
     course.title = request_body.get('title')
     course.description = request_body.get('description')
     course.thumbnail_url = request_body.get('imageUrl')
+    
     if (request_body.get('ct')):
         course.ct = request_body.get('ct')
 
     save_or_update_course(course)
 
+    save_semesters(request_body.get('semesters'))
+    
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
 
+def save_semesters(semesters):
+    for sem in semesters:
+        print(sem)
 
 def save_or_update_course(course):
     method_name = "save_or_update_course"

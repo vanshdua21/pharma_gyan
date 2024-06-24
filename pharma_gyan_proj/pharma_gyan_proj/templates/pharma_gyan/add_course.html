@@ -52,7 +52,6 @@
         background-color: #007bff;
         color: white;
         border-radius: 1rem;
-        cursor: pointer;
     }
     .add-button {
             display: inline-block;
@@ -144,7 +143,9 @@
                             <!-- Dynamic accordion items will be inserted here -->
                         </div>
 
-
+                        <div class="emailCTA">
+                            <button class="btn  btn-small btn-success" onclick="addCourse()" >Save</button>
+                        </div>
 
                     </div>
                     <div id="err-div" style="display: none;margin-top:20px;"></div>
@@ -176,13 +177,19 @@
             <div class="modal-body">
                 <form id="semesterForm">
                     <div class="form-group">
-                        <label for="subTitle">Title</label>
+                        <label for="subTitle" class="col-md-2">Title</label>
                         <input type="text" class="form-control" id="subTitle" required>
                     </div>
                     <div class="form-group">
-                        <label for="subDesc">Description</label>
+                        <label for="subDesc" class="col-md-2">Description</label>
                         <input type="text" class="form-control" id="subDesc" required>
                     </div>
+                    <div class="form-group">
+                        <label for="topicBtn" class="col-md-2">Topics</label>
+                        <button id="topicBtn" type="button" class="btn btn-primary" onclick="addTopic()">Add Topic</button>
+                    </div>
+                    
+                    <div id="topics-container"></div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -228,7 +235,7 @@
         }
 
         // Load the saved data from local storage
-        loadSavedData();
+        loadCourseFromLocalStorage();
 
         // Add event listeners to title and description inputs
         document.getElementById('title').addEventListener('input', saveCourseData);
@@ -261,6 +268,39 @@
         // Save title and description to localStorage
         localStorage.setItem('courseTitle', title);
         localStorage.setItem('courseDescription', description);
+    }
+
+    function addTopic() {
+        // Validate existing topics
+        const topicsContainer = document.getElementById('topics-container');
+        const topicInputs = topicsContainer.getElementsByTagName('input');
+        for (let input of topicInputs) {
+            if (input.value.trim() === '') {
+                alert('Please fill out all topic fields before adding a new one.');
+                return;
+            }
+        }
+    
+        // Add new topic input with delete button
+        const topicDiv = document.createElement('div');
+        topicDiv.className = 'd-flex align-items-center my-2';
+
+        const topicInput = document.createElement('input');
+        topicInput.type = 'text';
+        topicInput.className = 'form-control mr-2';
+        topicInput.placeholder = 'Enter topic';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn btn-danger';
+        deleteButton.innerHTML = '<i class="fal fa-trash"></i>';
+        deleteButton.onclick = function() {
+            topicsContainer.removeChild(topicDiv);
+        };
+
+        topicDiv.appendChild(topicInput);
+        topicDiv.appendChild(deleteButton);
+        topicsContainer.appendChild(topicDiv);
     }
 
     function handleSemesterChange(event) {
@@ -315,97 +355,91 @@
         saveData();
     }
 
-    let currentSemesterId = 0;
+    let currentSemesterId = null;
     let editPillElement = null;
+    let currentSubjectIndex = null;
 
-    function openModal(semesterId, title = '', description = '') {
+    function openModal(semesterId, subjectIndex = null) {
         currentSemesterId = semesterId;
-        document.getElementById('subTitle').value = title;
-        document.getElementById('subDesc').value = description;
+        currentSubjectIndex = subjectIndex;
+
+        // Reset form
+        document.getElementById('semesterForm').reset();
+        document.getElementById('topics-container').innerHTML = '';
+
+        // If editing a subject, populate the form with existing data
+        if (subjectIndex !== null) {
+            const savedData = JSON.parse(localStorage.getItem('semesters'));
+            const subject = savedData.find(s => s.semesterId === semesterId).subjects[subjectIndex];
+            document.getElementById('subTitle').value = subject.title;
+            document.getElementById('subDesc').value = subject.description;
+
+            subject.topics?.forEach(topic => {
+                addTopic();  // Add a new topic input
+                const topicInputs = document.getElementById('topics-container').getElementsByTagName('input');
+                topicInputs[topicInputs.length - 1].value = topic;  // Set the value of the last topic input
+            });
+        }
+
         $('#semesterModal').modal('show');
     }
+
+    function deleteSubject(semesterId, subjectIndex) {
+    if (confirm('Are you sure you want to delete this subject?')) {
+        const savedData = JSON.parse(localStorage.getItem('semesters')) || [];
+        const semester = savedData.find(s => s.semesterId === semesterId);
+        if (semester) {
+            semester.subjects.splice(subjectIndex, 1);
+            localStorage.setItem('semesters', JSON.stringify(savedData));
+            loadCourseFromLocalStorage();
+        }
+    }
+}
 
     function saveDetails() {
         const title = document.getElementById('subTitle').value;
         const description = document.getElementById('subDesc').value;
-        const cardBody = document.getElementById(`card-body-${currentSemesterId}`);
-        
-        if (editPillElement) {
-            // If editing, update the existing pill
-            editPillElement.innerHTML = `<strong>${title}</strong>: ${description}`;
-            editPillElement.dataset.title = title;
-            editPillElement.dataset.description = description;
-            editPillElement = null;
-        } else {
-            // If adding new, create a new pill
-            const newPill = document.createElement('div');
-            newPill.className = 'pill';
-            newPill.innerHTML = `<strong>${title}</strong>`;
-            newPill.dataset.title = title;
-            newPill.dataset.description = description;
-            newPill.onclick = function() { editPill(newPill, title, description); };
-            cardBody.insertBefore(newPill, cardBody.querySelector('.add-button'));
+        const topicsContainer = document.getElementById('topics-container');
+        const topicInputs = topicsContainer.getElementsByTagName('input');
+        const topics = [];
 
-            // Insert the new pill before the add-button, if it exists
-            const addButton = cardBody.querySelector('.add-button');
-            if (addButton) {
-                cardBody.insertBefore(newPill, addButton);
-            } else {
-                cardBody.appendChild(newPill);
+        // Validate topics
+        for (let input of topicInputs) {
+            if (input.value.trim() === '') {
+                alert('Please fill out all topic fields before saving.');
+                return;
             }
+            topics.push(input.value);
         }
 
-        // Remove the initial "Click here to add subjects" element if it exists
-        const initialAddElement = cardBody.querySelector('h3');
-        if (initialAddElement) {
-            cardBody.removeChild(initialAddElement);
+        if (!title || !description) {
+            alert('Title and description are required');
+            return;
         }
 
-        // Add a new "add subject" button if it doesn't exist
-        if (!cardBody.querySelector('.add-button')) {
-            const addButton = document.createElement('div');
-            addButton.className = 'add-button';
-            addButton.innerHTML = '+';
-            addButton.onclick = function() { openModal(currentSemesterId); };
-            cardBody.appendChild(addButton);
+        const savedData = JSON.parse(localStorage.getItem('semesters')) || [];
+        let semester = savedData.find(s => s.semesterId === currentSemesterId);
+        if (!semester) {
+            semester = {
+                semesterId: currentSemesterId,
+                subjects: []
+            };
+            savedData.push(semester);
         }
 
+        const subject = { title, description, topics };
+
+        if (currentSubjectIndex !== null) {
+            semester.subjects[currentSubjectIndex] = subject;
+        } else {
+            semester.subjects.push(subject);
+        }
+        localStorage.setItem('semesters', JSON.stringify(savedData));
         $('#semesterModal').modal('hide');
-        saveData();
+        loadCourseFromLocalStorage();
     }
 
-    function editPill(pill, title, description) {
-        editPillElement = pill;
-        currentSemesterId = pill.parentElement.id.split('-')[2];
-        openModal(currentSemesterId, title, description);
-    }
-
-    function saveData() {
-        const accordionContainer = document.getElementById('accordion-container');
-        const semesters = [];
-
-        accordionContainer.querySelectorAll('.card').forEach((card, index) => {
-            const semesterId = index + 1;
-            const cardBody = card.querySelector(`#card-body-${semesterId}`);
-            const subjects = [];
-
-            cardBody.querySelectorAll('.pill').forEach(pill => {
-                subjects.push({
-                    title: pill.dataset.title,
-                    description: pill.dataset.description
-                });
-            });
-
-            semesters.push({
-                semesterId: semesterId,
-                subjects: subjects
-            });
-        });
-
-        localStorage.setItem('semesters', JSON.stringify(semesters));
-    }
-
-    function loadSavedData() {
+    function loadCourseFromLocalStorage() {
         // Load course title, description, and image from localStorage
         const courseTitle = localStorage.getItem('courseTitle');
         const courseDescription = localStorage.getItem('courseDescription');
@@ -420,24 +454,42 @@
         }
 
         // Display the uploaded image if available
+        // Display the uploaded image if available
+        // Display the uploaded image if available
+        console.log(courseImage);
         if (courseImage) {
+            console.log('found image');
             const imageLabel = document.querySelector('.custom-file-label');
             imageLabel.textContent = 'Image Selected'; // Update label text to indicate an image is selected
-
-            // You can also display the image itself if needed
-            // For example, create an <img> element and set its src to courseImage
+            
             const imagePreview = document.getElementById('image-preview');
             imagePreview.src = courseImage;
             imagePreview.style.display = 'block'; // Show the image element
+
+            // Convert the base64 string to a Blob
+            fetch(courseImage)
+                .then(res => res.blob())
+                .then(blob => {
+                    console.log('in blob');
+                    // Create a new File object from the Blob
+                    const file = new File([blob], "image.jpg", { type: blob.type });
+                    
+                    // Create a DataTransfer to set the File object to the file input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    
+                    const fileInput = document.getElementById('image-file');
+                    fileInput.files = dataTransfer.files;
+                })
+                .catch(err => console.error('Error creating Blob from base64 string:', err));
         }
 
-        const savedData = JSON.parse(localStorage.getItem('semesters')); 
+        const savedData = JSON.parse(localStorage.getItem('semesters'));
         if (!savedData) return;
 
         const accordionContainer = document.getElementById('accordion-container');
-        const semCountSelect = document.getElementById('sem-count');
-        semCountSelect.value = savedData.length;
-        
+        accordionContainer.innerHTML = ''; // Clear the existing content
+
         savedData.forEach(data => {
             let newAccordion = document.createElement('div');
             newAccordion.className = 'card';
@@ -468,13 +520,15 @@
             accordionContainer.appendChild(newAccordion);
 
             const cardBody = newAccordion.querySelector(`#card-body-${data.semesterId}`);
-            data.subjects.forEach(subject => {
+            data.subjects.forEach((subject, index) => {
                 const newPill = document.createElement('div');
                 newPill.className = 'pill';
-                newPill.innerHTML = `<strong>${subject.title}</strong>: ${subject.description}`;
+                newPill.innerHTML = `<span style="margin-right:15px;">${subject.title}</span>
+                <i class="fal fa-light fa-pen" style="margin-right:4px; cursor: pointer;" onclick="openModal(${data.semesterId}, ${index})"></i>
+                <i class="fal fa-light fa-trash" style="cursor: pointer;" onclick="deleteSubject(${data.semesterId}, ${index})"></i>`;
                 newPill.dataset.title = subject.title;
                 newPill.dataset.description = subject.description;
-                newPill.onclick = function() { editPill(newPill, subject.title, subject.description); };
+                newPill.dataset.topics = JSON.stringify(subject.topics);
                 cardBody.appendChild(newPill);
             });
 
@@ -495,6 +549,31 @@
                 cardBody.appendChild(addButton);
             }
         });
+    }
+
+    function saveData() {
+        const accordionContainer = document.getElementById('accordion-container');
+        const semesters = [];
+
+        accordionContainer.querySelectorAll('.card').forEach((card, index) => {
+            const semesterId = index + 1;
+            const cardBody = card.querySelector(`#card-body-${semesterId}`);
+            const subjects = [];
+
+            cardBody.querySelectorAll('.pill').forEach(pill => {
+                subjects.push({
+                    title: pill.dataset.title,
+                    description: pill.dataset.description
+                });
+            });
+
+            semesters.push({
+                semesterId: semesterId,
+                subjects: subjects
+            });
+        });
+
+        localStorage.setItem('semesters', JSON.stringify(semesters));
     }
 
     function redirectToViewCourses(){
@@ -530,7 +609,7 @@
     }
 
     function setSuccess(domId){
-        $("#"+domId+"-err-icon").html('<i class="fa fa-check"></i>');
+        $("#"+domId+"-err-icon").html('<i class="fal fa-check"></i>');
 
         $("#"+domId+"-group").removeClass('has-error');
         $("#"+domId+"-group").addClass('has-success');
@@ -572,7 +651,6 @@
 
         setSuccess("desc");
 
-
         lock = true;
 
         initProgressBar();
@@ -582,13 +660,16 @@
         var title = document.getElementById('title').value;
         var description = document.getElementById('desc').value;
         var imageFile = document.getElementById('image-file').files[0];
+        var semesters = JSON.parse(localStorage.getItem('semesters')) || [];
 
         let formData = new FormData();
+        console.log(title, description, semesters);
         formData.append('title', title);
         formData.append('description', description);
         formData.append('image', imageFile);
+        formData.append('semesters', JSON.stringify(semesters))
 
-        let data = {'title':title, 'description':description,'image':imageFile};
+        //let data = {'title':title, 'description':description,'image':imageFile};
         if(mode=="edit"){
             editUniqueId = currentCustomerData["unique_id"];
             editId = currentCustomerData["id"];
@@ -599,7 +680,12 @@
             data["is_active"] = is_active;
             data["ct"] = ct;
         }
-        console.log(formData);
+
+        // Log FormData content
+        for (let pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+
         $.ajax({
             type : 'POST',
             url : 'upsertCourse/',
