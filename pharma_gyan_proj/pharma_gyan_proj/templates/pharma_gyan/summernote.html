@@ -23,6 +23,7 @@
         align-items: center;
     }
 </style>
+
 <div id="main-form-div">
     <div class="row">
         <div class="col-xl-12">
@@ -46,9 +47,10 @@
                                 <div class="mt-3">
 
                                 <div class="custom-control custom-checkbox col-lg-5" >
-                                        <input type="checkbox" class="custom-control-input" id="markAsFree" value="0">
-                                        <label class="custom-control-label" for="markAsFree" style="font-size: 15px;padding-left: 15px">Mark as free</label>
+                                        <input type="checkbox" class="custom-control-input " id="markAsFree" value="0">
+                                        <label class="custom-control-label " for="markAsFree" style="padding-left: 15px">Mark as free</label>
                                 </div>
+<!--                                    <div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text"></span></div>-->
                                     <button class="btn btn-small btn-success mt-3" onclick="saveSummernoteData()">Save</button>
                                 </div>
                             </div>
@@ -84,6 +86,11 @@
             clearInterval(interval);
         }, 3000);
     };
+       function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
 
     // Function to handle image upload
     function uploadImages(files) {
@@ -205,6 +212,7 @@
         success: function (response) {
             console.log("Save Success:", response);
             // Handle success response as needed
+
         },
         error: function (xhr, textStatus, errorThrown) {
             console.error("Save Failed:", textStatus, errorThrown);

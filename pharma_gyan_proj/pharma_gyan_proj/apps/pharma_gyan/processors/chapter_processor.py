@@ -76,9 +76,13 @@ def prepare_and_save_chapter(request_body):
 def validate_chapter_details(request_body):
     method_name = "validate_chapter_details"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
-    if request_body.get('title') is None:
+    # if request_body.get('title') is None:
+    title = request_body.get('title')
+    if title is None or title.strip() == '':
         raise BadRequestException(method_name=method_name, reason="Chapter name can not be blanked")
-    if request_body.get('content') is None:
+    # if request_body.get('content') is None:
+    content = request_body.get('content')
+    if content is None or content.strip() == '':
         raise BadRequestException(method_name=method_name, reason="Chapter name can not be blanked")
     logger.debug(f"Exit {method_name}, Success")
 
