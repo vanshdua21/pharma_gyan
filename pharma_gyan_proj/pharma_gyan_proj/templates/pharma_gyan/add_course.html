@@ -119,7 +119,7 @@
                                     </div>
 
                                     <!-- Image preview area -->
-                                    <div class="form-group">
+                                    <div class="form-group" id="image-preview-group">
                                         <label class="form-label" for="title">Image Preview:</label>
                                         <img id="image-preview" src="#" alt="Image Preview" style="height: 150px;width: 130px;">
                                     </div>
@@ -143,8 +143,8 @@
                             <!-- Dynamic accordion items will be inserted here -->
                         </div>
 
-                        <div class="emailCTA">
-                            <button class="btn  btn-small btn-success" onclick="addCourse()" >Save</button>
+                        <div class="emailCTA" style="display: flex; padding: inherit;">
+                            <button class="btn  btn-small btn-success" onclick="addCourse()" style="width: 10%; height: 45px;">Save</button>
                         </div>
 
                     </div>
@@ -204,7 +204,7 @@
 
     var baseUrl = '<?=$baseUrl?>';
     var mode = "{{mode}}";
-    var currentCustomerData = {};
+    var currentCourseData = {};
 
     $(document).ready(function() {
 
@@ -220,9 +220,14 @@
         }
 
         if(mode=="edit"){
-            currentCustomerData = JSON.parse('{{ user|escapejs }}');
-            console.log('Data-',currentCustomerData);
-            setEditMode(currentCustomerData);
+            currentCourseData = JSON.parse('{{ course|escapejs }}');
+            setEditMode(currentCourseData);
+        }
+        else {
+            localStorage.removeItem('courseTitle');
+            localStorage.removeItem('courseDescription');
+            localStorage.removeItem('courseImage');
+            localStorage.removeItem('semesters');
         }
 
         const semCountSelect = document.getElementById('sem-count');
@@ -250,6 +255,8 @@
         // Convert the image to base64
         const reader = new FileReader();
         reader.onloadend = function() {
+            const imagePreviewGroup = document.getElementById('image-preview-group');
+            imagePreviewGroup.hidden = false;
             const base64String = reader.result;
             localStorage.setItem('courseImage', base64String);
             const imagePreview = document.getElementById('image-preview');
@@ -305,59 +312,35 @@
 
     function handleSemesterChange(event) {
         const selectedValue = parseInt(event.target.value);
-        const accordionContainer = document.getElementById('accordion-container');
-        const currentAccordions = accordionContainer.getElementsByClassName('card');
-        const currentCount = currentAccordions.length;
+        const savedData = JSON.parse(localStorage.getItem('semesters')) || [];
+        const currentCount = savedData.length;
 
         if (selectedValue > currentCount) {
-            // Add new accordions
+            // Add new semesters
             for (let i = currentCount + 1; i <= selectedValue; i++) {
-                let newAccordion = document.createElement('div');
-                newAccordion.className = 'card';
-                newAccordion.innerHTML = `
-                    <div class="card-header">
-                        <a href="javascript:void(0);" class="card-title" data-toggle="collapse" data-target="#js_demo_accordion-${i}a" aria-expanded="false">
-                            Semester ${i}
-                            <span class="ml-auto">
-                                <span class="collapsed-reveal">
-                                    <i class="fal fa-chevron-up fs-xl"></i>
-                                </span>
-                                <span class="collapsed-hidden">
-                                    <i class="fal fa-chevron-down fs-xl"></i>
-                                </span>
-                            </span>
-                        </a>
-                    </div>
-                    <div id="js_demo_accordion-${i}a" class="collapse" data-parent="#accordion-container">
-                        <div class="card-body" id="card-body-${i}">
-                            <h3 style="display: flex; justify-content: center;">
-                                <div class="add" onclick="openModal(${i})">
-                                    <p>Click here to add subjects</p>
-                                    <p><i class="fal fa-plus-circle"></i></p>
-                                </div>
-                            </h3>
-                        </div>
-                    </div>`;
-                accordionContainer.appendChild(newAccordion);
+                savedData.push({
+                    semesterId: i,
+                    subjects: []
+                });
             }
         } else if (selectedValue < currentCount) {
-            // Remove accordions after confirmation
+            // Remove semesters after confirmation
             if (confirm('Are you sure you want to remove the last few semesters? This action cannot be undone.')) {
-                for (let i = currentCount; i > selectedValue; i--) {
-                    accordionContainer.removeChild(currentAccordions[i - 1]);
-                }
+                savedData.splice(selectedValue);
             } else {
                 // Revert to the previous value
                 event.target.value = currentCount;
+                return;
             }
         }
 
-        saveData();
+        localStorage.setItem('semesters', JSON.stringify(savedData));
+        loadCourseFromLocalStorage();
     }
 
-    let currentSemesterId = null;
-    let editPillElement = null;
-    let currentSubjectIndex = null;
+    var currentSemesterId = null;
+    var editPillElement = null;
+    var currentSubjectIndex = null;
 
     function openModal(semesterId, subjectIndex = null) {
         currentSemesterId = semesterId;
@@ -377,7 +360,7 @@
             subject.topics?.forEach(topic => {
                 addTopic();  // Add a new topic input
                 const topicInputs = document.getElementById('topics-container').getElementsByTagName('input');
-                topicInputs[topicInputs.length - 1].value = topic;  // Set the value of the last topic input
+                topicInputs[topicInputs.length - 1].value = topic.title;  // Set the value of the last topic input
             });
         }
 
@@ -409,7 +392,6 @@
                 alert('Please fill out all topic fields before saving.');
                 return;
             }
-            topics.push(input.value);
         }
 
         if (!title || !description) {
@@ -427,11 +409,35 @@
             savedData.push(semester);
         }
 
-        const subject = { title, description, topics };
-
         if (currentSubjectIndex !== null) {
-            semester.subjects[currentSubjectIndex] = subject;
+            let savedSubject = semester.subjects[currentSubjectIndex];
+            savedSubject.title = title;
+            savedSubject.description = description;
+
+            // Update existing topics and add new topics
+            const updatedTopics = [];
+            for (let i = 0; i < topicInputs.length; i++) {
+                if (i < savedSubject.topics.length) {
+                    updatedTopics.push({
+                        id: savedSubject.topics[i].id,
+                        unique_id: savedSubject.topics[i].unique_id,
+                        title: topicInputs[i].value
+                    });
+                } else {
+                    updatedTopics.push({
+                        title: topicInputs[i].value
+                    });
+                }
+            }
+            savedSubject.topics = updatedTopics;
         } else {
+            const topics = [];
+            for (let input of topicInputs) {
+                topics.push({
+                    title: input.value
+                });
+            }
+            const subject = { title, description, topics };
             semester.subjects.push(subject);
         }
         localStorage.setItem('semesters', JSON.stringify(savedData));
@@ -456,12 +462,15 @@
         // Display the uploaded image if available
         // Display the uploaded image if available
         // Display the uploaded image if available
-        console.log(courseImage);
+        console.log(courseImage, "course image dikhao");
         if (courseImage) {
             console.log('found image');
             const imageLabel = document.querySelector('.custom-file-label');
             imageLabel.textContent = 'Image Selected'; // Update label text to indicate an image is selected
-            
+
+            const imagePreviewGroup = document.getElementById('image-preview-group');
+            imagePreviewGroup.hidden = false;
+
             const imagePreview = document.getElementById('image-preview');
             imagePreview.src = courseImage;
             imagePreview.style.display = 'block'; // Show the image element
@@ -482,6 +491,10 @@
                     fileInput.files = dataTransfer.files;
                 })
                 .catch(err => console.error('Error creating Blob from base64 string:', err));
+        }
+        else {
+            const imagePreview = document.getElementById('image-preview-group');
+            imagePreview.hidden = true;
         }
 
         const savedData = JSON.parse(localStorage.getItem('semesters'));
@@ -551,55 +564,18 @@
         });
     }
 
-    function saveData() {
-        const accordionContainer = document.getElementById('accordion-container');
-        const semesters = [];
-
-        accordionContainer.querySelectorAll('.card').forEach((card, index) => {
-            const semesterId = index + 1;
-            const cardBody = card.querySelector(`#card-body-${semesterId}`);
-            const subjects = [];
-
-            cardBody.querySelectorAll('.pill').forEach(pill => {
-                subjects.push({
-                    title: pill.dataset.title,
-                    description: pill.dataset.description
-                });
-            });
-
-            semesters.push({
-                semesterId: semesterId,
-                subjects: subjects
-            });
-        });
-
-        localStorage.setItem('semesters', JSON.stringify(semesters));
-    }
-
     function redirectToViewCourses(){
         window.location='#viewCourses';
     }
 
-    function setEditMode(customerData){
-        $("#main_title").html('Edit User Data');
+    function setEditMode(data){
+        console.log(data);
+        localStorage.setItem('courseTitle', data["courseTitle"]);
+        localStorage.setItem('courseDescription', data['courseDescription']);
+        localStorage.setItem('semesters', JSON.stringify(data['semesters']));
 
-        $("#mobile").val(customerData["mobile_number"]);
-        $("#pass").val(customerData["password"]);
-        $("#name").val(customerData["display_name"]);
-        $("#userName").val(customerData["user_name"]);
-        $("#email").val(customerData["email_id"]);
-
-
-        $('#perm input:checked').each(function() {
-            $('input:checkbox').attr('checked',false);
-        });
-
-        let permissions = customerData["permissions"];
-        for(let key in permissions){
-            if(permissions[key] == 1){
-                $("#"+key).attr("checked", true);
-            }
-        }
+        var courseImageBase64String = data["courseImage"];
+        localStorage.setItem('courseImage', courseImageBase64String);
     }
 
     function setError(domId,msg){
@@ -651,34 +627,62 @@
 
         setSuccess("desc");
 
-        lock = true;
-
-        initProgressBar();
-
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
         var title = document.getElementById('title').value;
         var description = document.getElementById('desc').value;
         var imageFile = document.getElementById('image-file').files[0];
-        var semesters = JSON.parse(localStorage.getItem('semesters')) || [];
 
+        var semesters = JSON.parse(localStorage.getItem('semesters')) || [];
+        console.log(semesters);
+        if (semesters.length == 0) {
+            $("#err-div").html(`<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add one or more semesters ! </span></div>`);
+            $("#err-div").show();
+            return;
+        }
+        
+        const errors = [];
+            semesters.forEach(semester => {
+                if (semester.subjects.length === 0) {
+                    errors.push(`Please add one or more subjects in Semester ${semester.semesterId}!`);
+                }
+
+                semester.subjects?.forEach(subject => {
+                    if (subject.topics.length === 0) {
+                        errors.push(`Please add one or more topics in the subject "${subject.title}" of Semester ${semester.semesterId}!`);
+                    }
+                });
+        });
+
+        if (errors.length > 0) {
+            const errorHtml = errors.map(error => `
+                <div id="err-info" class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <strong>Error!</strong> <span id="err-text">${error}</span>
+                </div>
+            `).join('');
+            $("#err-div").html(errorHtml);
+            $("#err-div").show();
+            return false;
+        }
+
+        lock = true;
+        initProgressBar();
         let formData = new FormData();
         console.log(title, description, semesters);
         formData.append('title', title);
         formData.append('description', description);
         formData.append('image', imageFile);
-        formData.append('semesters', JSON.stringify(semesters))
+        formData.append('semesters', JSON.stringify(JSON.parse(semesters)));
 
         //let data = {'title':title, 'description':description,'image':imageFile};
         if(mode=="edit"){
-            editUniqueId = currentCustomerData["unique_id"];
-            editId = currentCustomerData["id"];
-            is_active = currentCustomerData["is_active"];
-            ct = currentCustomerData["ct"];
-            data['unique_id'] = editUniqueId;
-            data["id"] = editId;
-            data["is_active"] = is_active;
-            data["ct"] = ct;
+            editUniqueId = currentCourseData["unique_id"];
+            editId = currentCourseData["id"];
+            ct = currentCourseData["ct"];
+            formData.append('unique_id', editUniqueId);
+            formData.append('id', editId)
+            //formData["ct"] = ct;
         }
 
         // Log FormData content
@@ -709,6 +713,9 @@
                     }
 
                     $("#main-form-div").hide();
+                    localStorage.removeItem('courseTitle');
+                    localStorage.removeItem('courseDescription');
+                    localStorage.removeItem('semesters');
                     return;
                 }
                 else

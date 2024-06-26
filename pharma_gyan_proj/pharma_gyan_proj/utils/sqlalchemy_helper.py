@@ -317,8 +317,10 @@ def fetch_rows_limited(engine, table, filter_list, columns=[], relationships=[],
 def add_columns_projections(q, columns=[]):
     if len(columns) == 0:
         return q
-    q = q.options(load_only(*columns))
-    return q
+    entity = inspect(q._entities[0].entity)
+    # Ensure we only add column attributes
+    column_projections = [getattr(entity.mapper.class_, col) for col in columns if hasattr(entity.mapper.class_, col)]
+    return q.with_entities(*column_projections)
 
 
 def add_relationshsip_projections(q, relationships=[]):

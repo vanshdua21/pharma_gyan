@@ -28,7 +28,8 @@
                             <th>Description</th>
                             <th>Thumbnail</th>
                             <th>Active</th>
-                            <th>Call To Action</th>
+                            <th>Edit</th>
+                            <th>Deactivate</th>
 
                         </tr>
                         </thead>
@@ -41,7 +42,8 @@
                                 <th>Description</th>
                                 <th>Thumbnail</th>
                                 <th>Active</th>
-                                <th>Call To Action</th>
+                                <th>Edit</th>
+                                <th>Deactivate</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -78,9 +80,8 @@
                         return '<img src="' + data + '" alt="Image" height="100" width="p100">';
                     } },
                     { data: "is_active" },
-                    { data: "cta"}
-                    // { data: "edit"},
-                    // { data: "del"}
+                    { data: "edit"},
+                    { data: "deac"}
                 ],
                 dom:
                 /*	--- Layout Structure
@@ -151,8 +152,8 @@
     });
 
 
-    function editUser(id) {
-        window.open("#editUser?id=" + id, "_blank");
+    function editCourse(id) {
+        window.open("#editCourse?id=" + id, "_blank");
     }
 
     function deactivateCourse(id)

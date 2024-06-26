@@ -1,8 +1,10 @@
 import datetime
 import random
 import re
-from jsonschema import Draft4Validator
+# from jsonschema import Draft4Validator
 import string
+import requests
+import base64
 
 
 def get_random_uuid(length=20):
@@ -20,20 +22,20 @@ def get_uuid(length):
     return ran
 
 
-def validate_json_schema(json_schema, input_data):
-    """Validates the input data against  provided json_schema rules
+# def validate_json_schema(json_schema, input_data):
+#     """Validates the input data against  provided json_schema rules
 
-    Args:
-        json_schema (object) : Json schema containing the rules
-        input_data : The input data
+#     Args:
+#         json_schema (object) : Json schema containing the rules
+#         input_data : The input data
 
-    Returns:
-       list : List of all errors that come in the validation
+#     Returns:
+#        list : List of all errors that come in the validation
 
-    """
-    validator = Draft4Validator(json_schema)
-    errors = sorted(validator.iter_errors(input_data), key=lambda e: e.path)
-    return errors
+#     """
+#     validator = Draft4Validator(json_schema)
+#     errors = sorted(validator.iter_errors(input_data), key=lambda e: e.path)
+#     return errors
 
 
 def nested_path_get(obj, path_str, strict=False, mode='GET', default_return_value=None):
@@ -96,3 +98,20 @@ def nested_path_put(obj, path_str, value):
 def get_today_date():
     utc_time = datetime.datetime.utcnow()
     return datetime.datetime(day=utc_time.day, month=utc_time.month, year=utc_time.year)
+
+def url_to_base64(image_url):
+    try:
+        # Fetch the image data from the URL
+        response = requests.get(image_url)
+        if response.status_code == 200:
+            # Convert image data to base64 encoding
+            base64_data = base64.b64encode(response.content).decode('utf-8')
+            # Format the base64 string as data URI
+            data_uri = f"data:image/jpeg;base64,{base64_data}"
+            return data_uri
+        else:
+            print(f"Failed to fetch image. Status code: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"Error fetching image: {str(e)}")
+        return None

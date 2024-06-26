@@ -13,7 +13,7 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
-from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, prepare_and_save_course, process_activate_course, process_deactivate_course
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, fetch_course_from_id, prepare_and_save_course, process_activate_course, process_deactivate_course
 
 import boto3
 
@@ -198,6 +198,16 @@ def addCourse(request):
     rendered_page = render_to_string('pharma_gyan/add_course.html', {"user": user, "mode": "create"})
     return HttpResponse(rendered_page)
 
+def editCourse(request):
+    # Retrieve the id parameter from the query string
+    course_id = request.GET.get('id')
+    course = fetch_course_from_id(course_id)
+    if course is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No course with this ID")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_course.html', {"course": course, "mode": "edit"})
+    return HttpResponse(rendered_page)
+
 def viewCourses(request):
     courses = fetch_and_prepare_courses()
     # Convert list of dictionaries to JSON
@@ -207,6 +217,8 @@ def viewCourses(request):
 
 @csrf_exempt
 def upsertCourse(request):
+    id = request.POST.get('id')
+    unique_id = request.POST.get('unique_id')
     title = request.POST.get('title')
     description = request.POST.get('description')
     image_file = request.FILES.get('image')
@@ -215,6 +227,8 @@ def upsertCourse(request):
     imageUrl = save_file_to_s3(image_file)
     # Collect the data in a dictionary
     course = {
+        'id': id,
+        'unique_id': unique_id,
         'title': title,
         'description': description,
         'imageUrl': imageUrl,  # This is the uploaded file
