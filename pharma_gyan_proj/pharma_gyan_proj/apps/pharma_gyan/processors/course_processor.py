@@ -9,7 +9,7 @@ from django.core.files.storage import FileSystemStorage
 from pharma_gyan_proj.common.constants import TAG_FAILURE, TAG_SUCCESS, AdminUserPermissionType
 from pharma_gyan_proj.exceptions.failure_exceptions import BadRequestException, InternalServerError
 from pharma_gyan_proj.db_models.course_model import course_model
-from pharma_gyan_proj.orm_models.content.course_orm_model import pg_course
+from pharma_gyan_proj.orm_models.content_models import PgCourse, PgSemester, PgSubject, PgUnit, PgChapter
 
 logger = logging.getLogger("apps")
 
@@ -18,21 +18,46 @@ def prepare_and_save_course(request_body):
     method_name = "prepare_and_save_course"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
-    course = pg_course()
-    if (request_body.get('id')):
-        course.id = request_body.get('id')
-    course.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
+    course = PgCourse()
+    course.unique_id = uuid.uuid4().hex
     course.title = request_body.get('title')
     course.description = request_body.get('description')
     course.thumbnail_url = request_body.get('imageUrl')
     if (request_body.get('ct')):
         course.ct = request_body.get('ct')
-
+        
+    course.semesters = []
+    semestersBody = request_body.get('semesters')
+    for sem in semestersBody:
+        semester = PgSemester()
+        semester.unique_id = uuid.uuid4().hex
+        semester.title = sem.get('semesterId')
+        
+        semester.subjects = []
+        subjectBody = sem.get('subjects')
+        for sub in subjectBody:
+            subject = PgSubject()
+            subject.unique_id = uuid.uuid4().hex
+            subject.name = sub.get('title')
+            subject.description = sub.get('description')
+            
+            subject.units = []
+            unitBody = sub.get('topics')
+            for topic in unitBody:
+                unit = PgUnit()
+                unit.unique_id = uuid.uuid4().hex
+                unit.title = topic
+                
+                subject.units.append(unit)
+            
+            semester.subjects.append(subject)
+            
+        course.semesters.append(semester)
+    
     save_or_update_course(course)
-
+    
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
-
 
 def save_or_update_course(course):
     method_name = "save_or_update_course"

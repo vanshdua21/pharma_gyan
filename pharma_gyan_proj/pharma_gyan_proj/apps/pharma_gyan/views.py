@@ -274,6 +274,7 @@ def upsertCourse(request):
     title = request.POST.get('title')
     description = request.POST.get('description')
     image_file = request.FILES.get('image')
+    semesters = json.loads(request.POST.get('semesters', '[]'))
 
     imageUrl = save_file_to_s3(image_file)
     # Collect the data in a dictionary
@@ -281,6 +282,7 @@ def upsertCourse(request):
         'title': title,
         'description': description,
         'imageUrl': imageUrl,  # This is the uploaded file
+        'semesters': semesters,
     }
 
     response = prepare_and_save_course(course)

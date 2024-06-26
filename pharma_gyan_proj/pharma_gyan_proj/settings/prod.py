@@ -12,7 +12,7 @@ DATABASES = {
         "NAME": "pharma_gyan",
         "USER": "pharmagyan",
         "PASSWORD": "PharmaGyan@21",
-        "HOST": "localhost",
+        "HOST": localhost,
         "PORT": 3306
     }
 }
@@ -72,4 +72,6 @@ ROOT_URLCONF = 'pharma_gyan_proj.urls'
 #     },
 # }
 
-BASE_PATH="https://pharma_gyan.vansh.in"
+BASE_PATH="http://65.0.223.156:80/"
+LOGIN_PATH="/pharma_gyan/editor/adminLogin"
+SECURE_LOGIN_PATH="/pharma_gyan/editor/secureLogin/"

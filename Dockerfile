@@ -78,8 +78,9 @@ RUN python3 -m ensurepip
 RUN pip3 install --upgrade pip setuptools wheel
 
 # Add and install greenlet wheel file
-COPY greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl /tmp/
-RUN pip3 install /tmp/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl
+#RUN wget https://files.pythonhosted.org/packages/7b/2e/ae57d807c49ae8a3a1c50d489e86e4f3bb5d82c3c7a1ec3c68e6ab3e9e60/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl
+#COPY greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl /tmp/
+#RUN pip3 install /tmp/greenlet-1.1.0-cp38-cp38-manylinux1_x86_64.whl
 
 
 COPY pharma_gyan_proj/server_config/pip/requirements.txt /etc/pip/requirements.txt
