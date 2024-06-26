@@ -53,12 +53,6 @@ def dashboard(request):
 
 
 @csrf_exempt
-def media_dropzone(request):
-    rendered_page = render_to_string('pharma_gyan/add_media2.html', {})
-    return HttpResponse(rendered_page)
-
-
-@csrf_exempt
 #upload video and images:
 def add_media(request):
     image_size_limit = 5 * 1024 * 1024  # 5 MB in bytes
@@ -85,20 +79,7 @@ def add_media(request):
     else:
         return JsonResponse({'result': 'failure'}, status=400)
 
-def save_file_to_s3(file):
-    s3_client = boto3.client(
-        's3',
-        aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
-        aws_secret_access_key="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",
-        region_name="ap-south-1"
-    )
 
-    file_name = file.name
-
-    s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
-
-    s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
-    return s3_url
 def get_user_tab_permissions(user):
     user_groups = [group.name for group in list(user.groups.all())]
     return user_groups
@@ -138,20 +119,7 @@ def summernote(request):
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user})
     return HttpResponse(rendered_page)
 
-# @csrf_exempt
-# def save_summernote(request):
-#     # Extract the byte string from the request body
-#     byte_string = request.body  # This will be in byte format: b'data=...'
-#
-#     # Decode the byte string to a regular string
-#     decoded_string = byte_string.decode('utf-8')  # Convert from bytes to string
-#
-#     # Parse the URL-encoded data
-#     url_encoded_data = decoded_string.split('=', 1)[1]  # Get the part after 'data='
-#
-#     # URL-decode the data
-#     decoded_data = unquote(url_encoded_data)
-#     return HttpResponse(json.dumps("{'data':'OK'}", default=str), status=http.HTTPStatus.OK, content_type="application/json")
+
 @csrf_exempt
 def upsert_Save_chapter(request):
     method_name = "upsert_promo_code"
