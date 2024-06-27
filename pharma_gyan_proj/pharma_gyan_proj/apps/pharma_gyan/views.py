@@ -13,7 +13,7 @@ from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
 from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
-from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, fetch_course_from_id, prepare_and_save_course, process_activate_course, process_deactivate_course
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, fetch_course_from_id, fetch_course_tree_from_id, prepare_and_save_course, process_activate_course, process_deactivate_course
 
 import boto3
 
@@ -264,5 +264,11 @@ def deactivate_course(request, uniqueId):
 @csrf_exempt
 def activate_course(request, uniqueId):
     response = process_activate_course(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
+def get_course_tree_json(request, uniqueId):
+    response = fetch_course_tree_from_id(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

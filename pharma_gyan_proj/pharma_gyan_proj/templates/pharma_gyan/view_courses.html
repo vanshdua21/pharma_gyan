@@ -1,4 +1,8 @@
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<!-- <link href="/static/pharma_gyan/css/bstreeview.min.css">
+<script src="/static/pharma_gyan/js/bstreeview.min.js"></script> -->
+<link rel="stylesheet" href="/static/pharma_gyan/css/acl-tree-view.css" />
+<script src="/static/pharma_gyan/js/acl-tree-view.js"></script>
 <script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
 <script src="/static/pharma_gyan/js/datatables.export.js"></script>
 
@@ -28,6 +32,7 @@
                             <th>Description</th>
                             <th>Thumbnail</th>
                             <th>Active</th>
+                            <th>Course Structure</th>
                             <th>Edit</th>
                             <th>Deactivate</th>
 
@@ -42,6 +47,7 @@
                                 <th>Description</th>
                                 <th>Thumbnail</th>
                                 <th>Active</th>
+                                <th>Course Structure</th>
                                 <th>Edit</th>
                                 <th>Deactivate</th>
                             </tr>
@@ -49,6 +55,26 @@
                     </table>
                     <!-- datatable end -->
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="courseTreeModel" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Course Structure</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="example">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -80,6 +106,7 @@
                         return '<img src="' + data + '" alt="Image" height="100" width="p100">';
                     } },
                     { data: "is_active" },
+                    { data: "tree" },
                     { data: "edit"},
                     { data: "deac"}
                 ],
@@ -154,6 +181,104 @@
 
     function editCourse(id) {
         window.open("#editCourse?id=" + id, "_blank");
+    }
+
+    function openTreeModal(id) {
+        // const myData = [
+        //     {
+        //         "label": "Course Name",
+        //         "ul": 
+        //         [
+        //             {
+        //                 "label": "Semester 1",
+        //                 "ul": 
+        //                 [
+        //                     {
+        //                         "label": "Subject 1-1",
+        //                         "ul": 
+        //                         [
+        //                             {
+        //                                 "label": "Topic 1-1-1"
+        //                             }
+        //                         ]
+        //                     }
+        //                 ]
+        //             }, 
+        //             {
+        //                 "label": "Semester 2",
+        //                 "ul": 
+        //                 [
+        //                     {
+        //                         "label": "Subject 2-1",
+        //                         "ul": 
+        //                         [
+        //                             {
+        //                                 "label": "Topic 2-1-1"
+        //                             },
+        //                             {
+        //                                 "label": "Topic 2-1-2"
+        //                             }
+        //                         ]
+        //                     }
+        //                 ]
+        //             }, 
+        //             {
+        //                 "label": "Semester 3",
+        //                 "ul": 
+        //                 [
+        //                     {
+        //                         "label": "Subject 1",
+        //                         "ul": 
+        //                         [
+        //                             {
+        //                                 "label": "Topic 3-1-1"
+        //                             },
+        //                             {
+        //                                 "label": "Topic 3-1-2"
+        //                             },
+        //                             {
+        //                                 "label": "Topic 3-1-3"
+        //                             }
+        //                         ]
+        //                     }, 
+        //                     {
+        //                         "label": "Subject 2"
+        //                     },
+        //                     {
+        //                         "label": "Subject 3"
+        //                     }
+        //                 ]
+        //             }
+        //         ]
+        //     },
+        //     // more items here
+        // ]
+
+        lock = true;
+        $("#err-div").hide();
+        $("#success-div").hide();
+        $.post('/pharma_gyan/editor/getCourseTreeJson/' + id + '/',function(data)
+            {
+                lock=false;
+                if(data['result']=='SUCCESS')
+                {
+                    const myData = data.data;
+                    // Clear the existing tree view content
+                    $('#example').empty();
+                    $('#example').aclTreeView({ 
+                    // options here
+                    }, myData);
+                    $('#courseTreeModel').modal('show');
+                    return;
+                }
+                else
+                {
+                    alert('Error while fetching course tree data');
+                    return;
+                }
+
+            }
+        )   
     }
 
     function deactivateCourse(id)

@@ -96,6 +96,7 @@ def fetch_and_prepare_courses():
     courses_list = []
     for course in courses:
         editBtn = "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editCourse('{}')\">Edit</button>".format(course.unique_id, course.unique_id)
+        treeBtn = "<button id=\"tree-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"openTreeModal('{}')\">Show Course Structure</button>".format(course.unique_id, course.unique_id)
         if course.is_active:
             deac = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateCourse('{}')\">Deactivate</button>".format(
                 course.unique_id, course.unique_id)
@@ -108,6 +109,7 @@ def fetch_and_prepare_courses():
             "description": course.description,
             "image_url": course.thumbnail_url,
             "is_active": course.is_active,
+            "tree": treeBtn,
             "edit": editBtn, 
             "deac": deac,
             # "is_active": user.is_active,
@@ -169,7 +171,6 @@ def process_activate_course(unique_id):
 
 def fetch_course_from_id(course_id):
     filter_list = [{"column": "unique_id", "value": course_id, "op": "=="}]
-    columns = ["unique_id"]
     relationships_list = ["semesters", "semesters.subjects", "semesters.subjects.units", "semesters.subjects.units.chapters"]
     courses = fetch_courses(filter_list, relationships_list)
     if (len(courses) == 0):
@@ -178,6 +179,36 @@ def fetch_course_from_id(course_id):
     # Convert list of model instances to list of dictionaries
     course_json = course.to_json()
     return course_json
+
+def fetch_course_tree_from_id(course_id):
+    filter_list = [{"column": "unique_id", "value": course_id, "op": "=="}]
+    relationships_list = ["semesters", "semesters.subjects", "semesters.subjects.units"]
+    courses = fetch_courses(filter_list, relationships_list)
+    if (len(courses) == 0):
+        return None
+    course = courses[0]
+    course_json = course_to_json(course)
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS, data=course_json)
+
+def course_to_json(course):
+    def semester_to_dict(semester):
+        return {
+            "label": 'Semester ' + semester.title,
+            "ul": [subject_to_dict(subject) for subject in semester.subjects]
+        }
+
+    def subject_to_dict(subject):
+        return {
+            "label": subject.name,
+            "ul": [{"label": unit.title} for unit in subject.units]
+        }
+
+    course_dict = [{
+        "label": course.title,
+        "ul": [semester_to_dict(semester) for semester in course.semesters]
+    }]
+
+    return course_dict
 
 # def delete_user(user_id):
 #     method_name = "delete_user"

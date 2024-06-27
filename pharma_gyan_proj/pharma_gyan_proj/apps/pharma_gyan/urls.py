@@ -26,4 +26,5 @@ urlpatterns = [
     path("editor/deactivateCourse/<str:uniqueId>/", views.deactivate_course),
     path("editor/activateCourse/<str:uniqueId>/", views.activate_course),
     path("editor/editCourse/", views.editCourse),
+    path("editor/getCourseTreeJson/<str:uniqueId>/", views.get_course_tree_json),
 ]
