@@ -18,6 +18,7 @@ class PgCourse(Base, Orm_helper):
     unique_id = Column("unique_id", String, primary_key=True)
     title = Column("title", String)
     description = Column("description", Text)
+    price = Column("price", Numeric(10, 2))
     thumbnail_url = Column("thumbnail_url", String)
     created_by = Column("created_by", String)
     is_active = Column("is_active", Integer, default=1)
@@ -34,6 +35,7 @@ class PgCourse(Base, Orm_helper):
             "unique_id": self.unique_id,
             "courseTitle": self.title,
             "courseDescription": self.description,
+            "coursePrice": str(self.price),
             "courseImage": url_to_base64(self.thumbnail_url),
             "semesters": [semester.to_dict() for semester in self.semesters]
         }

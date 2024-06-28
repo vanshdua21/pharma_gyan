@@ -24,6 +24,7 @@ def prepare_and_save_course(request_body):
     course.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
     course.title = request_body.get('title')
     course.description = request_body.get('description')
+    course.price = request_body.get('price')
     course.thumbnail_url = request_body.get('imageUrl')
     if (request_body.get('ct')):
         course.ct = request_body.get('ct')
@@ -65,7 +66,11 @@ def prepare_and_save_course(request_body):
                 
             course.semesters.append(semester)
     
-    save_or_update_course(course)
+    try: 
+        save_or_update_course(course)
+    except Exception as e:
+        logger.error(f"Error while saving or updating course ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
     
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
@@ -73,18 +78,10 @@ def prepare_and_save_course(request_body):
 def save_or_update_course(course):
     method_name = "save_or_update_course"
 
-    try:
-        db_res = course_model().upsert(course)
-        if not db_res.get("status"):
-            raise InternalServerError(method_name=method_name,
-                                      reason=db_res.get("response"))
-    except InternalServerError as ey:
-        logger.error(
-            f"Error while saving or updating course InternalServerError ::{ey.reason}")
-        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
-    except Exception as e:
-        logger.error(f"Error while saving or updating course ::{e}")
-        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    db_res = course_model().upsert(course)
+    if not db_res.get("status"):
+        raise InternalServerError(method_name=method_name,
+                                    reason=db_res.get("response"))
 
     logger.debug(f"Exit {method_name}, Success")
 
@@ -107,6 +104,7 @@ def fetch_and_prepare_courses():
             "unique_id": course.unique_id,
             "title": course.title,
             "description": course.description,
+            "price": str(course.price),
             "image_url": course.thumbnail_url,
             "is_active": course.is_active,
             "tree": treeBtn,

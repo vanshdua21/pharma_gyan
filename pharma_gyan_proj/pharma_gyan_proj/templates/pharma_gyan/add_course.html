@@ -109,6 +109,10 @@
                                         <label class="form-label" for="desc">Description</label>
                                         <input type="text" id="desc" class="form-control">
                                     </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="price">Price</label>
+                                        <input type="text" id="price" class="form-control">
+                                    </div>
 
                                     <div class="form-group">
                                         <label class="form-label" for="pic">Course Thumbnail</label>
@@ -226,6 +230,7 @@
         else {
             localStorage.removeItem('courseTitle');
             localStorage.removeItem('courseDescription');
+            localStorage.removeItem('coursePrice');
             localStorage.removeItem('courseImage');
             localStorage.removeItem('semesters');
         }
@@ -245,6 +250,7 @@
         // Add event listeners to title and description inputs
         document.getElementById('title').addEventListener('input', saveCourseData);
         document.getElementById('desc').addEventListener('input', saveCourseData);
+        document.getElementById('price').addEventListener('input', saveCourseData);
         document.getElementById('image-file').addEventListener('change', handleImageUpload);
     });
 
@@ -271,10 +277,12 @@
     function saveCourseData() {
         const title = document.getElementById('title').value;
         const description = document.getElementById('desc').value;
+        const price = document.getElementById('price').value;
 
         // Save title and description to localStorage
         localStorage.setItem('courseTitle', title);
         localStorage.setItem('courseDescription', description);
+        localStorage.setItem('coursePrice', price);
     }
 
     function addTopic() {
@@ -449,6 +457,7 @@
         // Load course title, description, and image from localStorage
         const courseTitle = localStorage.getItem('courseTitle');
         const courseDescription = localStorage.getItem('courseDescription');
+        const coursePrice = localStorage.getItem('coursePrice');
         const courseImage = localStorage.getItem('courseImage');
 
         // Set course title and description
@@ -457,6 +466,9 @@
         }
         if (courseDescription) {
             document.getElementById('desc').value = courseDescription;
+        }
+        if (coursePrice) {
+            document.getElementById('price').value = coursePrice;
         }
 
         // Display the uploaded image if available
@@ -572,6 +584,7 @@
         console.log(data);
         localStorage.setItem('courseTitle', data["courseTitle"]);
         localStorage.setItem('courseDescription', data['courseDescription']);
+        localStorage.setItem('coursePrice', data['coursePrice']);
         localStorage.setItem('semesters', JSON.stringify(data['semesters']));
 
         var courseImageBase64String = data["courseImage"];
@@ -627,10 +640,30 @@
 
         setSuccess("desc");
 
+        if(!($('#price').val())){
+            setError("price");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Price ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        // Check if the price is numeric
+        var priceValue = $('#price').val();
+        if (!$.isNumeric(priceValue)) {
+            setError("price");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Price must be numeric!</span></div>');
+            $("#err-div").show();
+            return;
+        }
+
+        setSuccess("price");
+
         $("#err-div").html('');
         var barInterval = setInterval('incBar()',25);
         var title = document.getElementById('title').value;
         var description = document.getElementById('desc').value;
+        var price = document.getElementById('price').value;
         var imageFile = document.getElementById('image-file').files[0];
 
         var semesters = JSON.parse(localStorage.getItem('semesters')) || [];
@@ -672,6 +705,7 @@
         console.log(title, description, semesters);
         formData.append('title', title);
         formData.append('description', description);
+        formData.append('price', price);
         formData.append('image', imageFile);
         formData.append('semesters', JSON.stringify(semesters));
 
@@ -715,6 +749,7 @@
                     $("#main-form-div").hide();
                     localStorage.removeItem('courseTitle');
                     localStorage.removeItem('courseDescription');
+                    localStorage.removeItem('coursePrice');
                     localStorage.removeItem('semesters');
                     return;
                 }

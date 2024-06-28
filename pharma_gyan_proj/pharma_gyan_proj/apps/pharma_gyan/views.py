@@ -226,6 +226,7 @@ def upsertCourse(request):
     unique_id = request.POST.get('unique_id')
     title = request.POST.get('title')
     description = request.POST.get('description')
+    price = request.POST.get('price')
     image_file = request.FILES.get('image')
     semesters = json.loads(request.POST.get('semesters', '[]')) 
     
@@ -236,6 +237,7 @@ def upsertCourse(request):
         'unique_id': unique_id,
         'title': title,
         'description': description,
+        'price': price,
         'imageUrl': imageUrl,  # This is the uploaded file
         'semesters': semesters,
     }

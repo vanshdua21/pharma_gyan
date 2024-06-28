@@ -30,6 +30,7 @@
                         <tr>
                             <th>Title</th>
                             <th>Description</th>
+                            <th>Price</th>
                             <th>Thumbnail</th>
                             <th>Active</th>
                             <th>Course Structure</th>
@@ -45,6 +46,7 @@
                             <tr>
                                 <th>Title</th>
                                 <th>Description</th>
+                                <th>Price</th>
                                 <th>Thumbnail</th>
                                 <th>Active</th>
                                 <th>Course Structure</th>
@@ -112,6 +114,7 @@
                 columns: [
                     { data: "title" },
                     { data: "description" },
+                    { data: "price" },
                     { data: "image_url", render: function(data, type, row, meta) {
                         return '<img src="' + data + '" alt="Image" height="100" width="p100">';
                     } },
