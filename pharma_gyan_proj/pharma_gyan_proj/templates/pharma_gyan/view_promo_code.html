@@ -83,8 +83,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
     var data = JSON.parse('{{ users|escapejs }}');
+    var userPermissions = "{{ project_permissions }}";
     var datatable;
-<!--    const Swal = require('sweetalert2');-->
     $(document).ready(function()
     {
         data.forEach(item => {
@@ -199,45 +199,23 @@
 
     });
 
+    function validatePermissions() {
+        if (!userPermissions.includes("editPromoCodes")) {
+            alert("User does not have permission to edit Promo Codes");
+            return false;
+        }
+        return true;
+    }
 
     function editPromoCode(unique_id) {
+        if (!validatePermissions()) return;
         window.open("#editPromoCode?unique_id=" + unique_id, "_blank");
     }
 
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
-deactivatePromoCode
-<!--    function (id)-->
-<!--    {-->
-<!--        if(lock==true)-->
-<!--            return;-->
-
-<!--        var confirmDeactivate = confirm("Do you really want to deactivate this promo code?");-->
-<!--        if(confirmDeactivate==false)-->
-<!--            return;-->
-
-<!--        lock = true;-->
-<!--        $("#err-div").hide();-->
-<!--        $("#success-div").hide();-->
-<!--        $.post('/pharma_gyan/editor/deactivatePromoCode/' + id + '/',function(data)-->
-<!--            {-->
-<!--                lock=false;-->
-<!--                if(data['result']=='SUCCESS')-->
-<!--                {-->
-<!--                    location.reload();-->
-<!--                    return;-->
-<!--                }-->
-<!--                else-->
-<!--                {-->
-<!--                    alert('Error while deactivating promo code');-->
-<!--                    return;-->
-<!--                }-->
-
-<!--            }-->
-<!--        )-->
-<!--        ;-->
-<!--    }-->
-function deactivatePromoCode(id) {
+    function deactivatePromoCode(id) {
+            if (!validatePermissions()) return;
             if (lock == true) return;
 
             // Create the SweetAlert2 mixin for custom styling
@@ -290,45 +268,9 @@ function deactivatePromoCode(id) {
                 }
             });
         }
-<!--    function activatePromoCode(id)-->
-<!--    {-->
-<!--        if(lock==true)-->
-<!--            return;-->
-
-<!--        var confirmActivate = confirm("Do you really want to activate this promo code?");-->
-<!--        if(confirmActivate==false)-->
-<!--            return;-->
-
-<!--        lock = true;-->
-<!--        $("#err-div").hide();-->
-<!--        $("#success-div").hide();-->
-<!--        $.post('/pharma_gyan/editor/activatePromoCode/' + id + '/',function(data)-->
-<!--            {-->
-<!--                lock=false;-->
-<!--                if(data['result']=='SUCCESS')-->
-<!--                {-->
-<!--                    location.reload();-->
-<!--                    lock = false;-->
-<!--                    return;-->
-<!--                }-->
-<!--                else-->
-<!--                {-->
-<!--                    alert('Error while activating promo code.');-->
-<!--                    lock = false;-->
-<!--                    return;-->
-<!--                }-->
-
-<!--            }-->
-<!--        ).fail(function(jqXHR, textStatus, errorThrown) {-->
-<!--                    result = jqXHR['responseJSON']-->
-<!--                    console.log(result)-->
-<!--                    alert("Error! "+result['detailed_message']);-->
-<!--                    lock = false;-->
-<!--                    return;-->
-<!--        });-->
-<!--    }-->
 
     function activatePromoCode(id) {
+            if (!validatePermissions()) return;
             if (lock == true) return;
 
             // Create the SweetAlert2 mixin for custom styling

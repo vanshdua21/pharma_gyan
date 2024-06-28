@@ -64,6 +64,16 @@
 
 <script type="text/javascript">
     var data = JSON.parse('{{ users|escapejs }}');
+    var userPermissions = "{{ project_permissions }}";
+
+    function validatePermissions() {
+        if (!userPermissions.includes("editUsers")) {
+            alert("User does not have permission to edit Users");
+            return false;
+        }
+        return true;
+    }
+
     var datatable;
     $(document).ready(function()
     {
@@ -161,6 +171,7 @@
 
 
     function editUser(id) {
+        if (!validatePermissions()) return;
         window.open("#editUser?id=" + id, "_blank");
     }
 
@@ -169,6 +180,7 @@
 
     function delUser(id)
     {
+        if (!validatePermissions()) return;
         if(lock==true)
             return;
 

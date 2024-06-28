@@ -20,6 +20,8 @@ import boto3
 from django.http import JsonResponse
 import json
 
+from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
+
 
 
 
@@ -32,8 +34,11 @@ def admin_login(request):
 
 
 def editor(request):
+    session = Session()
+    project_permissions = session.get_admin_user_permissions()
+    permissions_list = project_permissions.split(', ')
     rendered_page = render_to_string('pharma_gyan/base.html',
-                                     {"tab_permissions": get_user_tab_permissions(request.user)})
+                                     {"project_permissions": permissions_list, "tab_permissions": get_user_tab_permissions(request.user)})
     return HttpResponse(rendered_page)
 
 
@@ -73,7 +78,7 @@ def view_promo_code(request):
     users = fetch_and_prepare_promo_code()
     # Convert list of dictionaries to JSON
     users_json = json.dumps(users)
-    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"users": users_json})
+    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"users": users_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
 def summernote(request):
@@ -152,7 +157,7 @@ def viewUsers(request):
     users = fetch_and_prepare_users()
     # Convert list of dictionaries to JSON
     users_json = json.dumps(users)
-    rendered_page = render_to_string('pharma_gyan/view_users.html', {"users": users_json})
+    rendered_page = render_to_string('pharma_gyan/view_users.html', {"users": users_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
 @csrf_exempt
@@ -212,7 +217,7 @@ def viewCourses(request):
     courses = fetch_and_prepare_courses()
     # Convert list of dictionaries to JSON
     courses_json = json.dumps(courses)
-    rendered_page = render_to_string('pharma_gyan/view_courses.html', {"courses": courses_json})
+    rendered_page = render_to_string('pharma_gyan/view_courses.html', {"courses": courses_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
 @csrf_exempt

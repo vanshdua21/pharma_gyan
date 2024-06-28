@@ -265,16 +265,20 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </a>
         <ul>
             <li>
-                <a href="#promoCode" title="Create new config" data-filter-tags="application intel introduction">
-                    <i class="fal fa-plus"></i>
-                    <span class="nav-link-text" data-i18n="nav.application_intel_introduction">Add</span>
-                </a>
+                {% if "editPromoCodes" in project_permissions %}
+                    <a href="#promoCode" title="Create new config" data-filter-tags="application intel introduction">
+                        <i class="fal fa-plus"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">Add</span>
+                    </a>
+                {% endif %}
             </li>
             <li>
-                <a href="#viewPromoCode" title="View saved config" data-filter-tags="application intel introduction">
-                    <i class="fal fa-eye"></i>
-                    <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
-                </a>
+                {% if "viewPromoCodes" in project_permissions %}
+                    <a href="#viewPromoCode" title="View saved config" data-filter-tags="application intel introduction">
+                        <i class="fal fa-eye"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
+                    </a>
+                {% endif %}
             </li>
         </ul>
         </li>
@@ -295,15 +299,19 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </a>
         <ul>
             <li>
+                {% if "editUsers" in project_permissions %}
                     <a href="#addUser" title="Add User" data-filter-tags="application intel">
                         <i class="fal fa-file-alt"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel">Add User</span>
                     </a>
-                </li>
-                <a href="#viewUsers" title="View saved config" data-filter-tags="application intel introduction">
-                    <i class="fal fa-eye"></i>
-                    <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
-                </a>
+                {% endif %}
+            </li>
+                {% if "viewUsers" in project_permissions %}
+                    <a href="#viewUsers" title="View saved config" data-filter-tags="application intel introduction">
+                        <i class="fal fa-eye"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
+                    </a>
+                {% endif %}
             </li>
         </ul>
         </li>
@@ -316,15 +324,19 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </a>
         <ul>
             <li>
+                {% if "editContent" in project_permissions %}
                     <a href="#addCourse" title="Add Course" data-filter-tags="application intel">
                         <i class="fal fa-file-alt"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel">Add Course</span>
                     </a>
+                {% endif %}
                 </li>
-                <a href="#viewCourses" title="View saved config" data-filter-tags="application intel introduction">
-                    <i class="fal fa-eye"></i>
-                    <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
-                </a>
+                {% if "viewContent" in project_permissions %}
+                    <a href="#viewCourses" title="View saved config" data-filter-tags="application intel introduction">
+                        <i class="fal fa-eye"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
+                    </a>
+                {% endif %}
             </li>
         </ul>
     </li> 
