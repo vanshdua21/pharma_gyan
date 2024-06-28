@@ -17,7 +17,12 @@ class S3Wrapper:
 
     def get_s3_client(self):
         if self.client is None:
-            self.client = boto3.client('s3', "ap-south-1")
+            self.client = boto3.client(
+                's3',
+                aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
+                aws_secret_access_key="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",
+                region_name="ap-south-1"
+            )
 
     def get_s3_bucket_key(self, path):
         #     return s3 bucket and key from s3 url
@@ -43,9 +48,14 @@ class S3Wrapper:
         else:
             return {"success": False, "data": None}
 
-    def get_s3_url(self, bucket, key):
-        url = f"https://s3-{settings.AWS_CONFIG['region_name']}.amazonaws.com/{bucket}/{key}"
-        return url
+    def upload_and_return_s3_url(self, bucket, file):
+        try:
+            self.client.upload_fileobj(file, bucket, file.name, ExtraArgs={'ACL': 'public-read'})
+        except Exception as e:
+            logging.error(f"log_key: upload_object_from_string, err: {e}")
+            return None
+        s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file.name}"
+        return s3_url
 
     def upload_object_from_string(self, bucket, key, data, params={}):
         try:

@@ -12,7 +12,6 @@ urlpatterns = [
     path('editor/viewPromoCode', views.view_promo_code),
     path("editor/upsertPromoCode/", views.upsert_promo_code),
     path("editor/summernote/", views.summernote),
-    # path("editor/saveSummernote/", views.save_summernote),
     path("editor/upsertSaveChapter/", views.upsert_Save_chapter),
     path("editor/secureLogin/", views.secure_login),
     path("editor/dumpDatabase/", views.dump_database),
@@ -29,4 +28,5 @@ urlpatterns = [
     path("editor/upsertCourse/", views.upsertCourse),
     path("editor/deactivateCourse/<str:uniqueId>/", views.deactivate_course),
     path("editor/activateCourse/<str:uniqueId>/", views.activate_course),
+    path("editor/previewChapterContent/<str:uniqueId>/", views.preview_chapter_content),
 ]

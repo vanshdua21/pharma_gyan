@@ -18,7 +18,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    All <span class="fw-900"><i>Promo Codes</i></span>
+                    <span class="fw-900 chapter-name"><i></i></span>
                 </h2>
                 <div class="panel-toolbar">
                     <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
@@ -82,8 +82,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
-    var data = JSON.parse('{{ promo_code|escapejs }}');
+    var data = JSON.parse('{{ chapter|escapejs }}');
     var datatable;
+    $("#chapter-name").text("data['title']");
 <!--    const Swal = require('sweetalert2');-->
     $(document).ready(function()
     {

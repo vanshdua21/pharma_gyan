@@ -1,7 +1,13 @@
 import http
 import logging
+import os
+import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
+
+from pharma_gyan_proj.utils.s3_utils import S3Wrapper
+
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import fetch_and_prepare_chapter_preview
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -18,7 +24,7 @@ from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import vali
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
-from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS
+from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS, BUCKET_NAME
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, prepare_and_save_course, process_activate_course, process_deactivate_course
 import boto3
@@ -71,8 +77,9 @@ def add_media(request):
                 return JsonResponse({'result': 'failure',
                                      'error': 'Invalid filename. Only alphanumeric characters, underscores, dots, and dashes are allowed.'},
                                     status=400)
+            file.name = uuid.uuid4().hex + '_' + file.name
 
-            file_url = save_file_to_s3(file)  # Implement save_file_to_s3 function
+            file_url = S3Wrapper().upload_and_return_s3_url(BUCKET_NAME, file)
             file_urls.append(file_url)
 
         return JsonResponse({'result': 'success', 'data': {'file_urls': file_urls}}, status=200)
@@ -92,6 +99,13 @@ def promo_code(request):
     return HttpResponse(rendered_page)
 
 
+def preview_chapter_content(request, uniqueId):
+    chapter = fetch_and_prepare_chapter_preview(uniqueId)
+
+    rendered_page = render_to_string('pharma_gyan/preview_chapter_content.html', {"chapter": chapter})
+    return HttpResponse(rendered_page)
+
+
 def edit_promo_code(request):
     baseUrl = settings.BASE_PATH
     # Retrieve the id parameter from the query string
@@ -107,10 +121,10 @@ def edit_promo_code(request):
 
 
 def view_promo_code(request):
-    users = fetch_and_prepare_promo_code()
+    promo_code = fetch_and_prepare_promo_code()
     # Convert list of dictionaries to JSON
-    users_json = json.dumps(users)
-    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"users": users_json})
+    promo_code_json = json.dumps(promo_code)
+    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"promo_code": promo_code_json})
     return HttpResponse(rendered_page)
 
 

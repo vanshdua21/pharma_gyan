@@ -86,3 +86,23 @@ def validate_chapter_details(request_body):
         raise BadRequestException(method_name=method_name, reason="Chapter name can not be blanked")
     logger.debug(f"Exit {method_name}, Success")
 
+
+def fetch_and_prepare_chapter_preview(unique_id):
+    method_name = "fetch_and_prepare_chapter_preview"
+    logger.debug(f"Entry {method_name}")
+
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        chapter = chapter_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching chapter InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching chapter ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if chapter is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Chapter is not found. Please add chapter first!")
+    logger.debug(f"Exit {method_name}")
+    return chapter[0]._asdict()
