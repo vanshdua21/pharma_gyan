@@ -267,7 +267,7 @@ external_root_jQuery_commonjs2_jquery_commonjs_jquery_amd_jquery_default.a.exten
       selectFromFiles: 'Select from files',
       maximumFileSize: 'Maximum file size',
       maximumFileSizeError: 'Maximum file size exceeded.',
-      url: 'Image URL',
+//      url: 'Image URL',
       remove: 'Remove Image',
       original: 'Original'
     },

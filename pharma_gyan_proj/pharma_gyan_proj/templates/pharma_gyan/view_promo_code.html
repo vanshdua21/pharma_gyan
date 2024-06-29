@@ -82,7 +82,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
-    var data = JSON.parse('{{ users|escapejs }}');
+    var data = JSON.parse('{{ promo_code|escapejs }}');
     var userPermissions = "{{ project_permissions }}";
     var datatable;
     $(document).ready(function()
@@ -214,7 +214,38 @@
 
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
-    function deactivatePromoCode(id) {
+deactivatePromoCode
+<!--    function (id)-->
+<!--    {-->
+<!--        if(lock==true)-->
+<!--            return;-->
+
+<!--        var confirmDeactivate = confirm("Do you really want to deactivate this promo code?");-->
+<!--        if(confirmDeactivate==false)-->
+<!--            return;-->
+
+<!--        lock = true;-->
+<!--        $("#err-div").hide();-->
+<!--        $("#success-div").hide();-->
+<!--        $.post('/pharma_gyan/editor/deactivatePromoCode/' + id + '/',function(data)-->
+<!--            {-->
+<!--                lock=false;-->
+<!--                if(data['result']=='SUCCESS')-->
+<!--                {-->
+<!--                    location.reload();-->
+<!--                    return;-->
+<!--                }-->
+<!--                else-->
+<!--                {-->
+<!--                    alert('Error while deactivating promo code');-->
+<!--                    return;-->
+<!--                }-->
+
+<!--            }-->
+<!--        )-->
+<!--        ;-->
+<!--    }-->
+function deactivatePromoCode(id) {
             if (!validatePermissions()) return;
             if (lock == true) return;
 

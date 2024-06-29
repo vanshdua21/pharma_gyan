@@ -1,0 +1,53 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+<!--added new changes-->
+    <!-- Include SweetAlert2 CSS with Bootstrap 4 theme -->
+    <!-- Other necessary CSS files -->
+    <link id="vendorsbundle" rel="stylesheet" media="screen, print" href="css/vendors.bundle.css">
+    <link id="appbundle" rel="stylesheet" media="screen, print" href="css/app.bundle.css">
+    <link id="myskin" rel="stylesheet" media="screen, print" href="css/skins/skin-master.css">
+    <link rel="stylesheet" media="screen, print" href="css/theme-demo.css">
+
+<!-- Include SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+<!-- Include SweetAlert2 JS -->
+<!--added new changes-->
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-hdr">
+                <h2>
+                    <span class="fw-900 chapter-name"><i></i></span>
+                </h2>
+                <div class="panel-toolbar">
+                    <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                    <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen" id="fullScreen"></button>
+                    <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="panel-tag">
+                        <p></p>
+                    </div>
+                    <div class="chapterPreview"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script type="text/javascript">
+    var data = JSON.parse('{{ chapter|escapejs }}');
+    console.log(data);
+    var title = data['title'];
+    var content = data['content'];
+    $(document).ready(function() {
+    $(".panel-tag p").text(title);
+    $(".chapterPreview").html(content);
+    $("#fullScreen").click();
+    });
+
+</script>

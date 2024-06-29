@@ -1,5 +1,18 @@
 import http
-import json
+import logging
+import os
+import uuid
+
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
+
+from pharma_gyan_proj.utils.s3_utils import S3Wrapper
+
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import fetch_and_prepare_chapter_preview
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+import boto3
 from django.shortcuts import HttpResponse
 from django.template.loader import render_to_string
 # from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
@@ -11,19 +24,24 @@ from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import vali
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
-from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType
+from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS, BUCKET_NAME
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, fetch_course_from_id, fetch_course_tree_from_id, prepare_and_save_course, process_activate_course, process_deactivate_course
 
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, prepare_and_save_course, process_activate_course, process_deactivate_course
 import boto3
-
-from django.http import JsonResponse
 import json
+from django.http import JsonResponse
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 
+from django.views.decorators.csrf import csrf_exempt
+import re
+from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
 
-
+def validate_filename(filename):
+    # Check if filename contains only alphanumeric characters and underscores
+    return re.match(r'^[\w.-]+$', filename)
 
 def admin_login(request):
     baseUrl = settings.BASE_PATH
@@ -48,6 +66,35 @@ def dashboard(request):
     return HttpResponse(rendered_page)
 
 
+@csrf_exempt
+#upload video and images:
+def add_media(request):
+    image_size_limit = 5 * 1024 * 1024  # 5 MB in bytes
+    video_size_limit = 5 * 1024 * 1024  # 5 MB in bytes
+
+    if request.method == 'POST' and (request.FILES.getlist('image-file') or request.FILES.getlist('video-file')):
+        uploaded_files = request.FILES.getlist('image-file') + request.FILES.getlist('video-file')
+        file_urls = []
+        for file in uploaded_files:
+            if file.size > image_size_limit and file.content_type.startswith('image/'):
+                return JsonResponse({'result': 'failure', 'error': 'Image size exceeds 5MB limit'}, status=400)
+            elif file.size > video_size_limit and file.content_type.startswith('video/'):
+                return JsonResponse({'result': 'failure', 'error': 'Video size exceeds 5MB limit'}, status=400)
+
+            if not validate_filename(file.name):
+                return JsonResponse({'result': 'failure',
+                                     'error': 'Invalid filename. Only alphanumeric characters, underscores, dots, and dashes are allowed.'},
+                                    status=400)
+            file.name = uuid.uuid4().hex + '_' + file.name
+
+            file_url = S3Wrapper().upload_and_return_s3_url(BUCKET_NAME, file)
+            file_urls.append(file_url)
+
+        return JsonResponse({'result': 'success', 'data': {'file_urls': file_urls}}, status=200)
+    else:
+        return JsonResponse({'result': 'failure'}, status=400)
+
+
 def get_user_tab_permissions(user):
     user_groups = [group.name for group in list(user.groups.all())]
     return user_groups
@@ -57,6 +104,13 @@ def promo_code(request):
     baseUrl = settings.BASE_PATH
 
     rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"baseUrl": baseUrl, "mode": "create"})
+    return HttpResponse(rendered_page)
+
+
+def preview_chapter_content(request, uniqueId):
+    chapter = fetch_and_prepare_chapter_preview(uniqueId)
+
+    rendered_page = render_to_string('pharma_gyan/preview_chapter_content.html', {"chapter": json.dumps(chapter, default=str)})
     return HttpResponse(rendered_page)
 
 
@@ -75,32 +129,27 @@ def edit_promo_code(request):
 
 
 def view_promo_code(request):
-    users = fetch_and_prepare_promo_code()
+    promo_code = fetch_and_prepare_promo_code()
     # Convert list of dictionaries to JSON
-    users_json = json.dumps(users)
-    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"users": users_json, "project_permissions": Session().get_admin_user_permissions()})
+    promo_code_json = json.dumps(promo_code)
+    rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"promo_code": promo_code_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
-def summernote(request):
-    user = request.user
 
-    rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user})
+def add_chapter(request):
+    user = settings.BASE_PATH
+    rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
     return HttpResponse(rendered_page)
+
 
 @csrf_exempt
-def save_summernote(request):
-    # Extract the byte string from the request body
-    byte_string = request.body  # This will be in byte format: b'data=...'
-
-    # Decode the byte string to a regular string
-    decoded_string = byte_string.decode('utf-8')  # Convert from bytes to string
-
-    # Parse the URL-encoded data
-    url_encoded_data = decoded_string.split('=', 1)[1]  # Get the part after 'data='
-
-    # URL-decode the data
-    decoded_data = unquote(url_encoded_data)
-    return HttpResponse(json.dumps("{'data':'OK'}", default=str), status=http.HTTPStatus.OK, content_type="application/json")
+def upsert_chapter(request):
+    method_name = "upsert_chapter"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    response = prepare_and_save_chapter(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
 
 @csrf_exempt
@@ -228,8 +277,8 @@ def upsertCourse(request):
     description = request.POST.get('description')
     price = request.POST.get('price')
     image_file = request.FILES.get('image')
-    semesters = json.loads(request.POST.get('semesters', '[]')) 
-    
+    semesters = json.loads(request.POST.get('semesters', '[]'))
+
     imageUrl = save_file_to_s3(image_file)
     # Collect the data in a dictionary
     course = {
@@ -241,7 +290,7 @@ def upsertCourse(request):
         'imageUrl': imageUrl,  # This is the uploaded file
         'semesters': semesters,
     }
-    
+
     response = prepare_and_save_course(course)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
