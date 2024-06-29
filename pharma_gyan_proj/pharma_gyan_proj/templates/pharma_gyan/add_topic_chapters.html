@@ -1,0 +1,565 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css">
+<script src="/static/pharma_gyan/js/summernote.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
+
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+    .add{
+        border-style: dashed;
+        padding: 40px 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    .pill {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        background-color: #007bff;
+        color: white;
+        border-radius: 1rem;
+    }
+    .add-button {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+
+</style>
+
+
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+    "><strong>Congratulations!</strong> <span id="success-text"></span>
+    
+        </div>
+    
+        </div>
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-12">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+
+                        <div class="emailCTA" style="display: flex; padding: inherit;">
+                            <button class="btn  btn-small btn-success" onclick="addChapter()" style="width: 10%; height: 45px;">Add Chapter</button>
+                        </div>
+
+                        <div id="accordion-container" class="accordion accordion-hover col-lg-12" style="margin-top: 15px;">
+                            <!-- Dynamic accordion items will be inserted here -->
+                        </div>
+
+                        <div class="emailCTA" style="display: flex; padding: inherit;">
+                            <button class="btn  btn-small btn-success" onclick="saveTopic()" style="width: 10%; height: 45px;">Save</button>
+                        </div>
+
+                    </div>
+                    <div id="err-div" style="display: none;margin-top:20px;"></div>
+
+
+
+                    <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var baseUrl = '<?=$baseUrl?>';
+    var mode = "{{mode}}";
+    var autoSave = $('#autoSave');
+    var interval;
+    var timer = function(currentChapterId){
+    interval = setInterval(function(){
+            //start slide...
+            if (true)
+            saveToLocal(currentChapterId);
+
+            clearInterval(interval);
+        }, 3000);
+    };
+
+    //save
+    var saveToLocal = function(currentChapterId){
+        console.log('currentChapterId', currentChapterId);
+        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+        const chapter = topic_chapters.chapters.find(c => c.unique_id === currentChapterId);
+        console.log('chapter saving', chapter);
+        chapter.content = $(`#saveToLocal-${chapter.unique_id}`).summernote("code");
+        console.log('chapter content', chapter.content);
+        localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
+        console.log("saved");
+    }
+
+    function addChapter() {
+        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+        let newUuid = uuid.v4().replace(/-/g, '');
+        const chapter = {
+            'unique_id': newUuid,
+            'title': 'New Chapter',
+            'content': '',
+            'index': topic_chapters.chapters.length
+        };
+        topic_chapters.chapters.push(chapter);
+        localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
+
+        const chapters_positions = JSON.parse(localStorage.getItem('chapters_positions')) || [];
+        chapters_positions.push(newUuid);
+        localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+        console.log("chapter added");
+        loadChaptersFromLocalStorage();
+    }
+
+    function deleteChapter(chapter_unique_id) {
+        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+        if (topic_chapters && topic_chapters.chapters) {
+            const chapterIndex = topic_chapters.chapters.findIndex(c => c.unique_id === chapter_unique_id);
+            if (chapterIndex !== -1) {
+                topic_chapters.chapters.splice(chapterIndex, 1);
+                localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
+                console.log(`Chapter with ID ${chapter_unique_id} has been deleted.`);
+            } else {
+                console.log(`Chapter with ID ${chapter_unique_id} not found.`);
+            }
+        } else {
+            console.log('No chapters found in localStorage.');
+        }
+
+        const chapters_positions = JSON.parse(localStorage.getItem('chapters_positions')) || [];
+        const chIndex = chapters_positions.findIndex(c => c === chapter_unique_id);
+        chapters_positions.splice(chIndex, 1);
+        localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+        console.log("chapter removed");
+        loadChaptersFromLocalStorage();
+    }
+
+    function handleChapterTitleInputChange(event, chapter_unique_id) {
+        const title = event.target.value;
+        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+        const chapter = topic_chapters.chapters.find(c => c.unique_id === chapter_unique_id);
+        chapter.title = title;
+        localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
+    }
+
+
+    function loadChaptersFromLocalStorage(data) {
+        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+        let chapters_positions = JSON.parse(localStorage.getItem('chapters_positions')) || [];
+        
+        console.log('topic_chapters', topic_chapters);
+        if (!topic_chapters) return;
+
+        var title = topic_chapters.title;
+        document.getElementById('main_title').innerHTML = `Topic - ${title}`;
+
+        const accordionContainer = document.getElementById('accordion-container');
+        accordionContainer.innerHTML = ''; // Clear the existing content
+
+        var chapters = topic_chapters.chapters;
+        if (!chapters) return;
+
+        if (!chapters_positions || chapters_positions.length === 0) {
+            chapters_positions = [];
+            chapters.forEach(c => { chapters_positions.push(c.unique_id) });
+            localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+        }
+        console.log(chapters_positions);
+        chapters_positions.forEach(unique_id => {
+            let chapter = chapters.find(c => c.unique_id === unique_id);
+            console.log(unique_id, chapter);
+            let newAccordion = document.createElement('div');
+            newAccordion.className = 'card';
+            newAccordion.innerHTML = `
+                <div class="card-header">
+                    <a href="javascript:void(0);" class="card-title" data-toggle="collapse" data-target="#js_demo_accordion-${chapter.unique_id}" aria-expanded="false">
+                        ${chapter.title}
+                        <span class="ml-auto">
+                            <span class="collapsed-reveal">
+                                <i class="fal fa-chevron-up fs-xl"></i>
+                            </span>
+                            <span class="collapsed-hidden">
+                                <i class="fal fa-chevron-down fs-xl"></i>
+                            </span>
+                        </span>
+                    </a>
+                </div>
+                <div id="js_demo_accordion-${chapter.unique_id}" class="collapse" data-parent="#accordion-container">
+                    <div class="card-body" id="card-body-${chapter.unique_id}">
+                        <div class="form-group col-xl-12">
+                            <label class="form-label col-xl-1" for="title-${chapter.unique_id}">Title</label>
+                            <input type="text" id="title-${chapter.unique_id}" value="${chapter.title}" class="form-control col-xl-6">
+                            <button onclick="deleteChapter('${chapter.unique_id}')" class="btn btn-small btn-danger col-xl-1" style="margin-left: auto;">Delete</button>
+                        </div>
+                        <h3 style="display: flex; justify-content: center;">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            Enter the Chapter Content here
+                                        </h2>
+                                        <div class="panel-toolbar">
+                                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="js-summernote-${chapter.unique_id} summernote" id="saveToLocal-${chapter.unique_id}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </h3>
+                    </div>
+                </div>`;
+        
+            accordionContainer.appendChild(newAccordion);
+            const inputElement = document.getElementById(`title-${chapter.unique_id}`);
+            inputElement.addEventListener('input', (event) => handleChapterTitleInputChange(event, chapter.unique_id));
+
+            //init default
+            console.log(`.js-summernote-${chapter.unique_id}`, chapter.content);
+			$(`.js-summernote-${chapter.unique_id}`).summernote({
+				height: 500,
+				tabsize: 2,
+				placeholder: "Type here...",
+				dialogsFade: true,
+				toolbar: [
+					['style', ['style']],
+    				['font', ['strikethrough', 'superscript', 'subscript']],
+					['font', ['bold', 'italic', 'underline', 'clear']],
+					['fontsize', ['fontsize']],
+					['fontname', ['fontname']],
+					['color', ['color']],
+					['para', ['ul', 'ol', 'paragraph']],
+					['height', ['height']]
+					['table', ['table']],
+					['insert', ['link', 'picture', 'video']],
+					['view', ['fullscreen', 'codeview', 'help']]
+				],
+				callbacks: {
+					//restore from localStorage
+					onInit: function(e) {
+						$(`.js-summernote-${chapter.unique_id}`).summernote("code", chapter.content);
+					},
+					onChange: function(contents, $editable) {
+						clearInterval(interval);
+						timer(chapter.unique_id);
+					}
+				}
+			});
+        });
+        localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+        
+        // Initialize Sortable
+        const sortable = new Sortable(accordionContainer, {
+            animation: 150,
+            handle: '.card-header',
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                console.log('Item moved from index', evt.oldIndex, 'to', evt.newIndex);
+                const chapters_positions = JSON.parse(localStorage.getItem('chapters_positions'));
+                if (chapters_positions) {
+                    const temp = chapters_positions[evt.oldIndex];
+                    chapters_positions[evt.oldIndex] = chapters_positions[evt.newIndex];
+                    chapters_positions[evt.newIndex] = temp;
+                    localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+                }
+            },
+        });
+
+			//load emojis
+			$.ajax({
+				url: 'https://api.github.com/emojis',
+				async: false
+			}).then(function (data) {
+				window.emojis = Object.keys(data);
+				window.emojiUrls = data;
+			});
+
+			//init emoji example
+			$(".js-hint2emoji").summernote({
+				height: 100,
+				toolbar: false,
+				placeholder: 'type starting with : and any alphabet',
+				hint: {
+					match: /:([\-+\w]+)$/,
+					search: function (keyword, callback) {
+						callback($.grep(emojis, function (item) {
+							return item.indexOf(keyword) === 0;
+						}));
+					},
+					template: function (item) {
+						var content = emojiUrls[item];
+						return '<img src="' + content + '" width="20" /> :' + item + ':';
+					},
+					content: function (item) {
+						var url = emojiUrls[item];
+						if (url) {
+							return $('<img />').attr('src', url).css('width', 20)[0];
+						}
+						return '';
+					}
+				}
+			});
+
+			//init mentions example
+			$(".js-hint2mention").summernote({
+				height: 100,
+				toolbar: false,
+				placeholder: "type starting with @",
+				hint: {
+					mentions: ['jayden', 'sam', 'alvin', 'david'],
+					match: /\B@(\w*)$/,
+					search: function (keyword, callback) {
+						callback($.grep(this.mentions, function (item) {
+							return item.indexOf(keyword) == 0;
+						}));
+					},
+					content: function (item) {
+						return '@' + item;
+					}
+				}
+			});
+
+    }
+
+    $(document).ready(function() {
+        var currentTopicData = JSON.parse(localStorage.getItem("topic_chapters"));
+        console.log('localstorage', currentTopicData);
+        if (!currentTopicData) {
+            currentTopicData = JSON.parse('{{ topic|escapejs }}');
+            console.log('from api', currentTopicData);
+            localStorage.setItem('topic_chapters', JSON.stringify(currentTopicData));
+            chapters_positions = [];
+            currentTopicData.chapters.forEach(c => { chapters_positions.push(c.unique_id) });
+            localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+        }
+        
+        function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+        loadChaptersFromLocalStorage();
+    });
+
+    var lock = false;
+    function saveTopic(){
+        $("#err-div").html('');
+        var barInterval = setInterval('incBar()',25);
+
+        var topic_chapters = JSON.parse(localStorage.getItem('topic_chapters')) || [];
+        console.log(topic_chapters);
+        if (topic_chapters.chapters.length == 0) {
+            $("#err-div").html(`<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add one or more chapters ! </span></div>`);
+            $("#err-div").show();
+            return;
+        }
+
+        var chapters_positions = JSON.parse(localStorage.getItem('chapters_positions'));
+        for (let idx = 0; idx < chapters_positions.length; idx++) {
+            chap = topic_chapters.chapters.findIndex(c => c.unique_id === chapters_positions[idx]);
+            console.log(idx, chap);
+            topic_chapters.chapters[chap].index = idx;
+        }
+        console.log('after index manip', topic_chapters.chapters);
+        
+        const errors = [];
+        topic_chapters.chapters.forEach(chapter => {
+            if (!chapter.title || chapter.title.length === 0) {
+                errors.push(`Please add title for chapter at position ${chapter.index}!`);
+            }
+
+            if (!chapter.content || chapter.content.content === 0) {
+                errors.push(`Please add content for chapter at position ${chapter.index}!`);
+            }
+        });
+
+        if (errors.length > 0) {
+            const errorHtml = errors.map(error => `
+                <div id="err-info" class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <strong>Error!</strong> <span id="err-text">${error}</span>
+                </div>
+            `).join('');
+            $("#err-div").html(errorHtml);
+            $("#err-div").show();
+            return false;
+        }
+
+        if (errors.length > 0) {
+            const errorHtml = errors.map(error => `
+                <div id="err-info" class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <strong>Error!</strong> <span id="err-text">${error}</span>
+                </div>
+            `).join('');
+            $("#err-div").html(errorHtml);
+            $("#err-div").show();
+            return false;
+        }
+
+        lock = true;
+        initProgressBar();
+        let formData = new FormData();
+        formData.append('id', topic_chapters.id);
+        formData.append('unique_id', topic_chapters.unique_id);
+        formData.append('title', topic_chapters.title);
+        formData.append('chapters', JSON.stringify(topic_chapters.chapters));
+
+        // Log FormData content
+        for (let pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+
+        $.ajax({
+            type : 'POST',
+            url : 'upsertTopic/',
+            data : formData,
+            processData: false,
+            contentType: false,
+            success :function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                console.log('Success', data);
+                if(data['result']=='SUCCESS')
+                {
+                    $("#success-div").show();
+                    if(mode == "edit"){
+                        $("#success-text").html("Course edited Successfully");
+                    }else{
+                        $("#success-text").html("Course added Successfully");
+                    }
+
+                    $("#main-form-div").hide();
+                    localStorage.removeItem('topic_chapters');
+                    localStorage.removeItem('chapters_positions');
+                    return;
+                }
+                else
+                {
+
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").show();
+                    $("#progress-bar-div").hide();
+
+                    return;
+                }
+
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+
+                return;
+            }
+
+        });
+    }
+
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fal fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+</script>
+
+

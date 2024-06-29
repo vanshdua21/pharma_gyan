@@ -178,6 +178,18 @@ def fetch_course_from_id(course_id):
     course_json = course.to_json()
     return course_json
 
+def fetch_topic_from_id(topic_id):
+    filter_list = [{"column": "unique_id", "value": topic_id, "op": "=="}]
+    relationships_list = ["semesters", "semesters.subjects", "semesters.subjects.units", "semesters.subjects.units.chapters"]
+    courses = fetch_courses(filter_list, relationships_list)
+    if (len(courses) == 0):
+        return None
+    course = courses[0]
+    
+    # Convert list of model instances to list of dictionaries
+    course_json = course.to_json()
+    return course_json
+
 def fetch_course_tree_from_id(course_id):
     filter_list = [{"column": "unique_id", "value": course_id, "op": "=="}]
     relationships_list = ["semesters", "semesters.subjects", "semesters.subjects.units"]
@@ -198,7 +210,7 @@ def course_to_json(course):
     def subject_to_dict(subject):
         return {
             "label": subject.name,
-            "ul": [{"label": unit.title} for unit in subject.units]
+            "ul": [{"label": f'<a href="#addTopicChapters?id={unit.unique_id}" target="_blank">{unit.title}</a>'} for unit in subject.units]
         }
 
     course_dict = [{

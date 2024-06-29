@@ -111,7 +111,11 @@ class PgUnit(Base, Orm_helper):
             "id": self.id,
             "unique_id": self.unique_id,
             "title": self.title,
+            "chapters": [chapter.to_dict() for chapter in self.chapters]
         }
+    
+    def to_json(self):
+        return json.dumps(self.to_dict(), indent=4)
 
 class PgChapter(Base, Orm_helper):
     __tablename__ = 'chapter'
@@ -120,6 +124,7 @@ class PgChapter(Base, Orm_helper):
     unique_id = Column("unique_id", String, primary_key=True)
     title = Column("title", String)
     content = Column("content", Text)
+    index = Column("index", Integer)
     unit_id = Column("unit_id", Integer, ForeignKey('unit.unique_id'))
     created_by = Column("created_by", String)
     ct = Column("ct", DateTime, default=datetime.utcnow)
@@ -133,6 +138,7 @@ class PgChapter(Base, Orm_helper):
             "unique_id": self.unique_id,
             "title": self.title,
             "content": self.content,
+            "index": self.index,
             "unit_id": self.unit_id,
             "created_by": self.created_by,
             "ct": self.ct.isoformat() if self.ct else None

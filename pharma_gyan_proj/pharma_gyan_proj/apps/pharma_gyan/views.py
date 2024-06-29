@@ -34,6 +34,7 @@ import json
 from django.http import JsonResponse
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
+from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit
 
 from django.views.decorators.csrf import csrf_exempt
 import re
@@ -295,6 +296,24 @@ def upsertCourse(request):
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
+@csrf_exempt
+def upsertTopic(request):
+    id = request.POST.get('id')
+    unique_id = request.POST.get('unique_id')
+    title = request.POST.get('title')
+    chapters = json.loads(request.POST.get('chapters', '[]')) 
+    
+    topic = {
+        'id': id,
+        'unique_id': unique_id,
+        'title': title,
+        'chapters': chapters,
+    }
+    print(topic)
+    response = prepare_and_save_unit(topic)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
@@ -328,3 +347,10 @@ def get_course_tree_json(request, uniqueId):
     response = fetch_course_tree_from_id(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+def addTopicChapters(request):
+    topicId = request.GET.get('id')
+    topic = fetch_unit_from_id(topicId)
+    print(topic)
+    rendered_page = render_to_string('pharma_gyan/add_topic_chapters.html', {"topic": topic, "mode": "create"})
+    return HttpResponse(rendered_page)

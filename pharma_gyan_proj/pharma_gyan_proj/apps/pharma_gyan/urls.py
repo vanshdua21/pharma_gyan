@@ -28,5 +28,7 @@ urlpatterns = [
     path("editor/activateCourse/<str:uniqueId>/", views.activate_course),
     path("editor/editCourse/", views.editCourse),
     path("editor/getCourseTreeJson/<str:uniqueId>/", views.get_course_tree_json),
+    path("editor/addTopicChapters/", views.addTopicChapters),
+    path("editor/upsertTopic/", views.upsertTopic),
     path("editor/previewChapterContent/<str:uniqueId>/", views.preview_chapter_content),
 ]
