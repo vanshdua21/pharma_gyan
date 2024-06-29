@@ -348,8 +348,9 @@
                 }
                 else
                 {
-
-                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    console.log(result['info']);
+                    console.log(result['info']['details_message']);
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']['details_message']+'</span></div>');
                     $("#err-div").show();
                     $("#progress-bar-div").hide();
 
@@ -362,8 +363,9 @@
             {
                 lock=false;
                 clearInterval(barInterval);
+                let respText = JSON.parse(data.responseText);
 
-                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                var message = data.responseText ? respText.details_message : 'some error occured while saving, please contact administrator !';
                 $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
                 $("#err-div").show();
                 $("#progress-bar-div").hide();

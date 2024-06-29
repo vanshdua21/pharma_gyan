@@ -24,11 +24,11 @@ def prepare_and_save_promo_code(request_body):
 
     validate_promo_code_details(request_body)
     try:
-        existing_promo_code = promo_code_model().get_promo_code_by_title(request_body.get('title'))
+        existing_promo_code = promo_code_model().get_promo_code_by_title_or_pc(request_body.get('title'), request_body.get('promo_code'))
         if existing_promo_code is not None and len(existing_promo_code) > 0:
             if request_body.get('id') is None or existing_promo_code[0].unique_id != request_body.get('unique_id'):
                 return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
-                            details_message="Duplicate promo code found. Please use a different promo code title.")
+                            details_message="Duplicate promo code found. Please use a different promo code title or promo code value.")
     except InternalServerError as ey:
         logger.error(f"Error while fetching promo code by title InternalServerError :: {ey.reason}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,

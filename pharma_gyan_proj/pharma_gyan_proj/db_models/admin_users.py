@@ -47,3 +47,13 @@ class admin_users_model:
     def dump_database(self):
         dump_command = f"mysqldump -u {settings.DATABASES[self.database]['USER']} -p{settings.DATABASES[self.database]['PASSWORD']} -h {settings.DATABASES[self.database]['HOST']} {settings.DATABASES[self.database]['NAME']} > {settings.DATABASES[self.database]['NAME']}.sql"
         subprocess.run(dump_command, shell=True, check=True)
+
+    def get_user_by_un_or_mn(self, mobile_number, user_name):
+        try:
+            query = f"""
+                    SELECT id from admin_users WHERE mobile_number = '{mobile_number}' or user_name = '{user_name}'
+                    """
+            res = execute_query(self.engine, query)
+            return res
+        except:
+            return None

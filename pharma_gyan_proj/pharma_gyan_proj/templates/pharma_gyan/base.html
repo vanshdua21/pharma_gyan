@@ -255,7 +255,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
             <span class="nav-link-text" data-i18n="nav.application_intel">Dashboard</span>
         </a>
     </li>
-
+        {% if "editPromoCodes" in project_permissions or "viewPromoCodes" in project_permissions %}
         <li class="nav-title">Promo Code</li>
         <li>
         <a href="#" title="Promo Code Configuartion" data-filter-tags="application intel">
@@ -281,6 +281,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
             </li>
         </ul>
         </li>
+        {% endif %}
 
     <li class="nav-title">Text Editor</li>
         <li>
@@ -289,7 +290,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
             <span class="nav-link-text" data-i18n="nav.application_intel">Text Editor</span>
         </a>
         </li>
-
+    {% if "editUsers" in project_permissions or "viewUsers" in project_permissions %}
     <li class="nav-title">Users</li>
         <li>
         <a href="#" title="Users" data-filter-tags="application intel">
@@ -314,7 +315,9 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
             </li>
         </ul>
         </li>
+        {% endif %}
 
+    {% if "editContent" in project_permissions or "viewContent" in project_permissions %}
     <li class="nav-title">Courses</li>
         <li>
         <a href="#" title="Courses" data-filter-tags="application intel">
@@ -338,7 +341,8 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
                 {% endif %}
             </li>
         </ul>
-    </li> 
+    </li>
+    {% endif %}
 
     
 
