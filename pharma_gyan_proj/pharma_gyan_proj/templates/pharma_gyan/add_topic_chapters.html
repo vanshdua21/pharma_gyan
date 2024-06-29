@@ -194,6 +194,9 @@
 
     function handleChapterTitleInputChange(event, chapter_unique_id) {
         const title = event.target.value;
+        const titleBanner = document.getElementById(`titleBanner-${chapter_unique_id}`);
+        console.log('banner div', titleBanner);
+        titleBanner.innerHTML = title;
         const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
         const chapter = topic_chapters.chapters.find(c => c.unique_id === chapter_unique_id);
         chapter.title = title;
@@ -231,7 +234,7 @@
             newAccordion.innerHTML = `
                 <div class="card-header">
                     <a href="javascript:void(0);" class="card-title" data-toggle="collapse" data-target="#js_demo_accordion-${chapter.unique_id}" aria-expanded="false">
-                        ${chapter.title}
+                        <div id = "titleBanner-${chapter.unique_id}">${chapter.title}</div>
                         <span class="ml-auto">
                             <span class="collapsed-reveal">
                                 <i class="fal fa-chevron-up fs-xl"></i>

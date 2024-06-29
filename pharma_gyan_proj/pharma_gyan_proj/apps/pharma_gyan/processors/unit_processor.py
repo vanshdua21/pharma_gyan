@@ -80,29 +80,8 @@ def fetch_unit_from_id(unit_id):
     if (len(units) == 0):
         return None
     unit = units[0]
-    chapters = []
-    ch = PgChapter()
-    ch.title = 'Chapte 1'
-    ch.id = 1
-    ch.unique_id = '664ae13317ef4ce486770bc26e6dd041'
-    ch.index = 0
-    chapters.append(ch)
-    
-    ch2 = PgChapter()
-    ch2.title = 'Chapte 2'
-    ch2.id = 2
-    ch2.unique_id = '664ae13317ef4ce486770bc26e6dd042'
-    ch2.index = 1
-    chapters.append(ch2)
-    
-    ch3 = PgChapter()
-    ch3.title = 'Chapte 3'
-    ch3.id = 3
-    ch3.unique_id = '664ae13317ef4ce486770bc26e6dd043'
-    ch3.index = 2
-    chapters.append(ch3)
-    
-    unit.chapters = chapters
+    unit.chapters = sorted(unit.chapters, key=lambda chapter: chapter.index)
     # Convert list of model instances to list of dictionaries
     unit_json = unit.to_json()
+    print(unit_json)
     return unit_json
