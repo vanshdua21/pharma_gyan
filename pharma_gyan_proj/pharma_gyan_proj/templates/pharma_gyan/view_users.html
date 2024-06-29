@@ -1,7 +1,7 @@
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
 <script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
 <script src="/static/pharma_gyan/js/datatables.export.js"></script>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 <div class="row">
     <div class="col-xl-12">
         <div id="panel-1" class="panel">
@@ -61,7 +61,7 @@
     </div>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
     var data = JSON.parse('{{ users|escapejs }}');
     var userPermissions = "{{ project_permissions }}";
@@ -178,37 +178,94 @@
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
 
-    function delUser(id)
-    {
-        if (!validatePermissions()) return;
-        if(lock==true)
-            return;
+<!--    function delUser(id)-->
+<!--    {-->
+<!--        if (!validatePermissions()) return;-->
+<!--        if(lock==true)-->
+<!--            return;-->
 
-        var confirmDelete = confirm("Do you really want to delete this user?");
-        if(confirmDelete==false)
-            return;
+<!--        var confirmDelete = confirm("Do you really want to delete this user?");-->
+<!--        if(confirmDelete==false)-->
+<!--            return;-->
 
-        lock = true;
-        $("#err-div").hide();
-        $("#success-div").hide();
-        $.post('/pharma_gyan/editor/deleteUser/' + id + '/',function(data)
-            {
-                lock=false;
-                if(data['result']=='SUCCESS')
-                {
-                    location.reload();
-                    return;
+<!--        lock = true;-->
+<!--        $("#err-div").hide();-->
+<!--        $("#success-div").hide();-->
+<!--        $.post('/pharma_gyan/editor/deleteUser/' + id + '/',function(data)-->
+<!--            {-->
+<!--                lock=false;-->
+<!--                if(data['result']=='SUCCESS')-->
+<!--                {-->
+<!--                    location.reload();-->
+<!--                    return;-->
+<!--                }-->
+<!--                else-->
+<!--                {-->
+<!--                    alert('Error while deleting user');-->
+<!--                    return;-->
+<!--                }-->
+
+<!--            }-->
+<!--        )-->
+<!--        ;-->
+<!--    }-->
+
+    function delUser(id) {
+    if (!validatePermissions()) return;
+    if (lock == true) return;
+
+    // Create the SweetAlert2 mixin for custom styling
+    var swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-danger mr-2'
+        },
+        buttonsStyling: false
+    });
+
+    // Display the confirmation dialog
+    swalWithBootstrapButtons.fire({
+        title: 'Are you sure?',
+        text: 'Do you really want to delete this user?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!',
+        reverseButtons: true,
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            // Proceed with deletion if confirmed
+            lock = true;
+            $("#err-div").hide();
+            $("#success-div").hide();
+            $.post('/pharma_gyan/editor/deleteUser/' + id + '/', function(data) {
+                lock = false;
+                if (data['result'] == 'SUCCESS') {
+                    swalWithBootstrapButtons.fire(
+                        'Deleted!',
+                        'The user has been deleted.',
+                        'success'
+                    ).then(function() {
+                        location.reload(); // Reload after showing success message
+                    });
+                } else {
+                    swalWithBootstrapButtons.fire(
+                        'Error',
+                        'Error while deleting user',
+                        'error'
+                    );
                 }
-                else
-                {
-                    alert('Error while deleting user');
-                    return;
-                }
+            });
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            swalWithBootstrapButtons.fire(
+                'Cancelled',
+                'The user is safe :)',
+                'error'
+            );
+        }
+    });
+}
 
-            }
-        )
-        ;
-    }
 
 
 </script>

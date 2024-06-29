@@ -1,4 +1,5 @@
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 
 <style>
     .form-group {
@@ -74,7 +75,7 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script src="/static/pharma_gyan/js/summernote.js"></script>
 <script>
     var interval;
@@ -115,14 +116,14 @@
 
             // Check if filename is valid (only alphanumeric, underscores, dots, and dashes)
             if (!validateFilename(file.name)) {
-                alert("Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.");
+                 Swal.fire({ text: 'Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.',  });
                 console.log("Invalid filename:", file.name);
                 continue; // Skip uploading this file
             }
 
             // Check file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert("File size exceeds 5MB limit.");
+                Swal.fire({ text: "File size exceeds 5MB limit."});
                 console.log("File size exceeds 5MB limit:", file.name);
                 continue; // Skip uploading this file
             }
@@ -166,14 +167,14 @@
 
             // Check if filename is valid (only alphanumeric, underscores, dots, and dashes)
             if (!validateFilename(file.name)) {
-                alert("Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.");
+                Swal.fire({ text: 'Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.',  });
                 console.log("Invalid filename:", file.name);
                 continue; // Skip uploading this file
             }
 
             // Check file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert("File size exceeds 5MB limit.");
+               Swal.fire({ text: "File size exceeds 5MB limit."});
                 console.log("File size exceeds 5MB limit:", file.name);
                 continue; // Skip uploading this file
             }
