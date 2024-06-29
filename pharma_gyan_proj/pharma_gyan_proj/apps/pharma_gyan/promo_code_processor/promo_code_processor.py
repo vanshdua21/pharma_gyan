@@ -25,7 +25,7 @@ def prepare_and_save_promo_code(request_body):
     validate_promo_code_details(request_body)
     try:
         existing_promo_code = promo_code_model().get_promo_code_by_title(request_body.get('title'))
-        if len(existing_promo_code) > 0:
+        if existing_promo_code is not None and len(existing_promo_code) > 0:
             if request_body.get('id') is None or existing_promo_code[0].unique_id != request_body.get('unique_id'):
                 return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
                             details_message="Duplicate promo code found. Please use a different promo code title.")
@@ -68,7 +68,7 @@ def prepare_and_save_promo_code(request_body):
     promo_code.discount_type = request_body.get('discount_type')
     promo_code.discount = request_body.get('discount')
     promo_code.max_discount = request_body.get('max_discount', 0)
-    promo_code.max_usage = request_body.get('max_usage', 0)
+    promo_code.max_usage = request_body.get('max_usage', 0) if request_body.get('multi_usage', 0) != 0 else 0
     promo_code.expiry_date = request_body.get('expiry_date')
     promo_code.multi_usage = request_body.get('multi_usage', 0)
     promo_code.created_by = session.admin_user_session.user_name
@@ -193,6 +193,12 @@ def fetch_and_prepare_promo_code():
         else:
             cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activatePromoCode('{}')\">Activate</button>".format(
                 promo.unique_id, promo.unique_id)
+        if promo.max_usage == 0 and promo.multi_usage == 1:
+            usage_left = '<p style="font-size: 20px;">∞</p>'
+        elif promo.max_usage == 0 and promo.multi_usage == 0:
+            usage_left = f'0'
+        else:
+            usage_left = f'{promo.max_usage - promo.current_usage}'
         promo_code_list.append({
             "unique_id": promo.unique_id,
             "title": promo.title,
@@ -205,7 +211,7 @@ def fetch_and_prepare_promo_code():
             "multi_usage": promo.multi_usage,
             "created_by": promo.created_by,
             "last_update": promo.ut.strftime('%d %b %Y, %I:%M %p'),
-            "usage_left": '∞' if promo.max_usage == 0 else f'{promo.max_usage - promo.current_usage}',
+            "usage_left": usage_left,
             "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Edit</button>".format(promo.unique_id, promo.unique_id),
             "cta": cta
         })

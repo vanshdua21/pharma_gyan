@@ -63,6 +63,10 @@ def fetch_and_prepare_users():
     # Convert list of model instances to list of dictionaries
     users_list = []
     for user in users:
+        user_permission = []
+        permissions_list = user.permissions.split(', ') if user.permissions != '' else []
+        for permission in permissions_list:
+            user_permission.append(AdminUserPermissionType[permission].value)
         users_list.append({
             "unique_id": user.unique_id,
             "display_name": user.display_name,
@@ -70,7 +74,7 @@ def fetch_and_prepare_users():
             "user_name": user.user_name,
             "mobile_number": user.mobile_number,
             "password": user.password,
-            "permissions": user.permissions,
+            "permissions": ", ".join(user_permission) if len(user_permission) > 0 else '-',
             "is_active": user.is_active,
             "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editUser('{}')\">Edit</button>".format(user.unique_id, user.unique_id),
             "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"delUser('{}')\">Delete</button>".format(user.unique_id, user.unique_id)

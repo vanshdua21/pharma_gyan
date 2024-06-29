@@ -298,6 +298,11 @@
             selectedPerms.push($(this).val());
         });
 
+        if (selectedPerms.length === 0) {
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please provide at least one permission to the user! </span></div>');
+            $("#err-div").show();
+            return;
+        }
 
         lock = true;
 
