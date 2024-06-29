@@ -64,6 +64,7 @@ def prepare_and_save_chapter(request_body):
         if not db_res.get("status"):
             return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                         detailed_message="Unable to save chapter")
+        chapter = db_res["response"]
         # prepare_and_save_activity_logs(wa_content)
     except Exception as e:
         logger.error(f"Error while saving or updating Chapter Exception ::{e}")
@@ -71,7 +72,7 @@ def prepare_and_save_chapter(request_body):
                     detailed_message="Error while saving or updating Chapter code!")
 
     logger.debug(f"Exit {method_name}, Success")
-    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS, data=dict(unique_id=chapter.unique_id))
 
 def validate_chapter_details(request_body):
     method_name = "validate_chapter_details"
@@ -105,4 +106,6 @@ def fetch_and_prepare_chapter_preview(unique_id):
         return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                     details_message="Chapter is not found. Please add chapter first!")
     logger.debug(f"Exit {method_name}")
-    return chapter[0]._asdict()
+    chapter = chapter[0]._asdict()
+    chapter['ct'] = chapter['ct'].strftime('%d %b %Y, %I:%M %p')
+    return chapter

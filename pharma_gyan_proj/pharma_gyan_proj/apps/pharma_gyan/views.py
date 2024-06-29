@@ -102,7 +102,7 @@ def promo_code(request):
 def preview_chapter_content(request, uniqueId):
     chapter = fetch_and_prepare_chapter_preview(uniqueId)
 
-    rendered_page = render_to_string('pharma_gyan/preview_chapter_content.html', {"chapter": chapter})
+    rendered_page = render_to_string('pharma_gyan/preview_chapter_content.html', {"chapter": json.dumps(chapter, default=str)})
     return HttpResponse(rendered_page)
 
 
@@ -128,15 +128,15 @@ def view_promo_code(request):
     return HttpResponse(rendered_page)
 
 
-def summernote(request):
+def add_chapter(request):
     user = settings.BASE_PATH
-    rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user})
+    rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
     return HttpResponse(rendered_page)
 
 
 @csrf_exempt
-def upsert_Save_chapter(request):
-    method_name = "upsert_promo_code"
+def upsert_chapter(request):
+    method_name = "upsert_chapter"
     print(f'{method_name}, Before decode: {request.body}')
     request_body = json.loads(request.body.decode("utf-8"))
     response = prepare_and_save_chapter(request_body)

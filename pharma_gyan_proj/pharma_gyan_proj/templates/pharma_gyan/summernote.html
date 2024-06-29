@@ -24,6 +24,13 @@
     }
 </style>
 
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+"><strong>Congratulations!</strong> <span id="success-text"></span>
+
+    </div>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button></div>
+
 <div id="main-form-div">
     <div class="row">
         <div class="col-xl-12">
@@ -55,6 +62,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div id="err-div" style="display: none;margin-top:20px;"></div>
+                        <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+
+                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -65,6 +78,9 @@
 <script src="/static/pharma_gyan/js/summernote.js"></script>
 <script>
     var interval;
+    var mode = "{{mode}}";
+
+    var uniqueId;
 
     // Save to local storage
     var saveToLocal = function () {
@@ -202,21 +218,41 @@
 
         console.log('Title:', title);
         console.log('Is Free:', is_free);
+        lock = true;
+
+        initProgressBar();
 
     $.ajax({
         type: 'POST',
-        url: '/pharma_gyan/editor/upsertSaveChapter/',
+        url: '/pharma_gyan/editor/upsertChapter/',
         data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free}),
         contentType: 'application/json',
         dataType: 'json',
         success: function (response) {
-            console.log("Save Success:", response);
-            // Handle success response as needed
+            lock=false;
+<!--            clearInterval(barInterval);-->
+            console.log(response);
+            uniqueId = response['data']['unique_id']
+            $("#progress-bar").css({"width":"100%"});
+            $("#success-div").show();
+            if(mode == "edit"){
+                $("#success-text").html("Chapter edited Successfully");
+            }else{
+                $("#success-text").html("Chapter added Successfully");
+            }
+
+            $("#main-form-div").hide();
+            return;
 
         },
         error: function (xhr, textStatus, errorThrown) {
-            console.error("Save Failed:", textStatus, errorThrown);
-            // Handle error response as needed
+            var result = xhr['responseJSON'];
+            console.log(result);
+            lock = false;
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['details_message']+'</span></div>');
+            $("#err-div").show();
+            $("#progress-bar-div").hide();
+            return;
         }
     });
 }
@@ -225,8 +261,23 @@
         return /^[a-zA-Z0-9_.-]*$/.test(filename);
     }
 
+    function redirectToAddChapter(){
+        window.location.reload();
+    }
+
+    function redirectToPreviewChapter(){
+        window.location='#previewChapterContent/'+uniqueId;
+    }
+
+    function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
     $(document).ready(function () {
         // Custom video button
+
         var videoButton = function (context) {
             var ui = $.summernote.ui;
 
