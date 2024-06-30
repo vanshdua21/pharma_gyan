@@ -17,24 +17,26 @@ def prepare_and_save_user(request_body):
     method_name = "prepare_and_save_admin_user"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
-    try:
-        existing_admin_user = admin_users_model().get_user_by_un_or_mn(request_body.get('phone'), request_body.get('userName'))
-        if existing_admin_user is not None and len(existing_admin_user) > 0:
-            if request_body.get('id') is None or existing_admin_user[0].unique_id != request_body.get('unique_id'):
-                return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
-                            details_message="Duplicate admin user found. Please use a different user name or mobile number!")
-    except InternalServerError as ey:
-        logger.error(f"Error while fetching admin user by user_name InternalServerError :: {ey.reason}")
-        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                    details_message="Error while fetching admin user!")
-    except Exception as e:
-        logger.error(f"Error while fetching admin user by user_name Exception :: {e}")
-        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                    details_message="Error while fetching admin user !")
-
     admin_user = pg_admin_users()
     if (request_body.get('id')):
         admin_user.id = request_body.get('id')
+    else:
+        try:
+            existing_admin_user = admin_users_model().get_user_by_un_or_mn(request_body.get('phone'),
+                                                                           request_body.get('userName'))
+            if existing_admin_user is not None and len(existing_admin_user) > 0:
+                if request_body.get('id') is None or existing_admin_user[0].unique_id != request_body.get('unique_id'):
+                    return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
+                                details_message="Duplicate admin user found. Please use a different user name or mobile number!")
+        except InternalServerError as ey:
+            logger.error(f"Error while fetching admin user by user_name InternalServerError :: {ey.reason}")
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        details_message="Error while fetching admin user!")
+        except Exception as e:
+            logger.error(f"Error while fetching admin user by user_name Exception :: {e}")
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        details_message="Error while fetching admin user !")
+
     admin_user.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
     admin_user.email_id = request_body.get('email')
     admin_user.mobile_number = request_body.get('phone')
