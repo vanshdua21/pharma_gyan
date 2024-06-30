@@ -2,6 +2,7 @@
 <script src="/static/pharma_gyan/js/summernote.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 
 <style type="text/css">
     .form-field-custom{
@@ -22,7 +23,9 @@
     .form-label{
         width: 15%
     }
-
+     .form-group input {
+        flex-grow: 1; /* Allow the input to grow and take available space */
+    }
     .permissionWrapper{
         margin: 15px 0;
     }
@@ -76,9 +79,9 @@
 
 <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
     "><strong>Congratulations!</strong> <span id="success-text"></span>
-    
+
         </div>
-    
+
         </div>
 
 <div id="main-form-div">
@@ -87,7 +90,7 @@
             <div id="panel-1" class="panel">
                 <div class="panel-hdr">
                     <h2 id="main_title">
-                        
+
                     </h2>
                 </div>
                 <div class="panel-container show">
@@ -121,7 +124,7 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
 
     var baseUrl = '<?=$baseUrl?>';
@@ -207,7 +210,7 @@
     function loadChaptersFromLocalStorage(data) {
         const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
         let chapters_positions = JSON.parse(localStorage.getItem('chapters_positions')) || [];
-        
+
         console.log('topic_chapters', topic_chapters);
         if (!topic_chapters) return;
 
@@ -269,16 +272,170 @@
                                         <div class="panel-content">
                                             <div class="js-summernote-${chapter.unique_id} summernote" id="saveToLocal-${chapter.unique_id}"></div>
                                         </div>
+
                                     </div>
+
                                 </div>
+                                  <div class="custom-control custom-checkbox col-lg-5 form-field-custom" >
+                                        <input type="checkbox" class="custom-control-input mx-2" id="markAsFree" value="0">
+                                        <label class="custom-control-label " for="markAsFree" style="padding-left: 15px">Mark as free</label>
+                                  </div>
                             </div>
                         </h3>
                     </div>
                 </div>`;
-        
+
             accordionContainer.appendChild(newAccordion);
             const inputElement = document.getElementById(`title-${chapter.unique_id}`);
             inputElement.addEventListener('input', (event) => handleChapterTitleInputChange(event, chapter.unique_id));
+
+
+    function uploadVideos(files) {
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            // Check if filename is valid (only alphanumeric, underscores, dots, and dashes)
+            if (!validateFilename(file.name)) {
+                Swal.fire({ text: 'Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.', });
+                console.log("Invalid filename:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            // Check file size (max 50MB for videos)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire({ text: "File size exceeds 50MB limit." });
+                console.log("File size exceeds 5MB limit:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            let data = new FormData();
+            data.append("video-file", file);
+
+            $.ajax({
+                url: 'addMedia/',  // Check this URL path
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "POST",
+                success: function (response) {
+                    if (response.result === 'success') {
+                        let videoNode = $('<video controls>')
+                            .attr('src', response.data.file_urls[0])
+                            .css('width', '50%'); // Set initial width to 50%
+                        $(`.js-summernote-${chapter.unique_id}`).summernote('insertNode', videoNode[0]);
+
+                        // Manage multiple URLs in localStorage
+                        var uploadedVideoURLs_chapter = JSON.parse(localStorage.getItem('uploadedVideoURLs_chapter')) || [];
+                        response.data.file_urls.forEach(url => {
+                            uploadedVideoURLs_chapter.push(url);
+                        });
+                        localStorage.setItem('uploadedVideoURLs_chapter', JSON.stringify(uploadedVideoURLs_chapter));
+                    } else {
+                        console.log("Video upload failed");
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log("Video upload failed:", textStatus, errorThrown);
+                }
+            });
+        }
+    }
+
+        var videoButton = function (context) {
+        var ui = $.summernote.ui;
+
+        // create button
+        var button = ui.button({
+            contents: '<i class="note-icon-video"/>',
+            tooltip: 'Upload Video',
+            click: function () {
+                var fileInput = $('<input type="file" accept="video/*" multiple>');
+                fileInput.trigger('click');
+
+                fileInput.on('change', function () {
+                    var files = this.files;
+                    uploadVideos(files);
+                });
+            }
+        });
+
+        return button.render();   // return button as jquery object
+    };
+
+    // Function to handle image upload
+    function uploadImages(files) {
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            // Check if filename is valid (only alphanumeric, underscores, dots, and dashes)
+            if (!validateFilename(file.name)) {
+                 Swal.fire({ text: 'Invalid filename: Only alphanumeric characters, underscores, dots, and dashes are allowed.',  });
+                console.log("Invalid filename:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire({ text: "File size exceeds 5MB limit."});
+                console.log("File size exceeds 5MB limit:", file.name);
+                continue; // Skip uploading this file
+            }
+
+            let data = new FormData();
+            data.append("image-file", file);
+
+            $.ajax({
+                url: 'addMedia/',  // Check this URL path
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: data,
+                type: "POST",
+                success: function (response) {
+                    if (response.result === 'success') {
+                        let imgNode = $('<img>').attr('src', response.data.file_urls[0]).css('width', '50%'); // Set initial width to 50%
+                        $(`.js-summernote-${chapter.unique_id}`).summernote('insertNode', imgNode[0]);
+
+                        // Manage multiple URLs in localStorage
+                        var uploadedImageURLs_chapter = JSON.parse(localStorage.getItem('uploadedImageURLs_chapter')) || [];
+                        response.data.file_urls.forEach(url => {
+                            uploadedImageURLs_chapter.push(url);
+                        });
+                        localStorage.setItem('uploadedImageURLs_chapter', JSON.stringify(uploadedImageURLs_chapter));
+                    } else {
+                        console.log("Image upload failed");
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log("Image upload failed:", textStatus, errorThrown);
+                }
+            });
+        }
+    }
+      function validateFilename(filename) {
+        return /^[a-zA-Z0-9_.-]*$/.test(filename);
+    }
+            var imageButton = function (context) {
+            var ui = $.summernote.ui;
+
+            // create button
+            var button = ui.button({
+                contents: '<i class="note-icon-picture"/>',
+                tooltip: 'Upload Image',
+                click: function () {
+                    var fileInput = $('<input type="file" accept="image/*" multiple>');
+                    fileInput.trigger('click');
+
+                    fileInput.on('change', function () {
+                        var files = this.files;
+                        uploadImages(files);
+                    });
+                }
+            });
+
+            return button.render();   // return button as jquery object
+        };
 
             //init default
             console.log(`.js-summernote-${chapter.unique_id}`, chapter.content);
@@ -297,14 +454,21 @@
 					['para', ['ul', 'ol', 'paragraph']],
 					['height', ['height']]
 					['table', ['table']],
-					['insert', ['link', 'picture', 'video']],
+					['insert', ['customImage','customVideo']],
 					['view', ['fullscreen', 'codeview', 'help']]
 				],
+				 buttons:{
+                    customImage: imageButton,
+                     customVideo: videoButton
+				 },
 				callbacks: {
 					//restore from localStorage
 					onInit: function(e) {
 						$(`.js-summernote-${chapter.unique_id}`).summernote("code", chapter.content);
 					},
+					 onImageUpload: function (files) {
+                        uploadImages(files);
+                    },
 					onChange: function(contents, $editable) {
 						clearInterval(interval);
 						timer(chapter.unique_id);
@@ -313,7 +477,7 @@
 			});
         });
         localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
-        
+
         // Initialize Sortable
         const sortable = new Sortable(accordionContainer, {
             animation: 150,
@@ -398,7 +562,7 @@
             currentTopicData.chapters.forEach(c => { chapters_positions.push(c.unique_id) });
             localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
         }
-        
+
         function initProgressBar() {
             document.getElementById("progress-bar").style.width = '20%';
             $("#progress-bar-div").show();
@@ -433,7 +597,7 @@
             topic_chapters.chapters[chap].index = idx;
         }
         console.log('after index manip', topic_chapters.chapters);
-        
+
         const errors = [];
         topic_chapters.chapters.forEach(chapter => {
             if (!chapter.title || chapter.title.length === 0) {
@@ -479,7 +643,7 @@
 
         // Log FormData content
         for (let pair of formData.entries()) {
-            console.log(pair[0]+ ', ' + pair[1]); 
+            console.log(pair[0]+ ', ' + pair[1]);
         }
 
         $.ajax({
@@ -564,5 +728,6 @@
         $("#progress-bar").width(currWidth+50);
     }
 </script>
+
 
 
