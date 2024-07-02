@@ -35,9 +35,11 @@ def prepare_and_save_unit(request_body):
             chapter.title = chap.get('title')
             chapter.content = chap.get('content')
             chapter.index = chap.get('index')
+            chapter.mark_as_free = chap.get('mark_as_free')
             unit.chapters.append(chapter)
     
-    try: 
+    try:
+        print('unit debug',unit)
         save_or_update_unit(unit)
     except Exception as e:
         logger.error(f"Error while saving or updating unit ::{e}")

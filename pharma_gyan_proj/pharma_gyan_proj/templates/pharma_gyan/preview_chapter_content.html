@@ -41,7 +41,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script type="text/javascript">
     var data = JSON.parse('{{ chapter|escapejs }}');
-    console.log(data);
+    console.log('data',data);
     var title = data['title'];
     var content = data['content'];
     $(document).ready(function() {

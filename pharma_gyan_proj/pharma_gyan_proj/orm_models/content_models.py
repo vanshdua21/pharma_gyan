@@ -127,6 +127,7 @@ class PgChapter(Base, Orm_helper):
     index = Column("index", Integer)
     unit_id = Column("unit_id", Integer, ForeignKey('unit.unique_id'))
     created_by = Column("created_by", String)
+    mark_as_free = Column("mark_as_free", Integer, default=0)
     ct = Column("ct", DateTime, default=datetime.utcnow)
 
     def __init__(self, data={}):
@@ -141,5 +142,6 @@ class PgChapter(Base, Orm_helper):
             "index": self.index,
             "unit_id": self.unit_id,
             "created_by": self.created_by,
+            "mark_as_free":self.mark_as_free,
             "ct": self.ct.isoformat() if self.ct else None
         }

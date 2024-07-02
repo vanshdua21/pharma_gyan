@@ -3,77 +3,170 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,400,0,0" />
 <style type="text/css">
-    .form-field-custom{
-        font-weight:bold;
-        font-size:14px;
-    }
+  .form-field-custom {
+    font-weight: bold;
+    font-size: 14px;
+    display: flex; /* Flexbox to align items */
+    align-items: center; /* Center items vertically */
+}
+.form-field-custom .end-item {
+    margin-left: auto; /* Push the item to the end */
+}
 
-    body{
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-    }
+.material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 40;
+}
 
-    .form-group{
-        display: flex;
-        align-items: center;
-    }
+body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
 
-    .form-label{
-        width: 15%
-    }
-     .form-group input {
-        flex-grow: 1; /* Allow the input to grow and take available space */
-    }
-    .permissionWrapper{
-        margin: 15px 0;
-    }
+.form-group {
+    display: flex;
+    align-items: center;
+}
 
-    .perHead{
-        font-size: 18px;
-        padding: 10px 0;
-    }
+.form-label {
+    width: 15%;
+}
 
-    #perm{
-        padding: 10px 40px;
-        display: flex;
-        flex-wrap: wrap;
-    }
-    #perm >div{
-        width: 50%;
-        padding: 8px;
-    }
-    .add{
-        border-style: dashed;
-        padding: 40px 90px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-    }
-    .pill {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        margin: 0.25rem;
-        background-color: #007bff;
-        color: white;
-        border-radius: 1rem;
-    }
-    .add-button {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            background-color: #28a745;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            cursor: pointer;
-            margin: 0.25rem;
-        }
+.form-group input {
+    flex-grow: 1; /* Allow the input to grow and take available space */
+}
 
+.permissionWrapper {
+    margin: 15px 0;
+}
+
+.perHead {
+    font-size: 18px;
+    padding: 10px 0;
+}
+
+#perm {
+    padding: 10px 40px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#perm > div {
+    width: 50%;
+    padding: 8px;
+}
+
+.add {
+    border-style: dashed;
+    padding: 40px 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.pill {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.25rem;
+    background-color: #007bff;
+    color: white;
+    border-radius: 1rem;
+}
+
+.add-button {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    cursor: pointer;
+    margin: 0.25rem;
+}
+
+.emailCTA {
+    display: flex;
+    padding: inherit;
+    align-items: center; /* Center items vertically */
+    position: relative; /* Position for the tooltip */
+}
+
+.chapter-icon {
+    cursor: pointer;
+    margin-right: 10px; /* Space between the SVG and text */
+    width: 60px;
+    height: 60px;
+    fill: #1ec9b7;
+}
+.end-item {
+    cursor: pointer;
+}
+
+.tooltip {
+    visibility: hidden; /* Initially hidden */
+    font-size: 12px; /* Smaller font size for the tooltip */
+    font-weight: bold; /* Make the text bold */
+    color: #000000; /* Black text color */
+    background-color: #ffffff; /* Background color for the tooltip */
+    padding: 5px;
+    border-radius: 5px;
+    position: absolute;
+    bottom: -35px; /* Position below the SVG */
+    left: 0; /* Align to the left of the SVG */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Optional shadow for better visibility */
+    z-index: 1; /* Ensure the tooltip is above other elements */
+    transition: visibility 0.2s, opacity 0.2s; /* Smooth transition */
+    opacity: 0; /* Initially transparent */
+}
+
+.chapter-icon:hover + .tooltip {
+    visibility: visible; /* Show tooltip on hover */
+    opacity: 1; /* Fully opaque */
+}
+
+/* Optional: hover effect for better UX */
+.chapter-icon:hover {
+    fill: #17a2b8;
+}
+
+.tooltip-left {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip-left .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  font-size: 12px; /* Smaller font size for the tooltip */
+  font-weight: bold;
+  background-color: #ffffff;
+  color: #000000;
+  text-align: center;
+  padding: 4px 0;
+  border-radius: 6px;
+  transition: visibility 0.2s, opacity 0.2s;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  /* Position the tooltip text - see examples below! */
+  top: -5px;
+  right: 105%;
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip-left:hover .tooltiptext {
+  visibility: visible;
+}
 </style>
 
 
@@ -95,9 +188,11 @@
                 </div>
                 <div class="panel-container show">
                     <div class="panel-content">
-
                         <div class="emailCTA" style="display: flex; padding: inherit;">
-                            <button class="btn  btn-small btn-success" onclick="addChapter()" style="width: 10%; height: 45px;">Add Chapter</button>
+                            <svg class="chapter-icon" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="#1ec9b7" onclick="addChapter()">
+                                <path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h394v60H180v600h600v-394h60v394q0 24-18 42t-42 18H180Zm141-157v-60h319v60H321Zm0-127v-60h319v60H321Zm0-127v-60h319v60H321Zm371-73v-88h-88v-60h88v-88h60v88h88v60h-88v88h-60Z"/>
+                            </svg>
+                            <span class="tooltip">Add Chapter</span>
                         </div>
 
                         <div id="accordion-container" class="accordion accordion-hover col-lg-12" style="margin-top: 15px;">
@@ -142,16 +237,32 @@
     };
 
     //save
-    var saveToLocal = function(currentChapterId){
-        console.log('currentChapterId', currentChapterId);
-        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
-        const chapter = topic_chapters.chapters.find(c => c.unique_id === currentChapterId);
-        console.log('chapter saving', chapter);
-        chapter.content = $(`#saveToLocal-${chapter.unique_id}`).summernote("code");
-        console.log('chapter content', chapter.content);
-        localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
-        console.log("saved");
-    }
+var saveToLocal = function(currentChapterId) {
+    console.log('currentChapterId', currentChapterId);
+    const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+    const chapter = topic_chapters.chapters.find(c => c.unique_id === currentChapterId);
+
+    // Save content
+    chapter.content = $(`#saveToLocal-${chapter.unique_id}`).summernote("code");
+    console.log('chapter content', chapter.content);
+
+    // Save mark as free as integer (0 or 1)
+    const mark_as_free = $(`#markAsFree-${chapter.unique_id}`).is(':checked') ? 1 : 0;
+    chapter.mark_as_free = mark_as_free;
+    console.log('chapter mark as free', chapter.mark_as_free);
+
+    // Update localStorage
+// <!--    localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));-->
+        localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters, (key, value) => {
+        // Convert mark_as_free to integer before stringify
+        if (key === 'mark_as_free') {
+            return Number(value);
+        }
+        return value;
+    }));
+    console.log("Saved to localStorage");
+}
+
 
     function addChapter() {
         const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
@@ -160,7 +271,8 @@
             'unique_id': newUuid,
             'title': 'New Chapter',
             'content': '',
-            'index': topic_chapters.chapters.length
+            'index': topic_chapters.chapters.length,
+            'mark_as_free': 0
         };
         topic_chapters.chapters.push(chapter);
         localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
@@ -194,6 +306,46 @@
         console.log("chapter removed");
         loadChaptersFromLocalStorage();
     }
+   // To preview the chapter
+    function previewChapter(chapter_unique_id){
+        console.log('preview',chapter_unique_id);
+        const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+        const chapterIndex = topic_chapters.chapters.findIndex(c => c.unique_id === chapter_unique_id);
+        const chapter=topic_chapters.chapters[chapterIndex];
+        if(chapter)
+        {
+            const data = {
+                uniqueId: null, // Set uniqueId to null
+                title: chapter.title,
+                content: chapter.content
+            };
+       
+
+        $.ajax({
+            type : 'POST',
+            url : 'previewChapterContent/',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success :function(response)
+            {
+                console.log('Success', response);
+                return $('#main-form-div').html(response);
+            }
+             ,
+                error: function(error) {
+                    console.error('Error:', error);
+                }}
+            );
+        }
+        else{
+            // console.log(`Chapter with ID ${chapter_unique_id} not found.`); 
+            $("#err-div").html(`<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Chapter with ID ${chapter_unique_id} not found.</span></div>`);
+            $("#err-div").show();
+            return;
+   
+        }
+    }
+
 
     function handleChapterTitleInputChange(event, chapter_unique_id) {
         const title = event.target.value;
@@ -206,17 +358,37 @@
         localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters));
     }
 
+    function handleMarkAsFreeChange(event, chapter_unique_id) {
+    const markAsFree = event.target.checked;
+    console.log('mark as free edit',markAsFree);
+    const markAsFree_new =markAsFree ? 1 :0;
+    const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
+    const chapter = topic_chapters.chapters.find(c => c.unique_id === chapter_unique_id);
+    chapter.mark_as_free = markAsFree_new;
+    console.log('mark as free edit after change',chapter.mark_as_free);
+    // localStorage.setItem('handleMarkAsFreeChange topic_chapters', JSON.stringify(topic_chapters));
+    localStorage.setItem('topic_chapters', JSON.stringify(topic_chapters, (key, value) => {
+        if (key === 'mark_as_free') {
+            return Number(value); // Convert mark_as_free to integer before stringify
+        }
+        return value;
+    }));
+}
 
     function loadChaptersFromLocalStorage(data) {
         const topic_chapters = JSON.parse(localStorage.getItem('topic_chapters'));
         let chapters_positions = JSON.parse(localStorage.getItem('chapters_positions')) || [];
 
-        console.log('topic_chapters', topic_chapters);
+        console.log('topic_chapters_loadedFromstorage', topic_chapters);
         if (!topic_chapters) return;
 
         var title = topic_chapters.title;
         document.getElementById('main_title').innerHTML = `Topic - ${title}`;
-
+        const markAsFreeCheckbox = document.getElementById('mark_as_free');
+        if (markAsFreeCheckbox) {
+            markAsFreeCheckbox.checked = mark_as_free == 1;
+        }
+        
         const accordionContainer = document.getElementById('accordion-container');
         accordionContainer.innerHTML = ''; // Clear the existing content
 
@@ -231,7 +403,7 @@
         console.log(chapters_positions);
         chapters_positions.forEach(unique_id => {
             let chapter = chapters.find(c => c.unique_id === unique_id);
-            console.log(unique_id, chapter);
+            console.log(unique_id,chapter,chapter.mark_as_free);
             let newAccordion = document.createElement('div');
             newAccordion.className = 'card';
             newAccordion.innerHTML = `
@@ -276,10 +448,19 @@
                                     </div>
 
                                 </div>
-                                  <div class="custom-control custom-checkbox col-lg-5 form-field-custom" >
-                                        <input type="checkbox" class="custom-control-input mx-2" id="markAsFree" value="0">
-                                        <label class="custom-control-label " for="markAsFree" style="padding-left: 15px">Mark as free</label>
-                                  </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <div class="custom-control custom-checkbox form-field-custom">
+                                        <input type="checkbox" class="custom-control-input mx-2" id="markAsFree-${chapter.unique_id}" value="0" onchange="handleMarkAsFreeChange(event, '${chapter.unique_id}')">
+                                        <label class="custom-control-label" for="markAsFree-${chapter.unique_id}">Mark as free</label>
+                                    </div>
+                                    <div class="end-item tooltip-left" onclick="previewChapter('${chapter.unique_id}')"data-toggle="tooltip" data-placement="top" data-original-title="Preview">
+                                        <svg id="preview-chapter-btn" xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 -960 960 960" width="40px" fill="#5f6368">
+                                            <path d="M212.31-140q-29.83 0-51.07-21.24Q140-182.48 140-212.31v-535.38q0-29.83 21.24-51.07Q182.48-820 212.31-820h535.38q29.83 0 51.07 21.24Q820-777.52 820-747.69v535.38q0 29.83-21.24 51.07Q777.52-140 747.69-140H212.31Zm0-60h535.38q5.39 0 8.85-3.46t3.46-8.85V-680H200v467.69q0 5.39 3.46 8.85t8.85 3.46ZM480-300q-73.54 0-131.88-38.92-58.35-38.93-86.2-101.08 27.85-62.15 86.2-101.08Q406.46-580 480-580q73.54 0 131.88 38.92 58.35 38.93 86.2 101.08-27.85 62.15-86.2 101.08Q553.54-300 480-300Zm0-47.69q51.77 0 95.27-24.39 43.5-24.38 70.65-67.92-27.15-43.54-70.65-67.92-43.5-24.39-95.27-24.39-51.77 0-95.27 24.39-43.5 24.38-70.65 67.92 27.15 43.54 70.65 67.92 43.5 24.39 95.27 24.39Zm0-92.31Zm.09 52.31q21.83 0 37.02-15.29 15.2-15.28 15.2-37.11t-15.29-37.02q-15.28-15.2-37.11-15.2t-37.02 15.29q-15.2 15.28-15.2 37.11t15.29 37.02q15.28 15.2 37.11 15.2Z" />
+                                        </svg>
+                                        <span class="tooltiptext">Preview</span>
+                                    </div>
+                                   
+                                </div>                
                             </div>
                         </h3>
                     </div>
@@ -288,7 +469,8 @@
             accordionContainer.appendChild(newAccordion);
             const inputElement = document.getElementById(`title-${chapter.unique_id}`);
             inputElement.addEventListener('input', (event) => handleChapterTitleInputChange(event, chapter.unique_id));
-
+            const markAsFreeCheckbox = document.getElementById(`markAsFree-${chapter.unique_id}`);
+            markAsFreeCheckbox.checked = chapter.mark_as_free;
 
     function uploadVideos(files) {
         for (let i = 0; i < files.length; i++) {
@@ -583,7 +765,7 @@
         var barInterval = setInterval('incBar()',25);
 
         var topic_chapters = JSON.parse(localStorage.getItem('topic_chapters')) || [];
-        console.log(topic_chapters);
+        console.log('topic_chapters=>',topic_chapters);
         if (topic_chapters.chapters.length == 0) {
             $("#err-div").html(`<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add one or more chapters ! </span></div>`);
             $("#err-div").show();
@@ -727,6 +909,18 @@
         var currWidth = $("#progress-bar").width();
         $("#progress-bar").width(currWidth+50);
     }
+    document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.preview-chapter-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const chapter_unique_id = button.getAttribute('data-chapter-id');
+            previewChapter(chapter_unique_id);
+        });
+    });
+});
+   
+
+    
 </script>
 
 

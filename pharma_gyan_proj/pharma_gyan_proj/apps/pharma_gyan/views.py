@@ -107,13 +107,26 @@ def promo_code(request):
     rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"baseUrl": baseUrl, "mode": "create"})
     return HttpResponse(rendered_page)
 
+@csrf_exempt
+def preview_chapter_content(request):
+    method_name = "preview_chapter_content"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    unique_id = request_body.get('uniqueId')
+    title = request_body.get('title')
+    content = request_body.get('content')
+    if unique_id is not None and unique_id != '':
+        chapter = fetch_and_prepare_chapter_preview(unique_id)
+    elif title is not None and content is not None:
+        chapter = {
+            "title": title,
+            "content": content
+        }
+    else:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="Invalid request!")
 
-def preview_chapter_content(request, uniqueId):
-    chapter = fetch_and_prepare_chapter_preview(uniqueId)
-
-    rendered_page = render_to_string('pharma_gyan/preview_chapter_content.html', {"chapter": json.dumps(chapter, default=str)})
+    rendered_page = render_to_string('pharma_gyan/preview_chapter_content.html',{"chapter": json.dumps(chapter, default=str)})
     return HttpResponse(rendered_page)
-
 
 def edit_promo_code(request):
     baseUrl = settings.BASE_PATH
@@ -307,7 +320,7 @@ def upsertTopic(request):
         'id': id,
         'unique_id': unique_id,
         'title': title,
-        'chapters': chapters,
+        'chapters': chapters
     }
     print(topic)
     response = prepare_and_save_unit(topic)
