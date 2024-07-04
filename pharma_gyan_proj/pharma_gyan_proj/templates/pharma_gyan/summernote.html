@@ -1,6 +1,5 @@
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
-
 <style>
     .form-group {
         display: flex;
@@ -23,6 +22,68 @@
         justify-content: space-between;
         align-items: center;
     }
+    .tooltip-left {
+  position: relative;
+  display: inline-block;
+}
+.end-item{
+    cursor: pointer;
+}
+/* Tooltip text */
+.tooltip-left .tooltiptext {
+  
+  visibility: hidden;
+  width: 100px;
+  font-size: 12px; /* Smaller font size for the tooltip */
+  /* font-weight: bold; */
+  background-color: #ffffff;
+  color: #000000;
+  text-align: center;
+  padding: 4px 0;
+  border-radius: 6px;
+  transition: visibility 0.2s, opacity 0.2s;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  /* Position the tooltip text - see examples below! */
+  top: -5px;
+  right: 105%;
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip-left:hover .tooltiptext {
+  visibility: visible;
+}
+.note-group-select-from-files {
+            display: none;
+        }
+/* Style for the dropdown menu */
+.dropdown-video-resize {
+    min-width: 120px; /* Set the minimum width of the dropdown menu */
+    background-color: #fff; /* Set the background color */
+    border: 1px solid #ccc; /* Set the border color */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175); /* Add a shadow */
+    padding: 5px 0; /* Add some padding */
+}
+
+/* Style for the dropdown items */
+.dropdown-video-resize li {
+    padding: 3px 20px; /* Set padding for each item */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+/* Style for the dropdown items on hover */
+.dropdown-video-resize li:hover {
+    background-color: #f0f0f0; /* Change background color on hover */
+}
+
+/* Style for the dropdown items */
+.dropdown-video-resize li a {
+    color: #333; /* Set the text color */
+    text-decoration: none; /* Remove underline */
+    display: block; /* Make the anchor a block element */
+    width: 100%; /* Make it take the full width */
+}
 </style>
 
 <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
@@ -36,13 +97,10 @@
     <div class="row">
         <div class="col-xl-12">
             <div class="row">
-                <div class="col-xl-12">
+                <!-- <div class="col-xl-12"> -->
                     <div id="panel-1" class="panel">
                         <div class="panel-hdr">
-                            <div class="form-group">
-                                <label for="title"><strong>Enter Chapter name here</strong></label>
-                                <input type="text" id="title" class="form-control">
-                            </div>
+                            
                             <div class="panel-toolbar">
                                 <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
                                 <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
@@ -51,12 +109,23 @@
                         </div>
                         <div class="panel-container show">
                             <div class="panel-content">
+                                <div class="form-group">
+                                    <label for="title"><strong>Enter Chapter name here</strong></label>
+                                    <input type="text" id="title" class="form-control">
+                                </div>
                                 <div class="js-summernote" id="saveToLocal"></div>
                                 <div class="mt-3">
-
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div class="custom-control custom-checkbox col-lg-5" >
                                         <input type="checkbox" class="custom-control-input " id="markAsFree" value="0">
                                         <label class="custom-control-label " for="markAsFree" style="padding-left: 15px">Mark as free</label>
+                                </div>
+                                <div class="end-item tooltip-left" onclick="previewChapter()" data-toggle="tooltip" data-placement="top" data-original-title="Preview">
+                                    <svg id="preview-chapter-btn" xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="#5f6368">
+                                        <path d="M212.31-140q-29.83 0-51.07-21.24Q140-182.48 140-212.31v-535.38q0-29.83 21.24-51.07Q182.48-820 212.31-820h535.38q29.83 0 51.07 21.24Q820-777.52 820-747.69v535.38q0 29.83-21.24 51.07Q777.52-140 747.69-140H212.31Zm0-60h535.38q5.39 0 8.85-3.46t3.46-8.85V-680H200v467.69q0 5.39 3.46 8.85t8.85 3.46ZM480-300q-73.54 0-131.88-38.92-58.35-38.93-86.2-101.08 27.85-62.15 86.2-101.08Q406.46-580 480-580q73.54 0 131.88 38.92 58.35 38.93 86.2 101.08-27.85 62.15-86.2 101.08Q553.54-300 480-300Zm0-47.69q51.77 0 95.27-24.39 43.5-24.38 70.65-67.92-27.15-43.54-70.65-67.92-43.5-24.39-95.27-24.39-51.77 0-95.27 24.39-43.5 24.38-70.65 67.92 27.15 43.54 70.65 67.92 43.5 24.39 95.27 24.39Zm0-92.31Zm.09 52.31q21.83 0 37.02-15.29 15.2-15.28 15.2-37.11t-15.29-37.02q-15.28-15.2-37.11-15.2t-37.02 15.29q-15.2 15.28-15.2 37.11t15.29 37.02q15.28 15.2 37.11 15.2Z" />
+                                    </svg>
+                                    <span class="tooltiptext">Preview</span>
+                                </div>
                                 </div>
 <!--                                    <div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text"></span></div>-->
                                     <button class="btn btn-small btn-success mt-3" onclick="saveSummernoteData()">Save</button>
@@ -85,8 +154,15 @@
 
     // Save to local storage
     var saveToLocal = function () {
-        localStorage.setItem('summernoteData', $('#saveToLocal').summernote("code"));
+        var summernoteContent = $('#saveToLocal').summernote("code");
+        var summernoteContentString = JSON.stringify(summernoteContent);
+        localStorage.setItem('summernoteData',summernoteContentString);
         console.log("Saved to local storage");
+        const mark_as_free = $('#markAsFree').is(':checked') ? 1 : 0;
+        console.log('chapter mark as free', mark_as_free);
+        localStorage.setItem('markAsFree',mark_as_free );
+        var title =  JSON.stringify($('#title').val());
+        localStorage.setItem('Chapter_title',title );
     };
 
     // Remove from local storage
@@ -107,6 +183,46 @@
         $("#"+domId+"-error").html(msg);
         $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
         $("#"+domId+"-group").addClass('has-error');
+    }
+    //preview the chapter
+    function previewChapter(){
+       console.log('called preview');
+        const summernoteData = JSON.parse(localStorage.getItem('summernoteData'));
+        console.log('summernote',summernoteData);
+        const Chapter_title = JSON.parse(localStorage.getItem('Chapter_title'));
+        if(summernoteData!='' || Chapter_title!='')
+        {
+            const data = {
+                uniqueId: null, // Set uniqueId to null
+                title: Chapter_title,
+                content: summernoteData
+            }
+       
+
+        $.ajax({
+            type : 'POST',
+            url : 'previewChapterContent/',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success :function(response)
+            {
+                console.log('Success', response);
+                
+                return $('#main-form-div').html(response);
+            }
+             ,
+                error: function(error) {
+                    console.error('Error:', error);
+                }}
+            );
+        }
+        else{
+            // console.log(`Chapter with ID ${chapter_unique_id} not found.`); 
+            $("#err-div").html(`<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please Insert content </span></div>`);
+            $("#err-div").show();
+            return;
+   
+        }
     }
 
     // Function to handle image upload
@@ -193,14 +309,19 @@
                     if (response.result === 'success') {
                         let videoNode = $('<video controls>').attr('src', response.data.file_urls[0]).css('width', '50%'); // Set initial width to 50%
                         $('.js-summernote').summernote('insertNode', videoNode[0]);
-
                         // Manage multiple URLs in localStorage
                         var uploadedVideoURLs = JSON.parse(localStorage.getItem('uploadedVideoURLs')) || [];
                         response.data.file_urls.forEach(url => {
                             uploadedVideoURLs.push(url);
                         });
                         localStorage.setItem('uploadedVideoURLs', JSON.stringify(uploadedVideoURLs));
-                    } else {
+                        
+                        videoNode.on('click', function () {
+                        focusedVideoElement = this; // Update global variable with focused video element
+                        $(this).focus(); // Set focus on the clicked video
+                    });
+                  
+                }else {
                         console.log("Video upload failed");
                     }
                 },
@@ -210,12 +331,14 @@
             });
         }
     }
+      
 
+       
     // Function to save Summernote data via AJAX
         function saveSummernoteData() {
     var content = $('#saveToLocal').summernote("code");
     var title = $('#title').val();
-    var is_free = $('#markAsFree').is(':checked');
+    var is_free = $('#markAsFree').is(':checked') ? 1 : 0;
 
         console.log('Title:', title);
         console.log('Is Free:', is_free);
@@ -226,12 +349,12 @@
     $.ajax({
         type: 'POST',
         url: '/pharma_gyan/editor/upsertChapter/',
-        data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free}),
+        data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free ,'index':1}),
         contentType: 'application/json',
         dataType: 'json',
         success: function (response) {
             lock=false;
-<!--            clearInterval(barInterval);-->
+// <!--            clearInterval(barInterval);-->
             console.log(response);
             uniqueId = response['data']['unique_id']
             $("#progress-bar").css({"width":"100%"});
@@ -275,9 +398,19 @@
             $("#progress-bar-div").show();
 
         }
-
+        var focusedVideoElement = null;
     $(document).ready(function () {
         // Custom video button
+        function loadFromLocal() {
+        var summernoteContent = localStorage.getItem('summernoteData');
+        var chapterTitle = localStorage.getItem('Chapter_title');
+        if (summernoteContent) {
+            $('#saveToLocal').summernote('code', JSON.parse(summernoteContent));
+        }
+        if (chapterTitle) {
+            $('#title').val(JSON.parse(chapterTitle));
+        }
+    }
 
         var videoButton = function (context) {
             var ui = $.summernote.ui;
@@ -321,9 +454,76 @@
 
             return button.render();   // return button as jquery object
         };
+        var deleteButton = function (context) {
+        var ui = $.summernote.ui;
+
+        // create button
+        var button = ui.button({
+            contents: '<i class="note-icon-trash"></i>',
+            tooltip: 'Delete Video',
+            click: function () {
+                deleteFocusedVideoElement();
+
+                }}
+        );
+
+        return button.render();   // return button as jquery object
+        };
+        function deleteFocusedVideoElement() {
+            if (focusedVideoElement && focusedVideoElement.tagName === 'VIDEO') {
+                $(focusedVideoElement).remove(); // Remove the video element from the DOM
+                focusedVideoElement = null; // Clear the global variable
+                    }
+                }
+
+                // Add event listener to set the focusedVideoElement when a video is clicked
+                $(document).on('click', 'video', function() {
+                    focusedVideoElement = this; // Update the global variable with the clicked video element
+                });
+     var resizeVideoButton = function (context) {
+            var ui = $.summernote.ui;
+
+            var button = ui.buttonGroup([
+                ui.button({
+                    className: 'dropdown-toggle',
+                    contents: 'Resize<span class="note-icon"></span>',
+                    tooltip: 'Resize Video',
+                    data: {
+                        toggle: 'dropdown'
+                    }
+                }),
+                ui.dropdown({
+                    className: 'dropdown-video-resize',
+                    contents: '<li><a href="javascript:;" data-size="0.2">25%</a></li>' +
+                              '<li><a href="javascript:;" data-size="0.5">50%</a></li>' +
+                              '<li><a href="javascript:;" data-size="1.0">100%</a></li>' +
+                              '<li><a href="javascript:;" data-size="original">Original Size</a></li>',
+                    callback: function (items) {
+                        $(items).find('li a').each(function () {
+                            $(this).click(function (e) {
+                                var size = $(this).data('size');
+                                if (focusedVideoElement) {
+                                    if (size === 'original') {
+                                        $(focusedVideoElement).css('width', '');
+                                    } else {
+                                        $(focusedVideoElement).css('width', (size * 100) + '%');
+                                    }
+                                }
+                                e.preventDefault();
+                            });
+                        });
+                    }
+                })
+            ]);
+
+            return button.render();
+        };
+
+
 
         if (!$('.js-summernote').data('summernote')) {
             $('.js-summernote').summernote({
+                disableDragAndDrop:true,
                 height: 500,
                 tabsize: 2,
                 placeholder: "Type here...",
@@ -338,12 +538,16 @@
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['height', ['height']],
                     ['table', ['table']],
-                    ['insert', ['customImage', 'videoUpload']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
+                    ['insert', ['customImage']],
+                    ['mybutton', ['videoUpload','resizeVideo','deleteVideo']],
+                    ['view', ['fullscreen', 'codeview', 'help']],
+                    
                 ],
                 buttons: {
                     videoUpload: videoButton,
-                    customImage: imageButton
+                    customImage: imageButton,
+                    deleteVideo: deleteButton,
+                    resizeVideo: resizeVideoButton
                 },
                 callbacks: {
                     onImageUpload: function (files) {
@@ -353,8 +557,9 @@
                         clearInterval(interval);
                         timer();
                     }
-                }
+                },
             });
         }
+        loadFromLocal();
     });
 </script>

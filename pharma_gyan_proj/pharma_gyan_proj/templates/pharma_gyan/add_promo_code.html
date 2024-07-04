@@ -1,3 +1,7 @@
+<!-- Include Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
 <style type="text/css">
     .form-field-custom{
         font-weight:bold;
@@ -106,12 +110,24 @@
                                         <label class="form-label required" for="expiryDate">Expiry Date</label>
                                         <input type="date" id="expiryDate" class="form-control">
                                     </div>
-
-                                    <div class="form-group" id="maxUsage-div">
+<!-- 
+                                   <div class="form-group" id="maxUsage-div">
                                         <label class="form-label" for="maxUsage">Max Usage</label>
-                                        <input type="text" id="maxUsage" class="form-control">
-                                    </div>
+                                      <input type="text" id="maxUsage" class="form-control">
+                                   </div> -->
 
+                                    <div class="form-group"id="maxUsage-div">
+                                        <label class="form-label required" style="padding-right: 20px;">Max Usage</label>
+                                        <select class="form-control select2" id="maxUsage">
+                                            <option value="" disabled selected>Choose Max Usage</option>
+                                            <option value="5">5</option>
+                                            <option value="10">10</option>
+                                            <option value="15">15</option>
+                                            <option value="20">20</option>
+                                            <option value="50">50</option>
+                                            <option value="infinity">Infinity</option>
+                                        </select>
+                                    </div>
                                     <div style="display: flex; padding-bottom: 30px";>
                                     <div class="custom-control custom-checkbox col-lg-5"  id="multiUsage-div">
                                         <input type="checkbox" class="custom-control-input" id="multiUsage" value="0">
@@ -161,7 +177,9 @@
 
 
 
-
+<!-- Include Select2 JS -->
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script type="text/javascript">
 
     var baseUrl = "{{ baseUrl }}";
@@ -175,6 +193,34 @@
     $("#expiryDate-div").hide();
 
     $(document).ready(function() {
+                $('#maxUsage').select2({
+                tags: true,
+                placeholder: "Choose Max Usage",
+                allowClear: true,
+                createTag: function (params) {
+                    var term = $.trim(params.term);
+                    // Regular expression to allow only numbers or the word "infinity"
+                    var regex = /^(\d+|infinity)$/i;
+                    if (regex.test(term)) {
+                        return {
+                            id: term,
+                            text: term,
+                            newOption: true
+                        };
+                    }
+                    else{
+                            
+                    setError("maxUsage");
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Only Numbers are allowed !</span></div>');
+                    $("#err-div").show();
+
+                    return;
+       
+                    }
+                   
+                }
+                
+            });
 
         function initProgressBar() {
             document.getElementById("progress-bar").style.width = '20%';
@@ -246,8 +292,8 @@
         $("#discount").val(customerData["discount"]);
         $("#maxDiscount-div").hide();
     }
-    $("#maxUsage").val(customerData["max_usage"]);
-
+    $("#maxUsage").val(customerData["max_usage"]).trigger('change');
+    // $("#maxUsage").val(customerData["max_usage"]);
 
  if (customerData["multi_usage"]) {
         $("#multiUsage").attr("checked", true);
