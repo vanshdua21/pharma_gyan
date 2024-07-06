@@ -195,8 +195,6 @@ def fetch_and_prepare_promo_code():
                 promo.unique_id, promo.unique_id)
         if promo.max_usage == 0 and promo.multi_usage == 1:
             usage_left = '<p style="font-size: 20px;">∞</p>'
-        elif promo.max_usage == 0 and promo.multi_usage == 0:
-            usage_left = f'0'
         else:
             usage_left = f'{promo.max_usage - promo.current_usage}'
         promo_code_list.append({

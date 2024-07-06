@@ -19,9 +19,10 @@
 
     .panel-hdr {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
     }
+  
     .tooltip-left {
   position: relative;
   display: inline-block;
@@ -90,8 +91,9 @@
 "><strong>Congratulations!</strong> <span id="success-text"></span>
 
     </div>
-    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
-    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button></div>
+    <!-- <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button> -->
+</div>
 
 <div id="main-form-div">
     <div class="row">
@@ -110,7 +112,7 @@
                         <div class="panel-container show">
                             <div class="panel-content">
                                 <div class="form-group">
-                                    <label for="title"><strong>Enter Chapter name here</strong></label>
+                                    <label for="title" style="font-size: 18px;"><strong>Chapter title</strong></label>
                                     <input type="text" id="title" class="form-control">
                                 </div>
                                 <div class="js-summernote" id="saveToLocal"></div>
@@ -177,7 +179,7 @@
         interval = setInterval(function () {
             saveToLocal();
             clearInterval(interval);
-        }, 3000);
+        }, 1000);
     };
        function setError(domId,msg){
         $("#"+domId+"-error").html(msg);
@@ -364,7 +366,7 @@
             }else{
                 $("#success-text").html("Chapter added Successfully");
             }
-
+            removeFromLocal();
             $("#main-form-div").hide();
             return;
 
@@ -480,33 +482,44 @@
                 $(document).on('click', 'video', function() {
                     focusedVideoElement = this; // Update the global variable with the clicked video element
                 });
-     var resizeVideoButton = function (context) {
+                var resizeVideoButton = function (context) {
             var ui = $.summernote.ui;
 
             var button = ui.buttonGroup([
                 ui.button({
                     className: 'dropdown-toggle',
-                    contents: 'Resize<span class="note-icon"></span>',
-                    tooltip: 'Resize Video',
+                    contents: 'Actions<span class="note-icon"></span>',
+                    tooltip: 'Actions on Video',
                     data: {
                         toggle: 'dropdown'
                     }
                 }),
                 ui.dropdown({
                     className: 'dropdown-video-resize',
-                    contents: '<li><a href="javascript:;" data-size="0.2">25%</a></li>' +
-                              '<li><a href="javascript:;" data-size="0.5">50%</a></li>' +
-                              '<li><a href="javascript:;" data-size="1.0">100%</a></li>' +
-                              '<li><a href="javascript:;" data-size="original">Original Size</a></li>',
+                    contents: '<li><a href="javascript:;" data-size="0.2">25% Size</a></li>' +
+                        '<li><a href="javascript:;" data-size="0.5">50% Size</a></li>' +
+                        '<li><a href="javascript:;" data-size="1.0">100% Size</a></li>' +
+                        '<li><a href="javascript:;" data-size="original">Original Size</a></li>' +
+                        '<li><a href="javascript:;" data-float="right">Float Right</a></li>'+ 
+                        '<li><a href="javascript:;" data-float="left">Float Left </a></li>', 
                     callback: function (items) {
                         $(items).find('li a').each(function () {
                             $(this).click(function (e) {
                                 var size = $(this).data('size');
+                                var float = $(this).data('float');
                                 if (focusedVideoElement) {
-                                    if (size === 'original') {
-                                        $(focusedVideoElement).css('width', '');
-                                    } else {
-                                        $(focusedVideoElement).css('width', (size * 100) + '%');
+                                    if (size) {
+                                        if (size === 'original') {
+                                            $(focusedVideoElement).css('width', '');
+                                        } else {
+                                            $(focusedVideoElement).css('width', (size * 100) + '%');
+                                        }
+                                    }
+                                    if (float === 'right') {
+                                        $(focusedVideoElement).css('float', 'right');
+                                    }
+                                    if (float === 'left') {
+                                        $(focusedVideoElement).css('float', 'left');
                                     }
                                 }
                                 e.preventDefault();

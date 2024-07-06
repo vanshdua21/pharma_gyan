@@ -125,7 +125,7 @@
                                             <option value="15">15</option>
                                             <option value="20">20</option>
                                             <option value="50">50</option>
-                                            <option value="infinity">Infinity</option>
+                                            <option value="0">Infinity</option>
                                         </select>
                                     </div>
                                     <div style="display: flex; padding-bottom: 30px";>
@@ -178,8 +178,10 @@
 
 
 <!-- Include Select2 JS -->
-<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> -->
+
 <script type="text/javascript">
 
     var baseUrl = "{{ baseUrl }}";
@@ -221,8 +223,7 @@
                 }
                 
             });
-
-        function initProgressBar() {
+            function initProgressBar() {
             document.getElementById("progress-bar").style.width = '20%';
             $("#progress-bar-div").show();
 
@@ -270,17 +271,28 @@
         return `${year}-${monthNumber}-${day}`;
     }
     function setEditMode(customerData){
+        console.log('data',customerData);
        $("#main_title").html('Edit Promo Code');
 
         $("#title").val(customerData["title"]);
         $("#discountType").val(customerData["discount_type"]);
         $("#promoCode").val(customerData["promo_code"]);
-
         const formattedDate = formatDateForInput(customerData["expiry_date"]);
         console.log('Formatted Date:', formattedDate);
 
         let expiryDateInput = $("#expiryDate");
         expiryDateInput.val(formattedDate);
+        var maxUsageValue = customerData["max_usage"];
+        if ($('#maxUsage option[value="' + maxUsageValue + '"]').length > 0) {
+            // If maxUsageValue exists in options, select it
+            $("#maxUsage").val(maxUsageValue).trigger('change');
+        }
+         else {
+            // If not, create a new tag for it
+            $("#maxUsage").append(new Option(maxUsageValue, maxUsageValue, true, true)).trigger('change');
+        }
+        console.log('max',$("#maxUsage").val());
+        
 
     if (customerData["discount_type"] === "percentage") {
         $("#discount-div label").text("Discount (%)");
@@ -422,10 +434,11 @@ function typeChanged() {
         setSuccess("maxDiscount");
 
         if(!($('#maxUsage').val())){
-            var maxUsage = 0;
+            var maxUsage = 1;
         }
         else{
         var maxUsage = $('#maxUsage').val();
+        console.log("saving promocode",maxUsage);
         }
         setSuccess("maxUsage");
 
@@ -521,20 +534,20 @@ function typeChanged() {
         var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     }
- SingleSelection.prototype.render = function () {
-    var $selection = SingleSelection.__super__.render.call(this);
+<!-- SingleSelection.prototype.render = function () {-->
+<!--    var $selection = SingleSelection.__super__.render.call(this);-->
 
-    $selection.addClass('select2-selection--single');
+<!--    $selection.addClass('select2-selection&#45;&#45;single');-->
 
-    $selection.html(
-      '<span class="select2-selection__rendered"></span>' +
-      '<span class="select2-selection__arrow" role="presentation">' +
-        '<b role="presentation"></b>' +
-      '</span>'
-    );
+<!--    $selection.html(-->
+<!--      '<span class="select2-selection__rendered"></span>' +-->
+<!--      '<span class="select2-selection__arrow" role="presentation">' +-->
+<!--        '<b role="presentation"></b>' +-->
+<!--      '</span>'-->
+<!--    );-->
 
-    return $selection;
-  };
+<!--    return $selection;-->
+<!--  };-->
 
 </script>
 
