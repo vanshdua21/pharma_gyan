@@ -319,9 +319,6 @@
     $("#discount-div").show();
     $("#expiryDate-div").show();
     $("#multiUsage-div").show();
-
-    editUniqueId = customerData["unique_id"];
-    editId = customerData["id"];
     }
 
     function setError(domId,msg){
@@ -433,15 +430,6 @@ function typeChanged() {
 
         setSuccess("maxDiscount");
 
-        if(!($('#maxUsage').val())){
-            var maxUsage = 1;
-        }
-        else{
-        var maxUsage = $('#maxUsage').val();
-        console.log("saving promocode",maxUsage);
-        }
-        setSuccess("maxUsage");
-
         if(!($('#expiryDate').val())){
             setError("expiryDate");
             $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Display Expiry Date ! </span></div>');
@@ -456,10 +444,20 @@ function typeChanged() {
 
         if ($('#multiUsage').is(':checked')) {
             multiUsage = 1;
+            if(!($('#maxUsage').val())){
+            setError("maxUsage");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please select max usage ! </span></div>');
+            $("#err-div").show();
+        }
+        else{
+        var maxUsage = $('#maxUsage').val();
+        }
         } else {
             multiUsage = 0;
+            var maxUsage = 1;
         }
         setSuccess("multiUsage");
+        setSuccess("maxUsage");
 
         lock = true;
 
@@ -469,10 +467,6 @@ function typeChanged() {
         var barInterval = setInterval('incBar()',25);
         let data = {'title':($('#title').val()),'promo_code':($('#promoCode').val()),'discount_type':($('#discountType').val()), 'discount':($('#discount').val()),'max_discount':maxDiscount,'max_usage':maxUsage, 'expiry_date': ($('#expiryDate').val()), 'multi_usage': multiUsage};
         console.log(data);
-        if(mode=="edit"){
-            data['unique_id'] = editUniqueId;
-            data['id'] = editId;
-        }
         $.ajax({
             type : 'POST',
             url : 'upsertPromoCode/',
@@ -487,12 +481,7 @@ function typeChanged() {
                 if(data['result']=='SUCCESS')
                 {
                     $("#success-div").show();
-                    if(mode == "edit"){
-                        $("#success-text").html("Promo Code edited Successfully");
-                    }else{
-                        $("#success-text").html("Promo Code added Successfully");
-                    }
-
+                    $("#success-text").html("Promo Code added Successfully");
                     $("#main-form-div").hide();
                     return;
                 }

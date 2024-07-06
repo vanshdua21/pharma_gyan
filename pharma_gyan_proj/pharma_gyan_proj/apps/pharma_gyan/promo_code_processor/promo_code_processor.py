@@ -26,7 +26,6 @@ def prepare_and_save_promo_code(request_body):
     try:
         existing_promo_code = promo_code_model().get_promo_code_by_title_or_pc(request_body.get('title'), request_body.get('promo_code'))
         if existing_promo_code is not None and len(existing_promo_code) > 0:
-            if request_body.get('id') is None or existing_promo_code[0].unique_id != request_body.get('unique_id'):
                 return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
                             details_message="Duplicate promo code found. Please use a different promo code title or promo code value.")
     except InternalServerError as ey:
@@ -38,37 +37,15 @@ def prepare_and_save_promo_code(request_body):
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                     details_message="Error while fetching promo code !")
 
-    if request_body.get('id') is not None:
-        filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
-        try:
-            promo_code = promo_code_model().get_details_by_filter_list(filter_list)
-        except InternalServerError as ey:
-            logger.error(
-                f"Error while fetching users InternalServerError ::{ey.reason}")
-            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                        details_message="Something went wrong!")
-        except Exception as e:
-            logger.error(f"Error while fetching users ::{e}")
-            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                        details_message="Something went wrong !")
-        if promo_code is None:
-            return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
-                        details_message="Promo code is not found. Please add promo code first!")
-        promo_code = promo_code[0]
-        # existing_promo_code = promo_code_model().get_promo_code_by_title(request_body.get('title'))
-        # if existing_promo_code and (not promo_code or existing_promo_code.title != promo_code.title):
-        #      return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
-        #                  details_message="Duplicate promo code found. Please use a different promo code title.")
-    else:
-        promo_code = pg_promo_code()
-        promo_code.current_usage = 0
-        promo_code.unique_id = uuid.uuid4().hex
+    promo_code = pg_promo_code()
+    promo_code.current_usage = 0
+    promo_code.unique_id = uuid.uuid4().hex
     promo_code.title = request_body.get('title')
     promo_code.promo_code = request_body.get('promo_code')
     promo_code.discount_type = request_body.get('discount_type')
     promo_code.discount = request_body.get('discount')
     promo_code.max_discount = request_body.get('max_discount', 0)
-    promo_code.max_usage = request_body.get('max_usage', 0) if request_body.get('multi_usage', 0) != 0 else 0
+    promo_code.max_usage = request_body.get('max_usage', 0)
     promo_code.expiry_date = request_body.get('expiry_date')
     promo_code.multi_usage = request_body.get('multi_usage', 0)
     promo_code.created_by = session.admin_user_session.user_name
@@ -210,7 +187,7 @@ def fetch_and_prepare_promo_code():
             "created_by": promo.created_by,
             "last_update": promo.ut.strftime('%d %b %Y, %I:%M %p'),
             "usage_left": usage_left,
-            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Edit</button>".format(promo.unique_id, promo.unique_id),
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Clone</button>".format(promo.unique_id, promo.unique_id),
             "cta": cta
         })
     return promo_code_list
