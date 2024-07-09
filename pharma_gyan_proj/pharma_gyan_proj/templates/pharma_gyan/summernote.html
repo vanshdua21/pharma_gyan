@@ -87,13 +87,13 @@
 }
 </style>
 
-<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+<!-- <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
 "><strong>Congratulations!</strong> <span id="success-text"></span>
 
     </div>
-    <!-- <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
-    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button> -->
-</div>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button>
+</div> -->
 
 <div id="main-form-div">
     <div class="row">
@@ -146,14 +146,13 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script src="/static/pharma_gyan/js/summernote.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
     var interval;
     var mode = "{{mode}}";
-
     var uniqueId;
-
+    var focusedVideoElement = null;
     // Save to local storage
     var saveToLocal = function () {
         var summernoteContent = $('#saveToLocal').summernote("code");
@@ -181,7 +180,8 @@
             clearInterval(interval);
         }, 1000);
     };
-       function setError(domId,msg){
+    //error function
+    function setError(domId,msg){
         $("#"+domId+"-error").html(msg);
         $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
         $("#"+domId+"-group").addClass('has-error');
@@ -199,31 +199,31 @@
                 title: Chapter_title,
                 content: summernoteData
             }
-       
 
-        $.ajax({
-            type : 'POST',
-            url : 'previewChapterContent/',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success :function(response)
-            {
-                console.log('Success', response);
-                
-                return $('#main-form-div').html(response);
-            }
-             ,
-                error: function(error) {
-                    console.error('Error:', error);
-                }}
-            );
+
+            $.ajax({
+                type : 'POST',
+                url : 'previewChapterContent/',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success :function(response)
+                {
+                    console.log('Success', response);
+
+                    return $('#main-form-div').html(response);
+                }
+                ,
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }}
+                );
         }
         else{
-            // console.log(`Chapter with ID ${chapter_unique_id} not found.`); 
+            // console.log(`Chapter with ID ${chapter_unique_id} not found.`);
             $("#err-div").html(`<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please Insert content </span></div>`);
             $("#err-div").show();
             return;
-   
+
         }
     }
 
@@ -290,7 +290,7 @@
                 continue; // Skip uploading this file
             }
 
-            // Check file size (max 5MB)
+            // Check file/video size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                Swal.fire({ text: "File size exceeds 5MB limit."});
                 console.log("File size exceeds 5MB limit:", file.name);
@@ -317,12 +317,12 @@
                             uploadedVideoURLs.push(url);
                         });
                         localStorage.setItem('uploadedVideoURLs', JSON.stringify(uploadedVideoURLs));
-                        
+
                         videoNode.on('click', function () {
                         focusedVideoElement = this; // Update global variable with focused video element
                         $(this).focus(); // Set focus on the clicked video
                     });
-                  
+
                 }else {
                         console.log("Video upload failed");
                     }
@@ -333,55 +333,55 @@
             });
         }
     }
-      
 
-       
+
+
     // Function to save Summernote data via AJAX
-        function saveSummernoteData() {
-    var content = $('#saveToLocal').summernote("code");
-    var title = $('#title').val();
-    var is_free = $('#markAsFree').is(':checked') ? 1 : 0;
+    function saveSummernoteData() {
+        var content = $('#saveToLocal').summernote("code");
+        var title = $('#title').val();
+        var is_free = $('#markAsFree').is(':checked') ? 1 : 0;
 
-        console.log('Title:', title);
-        console.log('Is Free:', is_free);
-        lock = true;
+            console.log('Title:', title);
+            console.log('Is Free:', is_free);
+            lock = true;
 
         initProgressBar();
 
-    $.ajax({
-        type: 'POST',
-        url: '/pharma_gyan/editor/upsertChapter/',
-        data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free ,'index':1}),
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function (response) {
-            lock=false;
-// <!--            clearInterval(barInterval);-->
-            console.log(response);
-            uniqueId = response['data']['unique_id']
-            $("#progress-bar").css({"width":"100%"});
-            $("#success-div").show();
-            if(mode == "edit"){
-                $("#success-text").html("Chapter edited Successfully");
-            }else{
-                $("#success-text").html("Chapter added Successfully");
-            }
-            removeFromLocal();
-            $("#main-form-div").hide();
-            return;
+        $.ajax({
+            type: 'POST',
+            url: '/pharma_gyan/editor/upsertChapter/',
+            data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free ,'index':1}),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (response) {
+                lock=false;
+    // <!--            clearInterval(barInterval);-->
+                console.log(response);
+                uniqueId = response['data']['unique_id']
+                $("#progress-bar").css({"width":"100%"});
+                $("#success-div").show();
+                if(mode == "edit"){
+                    $("#success-text").html("Chapter edited Successfully");
+                }else{
+                    $("#success-text").html("Chapter added Successfully");
+                }
+                $("#main-form-div").hide();
+                return;
 
-        },
-        error: function (xhr, textStatus, errorThrown) {
-            var result = xhr['responseJSON'];
-            console.log(result);
-            lock = false;
-            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['details_message']+'</span></div>');
-            $("#err-div").show();
-            $("#progress-bar-div").hide();
-            return;
-        }
-    });
-}
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                var result = xhr['responseJSON'];
+                console.log(result);
+                lock = false;
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['details_message']+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+                return;
+            }
+        });
+        
+    }
     // Validate filename (only alphanumeric, underscores, dots, and dashes allowed)
     function validateFilename(filename) {
         return /^[a-zA-Z0-9_.-]*$/.test(filename);
@@ -399,21 +399,21 @@
             document.getElementById("progress-bar").style.width = '20%';
             $("#progress-bar-div").show();
 
-        }
-        var focusedVideoElement = null;
-    $(document).ready(function () {
-        // Custom video button
-        function loadFromLocal() {
+        } 
+    function loadFromLocal() {
         var summernoteContent = localStorage.getItem('summernoteData');
         var chapterTitle = localStorage.getItem('Chapter_title');
-        if (summernoteContent) {
-            $('#saveToLocal').summernote('code', JSON.parse(summernoteContent));
-        }
-        if (chapterTitle) {
-            $('#title').val(JSON.parse(chapterTitle));
-        }
-    }
-
+            if (summernoteContent) {
+                $('#saveToLocal').summernote('code', JSON.parse(summernoteContent));
+            }
+            if (chapterTitle) {
+                $('#title').val(JSON.parse(chapterTitle));
+            }
+        }    
+    $(document).ready(function () 
+    {
+   
+        // Custom video button
         var videoButton = function (context) {
             var ui = $.summernote.ui;
 
@@ -477,12 +477,11 @@
                 focusedVideoElement = null; // Clear the global variable
                     }
                 }
-
                 // Add event listener to set the focusedVideoElement when a video is clicked
                 $(document).on('click', 'video', function() {
                     focusedVideoElement = this; // Update the global variable with the clicked video element
                 });
-                var resizeVideoButton = function (context) {
+        var resizeVideoButton = function (context) {
             var ui = $.summernote.ui;
 
             var button = ui.buttonGroup([
@@ -500,8 +499,8 @@
                         '<li><a href="javascript:;" data-size="0.5">50% Size</a></li>' +
                         '<li><a href="javascript:;" data-size="1.0">100% Size</a></li>' +
                         '<li><a href="javascript:;" data-size="original">Original Size</a></li>' +
-                        '<li><a href="javascript:;" data-float="right">Float Right</a></li>'+ 
-                        '<li><a href="javascript:;" data-float="left">Float Left </a></li>', 
+                        '<li><a href="javascript:;" data-float="right">Float Right</a></li>'+
+                        '<li><a href="javascript:;" data-float="left">Float Left </a></li>',
                     callback: function (items) {
                         $(items).find('li a').each(function () {
                             $(this).click(function (e) {
@@ -532,8 +531,6 @@
             return button.render();
         };
 
-
-
         if (!$('.js-summernote').data('summernote')) {
             $('.js-summernote').summernote({
                 disableDragAndDrop:true,
@@ -554,7 +551,7 @@
                     ['insert', ['customImage']],
                     ['mybutton', ['videoUpload','resizeVideo','deleteVideo']],
                     ['view', ['fullscreen', 'codeview', 'help']],
-                    
+
                 ],
                 buttons: {
                     videoUpload: videoButton,
@@ -571,8 +568,12 @@
                         timer();
                     }
                 },
+                onInit: function(e)
+                        {
+                            $('.js-summernote').summernote("code", localStorage.getItem("summernoteData"));
+                        },
             });
         }
-        loadFromLocal();
+       loadFromLocal();
     });
 </script>
