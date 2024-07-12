@@ -8,7 +8,12 @@ TAG_GENERATE_OTP = "GENERATE_OTP"
 class PromoCodeDiscountType(Enum):
     flat = "flat"
     percentage = "percentage"
-    
+# class level(Enum):
+#     one = '1',
+#     two = 2,
+#     three = 3,
+#     four = 4,
+#     five = 5
 class AdminUserPermissionType(Enum):
     viewUsers = "View Users"
     editUsers = "Edit Users"
