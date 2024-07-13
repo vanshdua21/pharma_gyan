@@ -59,7 +59,7 @@ def fetch_and_prepare_entity_tag():
             "created_by": entity.created_by,
             "is_active": entity.is_active,
             "cta": cta,
-            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Clone</button>",
+            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneEntityTag('{}')\">Clone</button>",
         })
     return entity_tag_list
 
@@ -69,7 +69,7 @@ def prepare_and_save_entity_tag(request_body):
 
     session = Session()
 
-    validate_Entity_tag_details(request_body)
+    validate_entity_tag_details(request_body)
 
     try:
         existing_entity_tag = entity_tag_model().get_entity_tag_by_title_and_tag_category(request_body.get('title'), request_body.get('tag_category'))
@@ -87,29 +87,11 @@ def prepare_and_save_entity_tag(request_body):
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                     details_message="Error while fetching entity tage !")
 
-    if request_body.get('id') is not None:
-        filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
-        try:
-            entity_tag = entity_tag_model().get_details_by_filter_list(filter_list)
-        except InternalServerError as ey:
-            logger.error(
-                f"Error while fetching users InternalServerError ::{ey.reason}")
-            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                        details_message="Something went wrong!")
-        except Exception as e:
-            logger.error(f"Error while fetching users ::{e}")
-            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
-                        details_message="Something went wrong !")
-        if entity_tag is None:
-            return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
-                        details_message="Entity tag is not found. Please add entity tag first!")
-        entity_tag = entity_tag[0]
-    else:
-        entity_tag = pg_entity_tag()
-        entity_tag.unique_id = uuid.uuid4().hex
-        entity_tag.client_id = '123'
+    entity_tag = pg_entity_tag()
+    entity_tag.unique_id = uuid.uuid4().hex
+    entity_tag.client_id = '123'
     entity_tag.title = request_body.get('title')
-    entity_tag.description = request_body.get('Description')
+    entity_tag.description = request_body.get('description')
     entity_tag.tag_category_id = request_body.get('tag_category')
     entity_tag.created_by = session.admin_user_session.user_name
 
@@ -118,7 +100,6 @@ def prepare_and_save_entity_tag(request_body):
         if not db_res.get("status"):
             return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                         detailed_message="Unable to save entity tag details!")
-        # prepare_and_save_activity_logs(wa_content)
     except Exception as e:
         logger.error(f"Error while saving or updating entity tag Exception ::{e}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
@@ -128,8 +109,8 @@ def prepare_and_save_entity_tag(request_body):
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
 
 
-def validate_Entity_tag_details(request_body):
-    method_name = "validate_Entity_tag_details"
+def validate_entity_tag_details(request_body):
+    method_name = "validate_entity_tag_details"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
     tag_category_unique_id = request_body.get('tag_category')
 
@@ -140,14 +121,14 @@ def validate_Entity_tag_details(request_body):
     if not tag_category:
         raise BadRequestException(method_name=method_name, reason="Tag category value is incorrect")
 
-    validate_Entity_tag_title(request_body.get('title'))
-    validate_Entity_tag_desc(request_body.get('Description'))
+    validate_entity_tag_title(request_body.get('title'))
+    validate_entity_tag_desc(request_body.get('description'))
 
     logger.debug(f"Exit {method_name}, Success")
 
 
-def validate_Entity_tag_title(name):
-    method_name = "validate_Entity_tag_title"
+def validate_entity_tag_title(name):
+    method_name = "validate_entity_tag_title"
     logger.debug(f"Entry {method_name}, name: {name}")
     if name is None:
         raise BadRequestException(method_name=method_name, reason="Title is not provided")
@@ -161,12 +142,12 @@ def validate_Entity_tag_title(name):
     logger.debug(f"Exit {method_name}, Success")
 
 
-def validate_Entity_tag_desc(Description):
-    method_name = "validate_Entity_tag_desc"
-    logger.debug(f"Entry {method_name}, Description: {Description}")
-    if Description is None:
+def validate_entity_tag_desc(description):
+    method_name = "validate_entity_tag_desc"
+    logger.debug(f"Entry {method_name}, Description: {description}")
+    if description is None:
         raise BadRequestException(method_name=method_name, reason="Description is not provided")
-    if len(Description) > MAX_ALLOWED_DESCRIPTION_LENGTH or len(Description) < MIN_ALLOWED_DESCRIPTION_LENGTH:
+    if len(description) > MAX_ALLOWED_DESCRIPTION_LENGTH or len(description) < MIN_ALLOWED_DESCRIPTION_LENGTH:
         raise BadRequestException(method_name=method_name,
                                   reason=F"Description length should be from {MIN_ALLOWED_DESCRIPTION_LENGTH} to {MAX_ALLOWED_DESCRIPTION_LENGTH}")
     logger.debug(f"Exit {method_name}, Success")
