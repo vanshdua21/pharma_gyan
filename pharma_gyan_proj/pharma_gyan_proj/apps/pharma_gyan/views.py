@@ -209,6 +209,7 @@ def secure_login(request):
     if status_code == http.HTTPStatus.OK:
         resp = HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
         resp.set_cookie('access_token', response.get('access_token'))
+        resp.set_cookie('client_id', response.get('client_id'))
         return resp
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 

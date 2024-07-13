@@ -62,7 +62,7 @@ def validate_and_secure_login(request_body):
                     detailed_message="Error while saving or updating user session!")
 
     logger.debug(f"Exit {method_name}, Success")
-    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS, access_token=access_token)
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS, access_token=access_token, client_id=admin_users.client_id)
 
 
 def set_user_in_active(unique_id):
