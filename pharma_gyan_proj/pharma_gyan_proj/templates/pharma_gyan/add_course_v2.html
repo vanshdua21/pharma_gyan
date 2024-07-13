@@ -1,0 +1,632 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+
+
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
+
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+    .highlighted-row{
+        background-color: #d4edda !important;
+    }
+    .disabled-btn {
+        background-color: #c3e6cb;
+        border-color: #c3e6cb;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    .blur-effect {
+        filter: blur(5px); /* Adjust blur intensity as needed */
+    }
+    .opacity-effect {
+        opacity: 0.5; /* Adjust opacity level (0.0 to 1.0) */
+    }
+    .panel-container {
+        position: relative;
+    }
+    #add-topics-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 300px; /* Adjust width as needed */
+        height: 100px; /* Adjust height as needed */
+        background-color: #f8f9fa; /* Light background color */
+        border: 2px dashed #886ab5; /* Dashed border with primary color */
+        border-radius: 10px; /* Rounded corners */
+        cursor: pointer;
+        margin: 20px auto; /* Center horizontally */
+        transition: background-color 0.3s, border-color 0.3s; /* Smooth transitions */
+    }
+
+    #add-topics-box .add {
+        text-align: center;
+    }
+
+    #add-topics-box p {
+        margin: 0;
+        font-size: 0.9em; /* Larger font size */
+        color: #886ab5; /* Primary color */
+    }
+
+    #add-topics-box i {
+        font-size: 1.5em; /* Larger icon */
+        color: #886ab5; /* Primary color */
+    }
+
+    #add-topics-box:hover {
+        background-color: #886ab5; /* Primary color on hover */
+        border-color: #886ab5; /* Darker border color on hover */
+    }
+
+    #add-topics-box:hover p, 
+    #add-topics-box:hover i {
+        color: #fff; /* White color on hover */
+        
+    }
+
+    .select2-container .select2-selection--multiple {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #886ab5;
+        border: 1px solid #886ab5;
+        border-radius: 0.2rem;
+        color: #fff;
+        padding-right: 5px;
+    }
+
+    .select2-container--default .select2-results__option[aria-selected=true]::before {
+        content: '✔';
+        color: #886ab5;
+        margin-right: 10px;
+    }
+
+    .select2-container--default .select2-selection--multiple::after {
+        content: "\f078"; /* Font Awesome Unicode for 'fal fa-chevron-down' */
+        font-family: 'Font Awesome 5 Pro'; /* Ensure the use of the Font Awesome 5 Pro */
+        font-weight: 300; /* Light weight */
+        position: absolute;
+        right: 5px; /* Adjust the position of the icon */
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        font-size: 16px; /* Adjust the size of the icon */
+        color: #999; /* Adjust the color of the icon */
+    }
+
+</style>
+
+
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+    "><strong>Congratulations!</strong> <span id="success-text"></span>
+    
+        </div>
+    
+        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewCourses()>View courses</button>
+    
+        </div>
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-7">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Add Course
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div>
+                            <div class="p-20">
+                                <div id="uploadForm">
+                                    <div class="form-group">
+                                        <label class="form-label" for="title">Title</label>
+                                        <input type="text" id="title" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="desc">Description</label>
+                                        <input type="text" id="desc" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="hierarchical-select" style="width: 13%;">Tags</label>
+                                        <select class="form-control" id="hierarchical-select" multiple="multiple"></select>
+                                    </div>
+                                    
+
+                                    <div class="container mt-4" style="padding: 0;">
+                                        <div>
+                                            <label class="form-label">Topics</label>
+                                        </div>
+                                        <div id="topics-container">
+                                            <h3 id="add-topics-box">
+                                                <div id="add-topics-content" class="add" onclick="removeBlurOpacity()">
+                                                    <p>Click here to add Topics</p>
+                                                    <p><i class="fal fa-plus-circle"></i></p>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        
+                                        <!-- Add more topics as needed -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="emailCTA" style="display: flex; justify-content: space-between; align-items: center; margin-top: 50px;">
+                            <button class="btn btn-small btn-success" onclick="addCourse()" style="width: 100px;">
+                                Save
+                            </button>
+                            <div>
+                                <span class="clear-data-text" onclick="clearAllData()" style="cursor: pointer; font-style: italic; text-decoration: underline;">
+                                    Clear all data
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="err-div" style="display: none;margin-top:20px;"></div>
+                    <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5">
+            <div id="panel-5" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Available Topics
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div>
+                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Chapter Count</th>
+                                    <th>Add</th>
+                                </tr>
+                                </thead>
+                                <tbody id="colors-data">
+                                    
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+    var baseUrl = '<?=$baseUrl?>';
+    var mode = "{{mode}}";
+    var currentCustomerData = {};
+    var available_topics = JSON.parse('{{ topics|escapejs }}');
+    var tags = JSON.parse('{{ tags|escapejs }}');
+
+    // Function to remove blur and opacity effects
+    function removeBlurOpacity() {
+        document.getElementById('panel-5').classList.remove('blur-effect', 'opacity-effect');
+        document.getElementById('panel-5').style.pointerEvents = 'all';
+        document.getElementById('add-topics-content').innerHTML = `<p>Pick topics from the table on your right.</p>`;
+        document.getElementById('add-topics-content').style.cursor = "auto";
+    }
+
+    function onSortableReady(callback) {
+        var checkInterval = setInterval(function() {
+            if (typeof Sortable !== 'undefined') {
+                clearInterval(checkInterval);
+                callback();
+            }
+        }, 100); // Check every 100 milliseconds
+    }
+
+    onSortableReady(function() {
+        const select = $('#hierarchical-select');
+
+        tags.forEach(category => {
+            const optgroup = $('<optgroup>').attr('label', category.title);
+            category.tags.forEach(tag => {
+                const option = $('<option>').val(tag.unique_id).text(tag.title);
+                optgroup.append(option);
+            });
+            select.append(optgroup);
+        });
+
+        select.select2({
+            placeholder: "Select Tags",
+            allowClear: true,
+            closeOnSelect: false
+        });
+
+        datatable = $('#dt-basic-example').dataTable(
+            {
+                responsive: true,
+                lengthChange: false,
+                data : available_topics,
+                columns: [
+                    { data: "title" },
+                    { data: "chapter_count" },
+                    { data: "add" }
+                ],
+                scrollY: `550px`,
+                scrollCollapse: true,
+                paging: false
+            });
+
+        function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+        if(mode=="edit"){
+            currentCustomerData = JSON.parse('{{ user|escapejs }}');
+            console.log('Data-',currentCustomerData);
+            setEditMode(currentCustomerData);
+        }
+
+        // Initial blur and opacity effect on page load
+        document.getElementById('panel-5').classList.add('blur-effect', 'opacity-effect');
+        document.getElementById('panel-5').style.pointerEvents = 'none';
+
+        // Load data from localStorage if it exists
+        loadCourse();
+
+        // Save form data to localStorage on input change
+        $('#title, #desc, #hierarchical-select').on('change', saveCourse);
+
+        // Save selected topics
+        $('#topics-container').on('DOMSubtreeModified', saveCourse);
+    });
+
+    function saveCourse() {
+        let title = $('#title').val();
+        let description = $('#desc').val();
+        let tags = $('#hierarchical-select').val();
+        let topics = [];
+
+        $('#topics-container .topic-card-header').each(function() {
+            let topicId = $(this).attr('id').replace('topic-card-', '');
+            topics.push(topicId);
+        });
+
+        let courseData = {
+            title: title,
+            description: description,
+            tags: tags,
+            topics: topics
+        };
+
+        localStorage.setItem('course', JSON.stringify(courseData));
+    }
+
+    function loadCourse() {
+        let courseData = JSON.parse(localStorage.getItem('course'));
+
+        if (courseData) {
+            $('#title').val(courseData.title);
+            $('#desc').val(courseData.description);
+            $('#hierarchical-select').val(courseData.tags).trigger('change');
+
+            courseData.topics.forEach(topicId => {
+                topic = available_topics.find(topic => topic.unique_id == topicId);
+                addTopic(topicId, topic.title, topic.chapter_count);
+            });
+        }
+    }
+
+    function clearAllData() {
+        // Create the SweetAlert2 mixin for custom styling
+        var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+        // Display the confirmation dialog
+        swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'All data on the page will be reset!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Clear!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true,
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('course');
+                    location.reload();
+                }
+            });
+    }
+
+
+    function addTopic(uuid, title, chapter_count) {
+        console.log('adding topic');
+        document.getElementById('add-topics-box').hidden = true;
+        const topicContainer = document.getElementById('topics-container');
+        const newTopicCard = document.createElement('div');
+        newTopicCard.className = "row mb-3 topic-card-header";
+        newTopicCard.id = `topic-card-${uuid}`;
+        newTopicCard.innerHTML = `<div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="card-title mb-0">${title}</h5>
+                                                <small class="text-muted">Chapter Count: ${chapter_count}</small>
+                                            </div>
+                                            <button class="btn btn-danger btn-sm" onclick="removeTopic('${uuid}')">
+                                                <i class="fal fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>`;
+        topicContainer.appendChild(newTopicCard);
+        // id="add-topic-07d971d2-3ea6-11ef-a04f-5a57a4320fb5"
+        const buttonId = `add-topic-${uuid}`;
+        const addButton = document.getElementById(buttonId);
+        if (addButton) {
+            addButton.disabled = true;
+            addButton.classList.add('disabled-btn');
+            const row = addButton.closest('tr');
+            if (row) {
+                row.classList.add('highlighted-row');
+            }
+        }
+
+        if (topicContainer.childElementCount > 1) {
+            removeBlurOpacity();
+        }
+        if (topicContainer.childElementCount > 1 ) {
+            const sortable = new Sortable(topicContainer, {
+            animation: 150,
+            handle: '.topic-card-header',
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                console.log('Item moved from index', evt.oldIndex, 'to', evt.newIndex);
+                // const chapters_positions = JSON.parse(localStorage.getItem('chapters_positions'));
+                // if (chapters_positions) {
+                //     const temp = chapters_positions[evt.oldIndex];
+                //     chapters_positions[evt.oldIndex] = chapters_positions[evt.newIndex];
+                //     chapters_positions[evt.newIndex] = temp;
+                //     localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+                // }
+            },
+        });
+        }
+    }
+
+    function removeTopic(uuid) {
+        const topicCard = document.getElementById(`topic-card-${uuid}`);
+        if (topicCard) {
+            topicCard.remove();
+        }
+
+        const buttonId = `add-topic-${uuid}`;
+        const addButton = document.getElementById(buttonId);
+        if (addButton) {
+            addButton.disabled = false;
+            addButton.classList.remove('disabled-btn');
+            const row = addButton.closest('tr');
+            if (row) {
+                row.classList.remove('highlighted-row');
+            }
+        }
+
+        const topicContainer = document.getElementById('topics-container');
+        console.log('topic count', topicContainer.childElementCount);
+        if (topicContainer.childElementCount == 1) {
+            document.getElementById('add-topics-box').hidden = false;
+        }
+    }
+
+
+    function redirectToViewCourses(){
+        window.location='#viewCourses';
+    }
+
+    function setEditMode(customerData){
+        $("#main_title").html('Edit User Data');
+
+        $("#mobile").val(customerData["mobile_number"]);
+        $("#pass").val(customerData["password"]);
+        $("#name").val(customerData["display_name"]);
+        $("#userName").val(customerData["user_name"]);
+        $("#email").val(customerData["email_id"]);
+
+
+        $('#perm input:checked').each(function() {
+            $('input:checkbox').attr('checked',false);
+        });
+
+        let permissions = customerData["permissions"];
+        for(let key in permissions){
+            if(permissions[key] == 1){
+                $("#"+key).attr("checked", true);
+            }
+        }
+    }
+
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fal fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+
+    var lock = false;
+    function addCourse(){
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Title ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("title");
+
+        if(!($('#desc').val())){
+            setError("desc");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Description ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("desc");
+
+        lock = true;
+
+        initProgressBar();
+
+        $("#err-div").html('');
+        let courseData = JSON.parse(localStorage.getItem('course'));
+        var barInterval = setInterval('incBar()',25);
+
+        //let data = {'title':title, 'description':description,'image':imageFile};
+        console.log(courseData);
+        if(mode=="edit"){
+            editUniqueId = currentCustomerData["unique_id"];
+            editId = currentCustomerData["id"];
+            is_active = currentCustomerData["is_active"];
+            ct = currentCustomerData["ct"];
+            data['unique_id'] = editUniqueId;
+            data["id"] = editId;
+            data["is_active"] = is_active;
+            data["ct"] = ct;
+        }
+
+        $.ajax({
+            type : 'POST',
+            url : 'upsertCourseV2/',
+            data : localStorage.getItem('course'),
+            processData: false,
+            contentType: false,
+            success :function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                console.log('Success', data);
+                if(data['result']=='SUCCESS')
+                {
+                    localStorage.removeItem('course');
+                    $("#success-div").show();
+                    if(mode == "edit"){
+                        $("#success-text").html("Course edited Successfully");
+                    }else{
+                        $("#success-text").html("Course added Successfully");
+                    }
+
+                    $("#main-form-div").hide();
+                    return;
+                }
+                else
+                {
+
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").show();
+                    $("#progress-bar-div").hide();
+
+                    return;
+                }
+
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+
+                return;
+            }
+
+        });
+    }
+
+</script>
+
+

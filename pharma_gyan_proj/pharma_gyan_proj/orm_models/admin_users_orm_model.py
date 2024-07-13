@@ -6,6 +6,7 @@ class pg_admin_users(Base, Orm_helper):
 
     id = Column("id", Integer, autoincrement=True)
     unique_id = Column("unique_id", String, primary_key=True)
+    client_id = Column("client_id", String)
     email_id = Column("email_id", String)
     expiry_time = Column("expiry_time", DateTime)
     mobile_number = Column("mobile_number", String)

@@ -1,0 +1,30 @@
+[
+    {
+        "unique_id": "077b811e-3f53-11ef-a04f-5a57a4320fb5",
+        "title": "Semester",
+        "tags": [
+            {
+                "unique_id": "7bd0646c-3ea4-11ef-a04f-5a57a4320fb5",
+                "title": "Semester 1"
+            },
+            {
+                "unique_id": "7bd11fd8-3ea4-11ef-a04f-5a57a4320fb5",
+                "title": "Semester 2"
+            }
+        ]
+    },
+    {
+        "unique_id": "0a5df8e4-3f53-11ef-a04f-5a57a4320fb5",
+        "title": "Subject",
+        "tags": [
+            {
+                "unique_id": "7bd1771c-3ea4-11ef-a04f-5a57a4320fb5",
+                "title": "Maths"
+            },
+            {
+                "unique_id": "7bd1bc90-3ea4-11ef-a04f-5a57a4320fb5",
+                "title": "Chemistry"
+            }
+        ]
+    }
+]

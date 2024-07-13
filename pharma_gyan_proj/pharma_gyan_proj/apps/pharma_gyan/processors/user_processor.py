@@ -44,6 +44,7 @@ def prepare_and_save_user(request_body):
     admin_user.permissions = ', '.join(json.loads(request_body.get('perm', [])))
     admin_user.user_name = request_body.get('userName')
     admin_user.display_name = unquote_plus(request_body.get('displayName'))
+    admin_user.client_id = 'cd6b7678-3ea3-11ef-a04f-5a57a4320fb5'
     if (request_body.get('is_active')):
         admin_user.is_active = request_body.get('is_active')
     if (request_body.get('ct')):
