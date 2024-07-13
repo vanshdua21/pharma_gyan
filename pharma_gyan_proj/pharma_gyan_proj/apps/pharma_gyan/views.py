@@ -5,7 +5,7 @@ import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
-    prepare_and_save_Entity_tag, deactivate_entity, activate_entity
+    prepare_and_save_entity_tag, deactivate_entity, activate_entity
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
 
 from pharma_gyan_proj.utils.s3_utils import S3Wrapper
@@ -188,11 +188,11 @@ def upsert_promo_code(request):
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
 @csrf_exempt
-def upsert_Entity_tag(request):
-    method_name = "upsert_Entity_tag"
+def upsert_entity_tag(request):
+    method_name = "upsert_entity_tag"
     print(f'{method_name}, Before decode: {request.body}')
     request_body = json.loads(request.body.decode("utf-8"))
-    response = prepare_and_save_Entity_tag(request_body)
+    response = prepare_and_save_entity_tag(request_body)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 

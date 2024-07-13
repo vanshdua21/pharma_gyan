@@ -113,13 +113,11 @@
     var baseUrl = "{{ baseUrl }}";
     var mode = "{{mode}}";
     var data = JSON.parse('{{ tag_category|escapejs }}');
-    const activeItems = data.filter(item => item.is_active === 1);
     console.log("data for tag catagory" , data);
-    console.log("active tag catagory" , activeItems);
     $(document).ready(function() {
                     // Populate the tag category dropdown
             var $tagCategory = $('#tagCategory');
-            activeItems.forEach(function(item) {
+            data.forEach(function(item) {
                 var option = $('<option></option>')
                     .attr('value', item.unique_id)
                     .text(item.title);

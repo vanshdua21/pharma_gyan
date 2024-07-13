@@ -30,13 +30,9 @@ class entity_tag_model:
     def get_entity_tag_by_title_and_tag_category(self, title, tag_category):
         try:
             query = f"""
-                    SELECT id from entity_tag WHERE title = '{title}' and tag_id = '{tag_category}'
+                    SELECT id from entity_tag WHERE title = '{title}' and tag_category_id = '{tag_category}'
                     """
             res = execute_query(self.engine, query)
             return res
         except:
             return None
-
-    # def get_entity_tag_by_title(self, title):
-    #     filter_list = [{"column": "title", "value": title, "op": "=="}]
-    #     return self.get_details_by_filter_list(filter_list)

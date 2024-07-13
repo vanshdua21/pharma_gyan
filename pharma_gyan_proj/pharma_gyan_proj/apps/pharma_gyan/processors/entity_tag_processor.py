@@ -44,7 +44,7 @@ def fetch_and_prepare_entity_tag():
     entity_tag_list = []
     for entity in entity_tag:
 
-        tag_title = tag_category_dict.get(entity.tag_id, "Unknown Tag Category")
+        tag_title = tag_category_dict.get(entity.tag_category_id, "Unknown Tag Category")
         if entity.is_active:
             cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateEntityTag('{}')\">Deactivate</button>".format(
                 entity.unique_id, entity.unique_id)
@@ -63,8 +63,8 @@ def fetch_and_prepare_entity_tag():
         })
     return entity_tag_list
 
-def prepare_and_save_Entity_tag(request_body):
-    method_name = "prepare_and_save_promo_code"
+def prepare_and_save_entity_tag(request_body):
+    method_name = "prepare_and_save_entity_tag"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
     session = Session()
@@ -110,7 +110,7 @@ def prepare_and_save_Entity_tag(request_body):
         entity_tag.client_id = '123'
     entity_tag.title = request_body.get('title')
     entity_tag.description = request_body.get('Description')
-    entity_tag.tag_id = request_body.get('tag_category')
+    entity_tag.tag_category_id = request_body.get('tag_category')
     entity_tag.created_by = session.admin_user_session.user_name
 
     try:

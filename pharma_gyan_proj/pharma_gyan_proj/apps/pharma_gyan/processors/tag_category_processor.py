@@ -11,7 +11,8 @@ def fetch_and_prepare_tag_category():
     logger.debug(f"Entry {method_name}")
 
     try:
-       tag_category = tag_category_model().get_details_by_filter_list([])
+        filter_list = [{"column": "is_active", "value": 1, "op": "=="}]
+        tag_category = tag_category_model().get_details_by_filter_list(filter_list)
     except InternalServerError as ey:
         logger.error(
             f"Error while fetching users InternalServerError ::{ey.reason}")

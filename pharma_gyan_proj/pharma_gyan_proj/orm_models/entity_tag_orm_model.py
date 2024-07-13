@@ -9,7 +9,7 @@ class pg_entity_tag(Base, Orm_helper):
     unique_id = Column("unique_id", String, primary_key=True)
     client_id = Column("client_id", String)
     description = Column("description", String)
-    tag_id = Column("tag_id", String)
+    tag_category_id = Column("tag_category_id", String)
     is_active = Column("is_active", Integer, default=1)
     created_by = Column("created_by", String)
     ct = Column("ct", DateTime, default=datetime.utcnow())

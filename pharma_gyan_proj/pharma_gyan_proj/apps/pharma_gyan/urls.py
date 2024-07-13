@@ -11,7 +11,7 @@ urlpatterns = [
     path("editor/upsertPromoCode/", views.upsert_promo_code),
     path('editor/entityTag', views.entity_tag),
     path('editor/viewEntityTag', views.view_entity_tag),
-    path("editor/upsertEntityTag/", views.upsert_Entity_tag),
+    path("editor/upsertEntityTag/", views.upsert_entity_tag),
     path("editor/addChapter/", views.add_chapter),
     path("editor/upsertChapter/", views.upsert_chapter),
     path("editor/secureLogin/", views.secure_login),

@@ -30,16 +30,6 @@ class tag_category_model:
         filter_list = [{"column": "title", "value": title, "op": "=="}]
         return self.get_details_by_filter_list(filter_list)
 
-    # def get_promo_code_by_title_or_pc(self, title, promo_code):
-    #     try:
-    #         query = f"""
-    #                 SELECT id from promo_code WHERE title = '{title}' or promo_code = '{promo_code}'
-    #                 """
-    #         res = execute_query(self.engine, query)
-    #         return res
-    #     except:
-    #         return None
-
     def get_tag_category_by_unique_id(self, unique_id):
         filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="},
                        {"column": "is_active", "value": 1, "op": "=="}]
