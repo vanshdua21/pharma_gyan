@@ -58,7 +58,7 @@ def admin_login(request):
 def editor(request):
     session = Session()
     project_permissions = session.get_admin_user_permissions()
-    permissions_list = project_permissions.split(', ')
+    permissions_list = re.split(r'\s*,\s*', project_permissions)
     rendered_page = render_to_string('pharma_gyan/base.html',
                                      {"project_permissions": permissions_list, "tab_permissions": get_user_tab_permissions(request.user)})
     return HttpResponse(rendered_page)
