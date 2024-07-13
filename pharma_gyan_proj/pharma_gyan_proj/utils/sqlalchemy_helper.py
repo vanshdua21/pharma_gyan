@@ -1,4 +1,5 @@
 import logging
+from pharma_gyan_proj.orm_models.v2.all_models import CourseTagMapping
 from sqlalchemy import inspect, column ,text
 from sqlalchemy.orm import Session, joinedload, load_only
 from pharma_gyan_proj.utils.sqlalchemy_engine import SqlAlchemyEngine
@@ -287,6 +288,34 @@ def save(engine, table, entity):
         else:
             session.commit()
 
+def fetch_rows_with_join(engine, table, join_list, columns=[], relationships=[], limit=None):
+    """
+        Function to fetch multiple rows from table.
+        parameters:
+            table: table class name
+            filter_list: list of dict of filters, format - [{"column": "col", "value": "val", "op": "=="}]
+            columns: list of columns to be fetched , ["id","unique_id"]
+            relationships: list of relationships to be fetched , ["tag_mapping.tag","url_mapping.url"]
+            limit: no of rows to be fetched
+        returns: List of class object of table
+    """
+    with Session(engine) as session:
+        session.begin()
+        try:
+            q = session.query(table).options(
+                joinedload(table.tags),
+                joinedload(table.topics)
+            )
+            # for filters in filter_list:
+            #     q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
+            # q = add_columns_projections(q, columns)
+            # q = add_relationshsip_projections(q, relationships)
+            print('---- query ----', q)
+            entity = q.limit(limit).all() if limit is not None else q.all()
+            return entity
+        except Exception as ex:
+            logging.error(f"error while fetching from table, Error: ", ex)
+            raise ex
 
 def fetch_rows_limited(engine, table, filter_list, columns=[], relationships=[], limit=None):
     """

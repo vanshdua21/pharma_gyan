@@ -37,7 +37,7 @@ import json
 from django.http import JsonResponse
 import json
 
-from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import prepare_and_save_course_v2
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import fetch_and_prepare_courses_v2, prepare_and_save_course_v2
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit
@@ -341,6 +341,13 @@ def viewCourses(request):
     # Convert list of dictionaries to JSON
     courses_json = json.dumps(courses)
     rendered_page = render_to_string('pharma_gyan/view_courses.html', {"courses": courses_json, "project_permissions": Session().get_admin_user_permissions()})
+    return HttpResponse(rendered_page)
+
+def viewCoursesV2(request):
+    courses = fetch_and_prepare_courses_v2()
+    # Convert list of dictionaries to JSON
+    courses_json = json.dumps(courses)
+    rendered_page = render_to_string('pharma_gyan/view_courses_v2.html', {"courses": courses_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
 @csrf_exempt

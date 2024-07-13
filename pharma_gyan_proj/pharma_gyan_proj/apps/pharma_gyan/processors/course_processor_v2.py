@@ -70,13 +70,16 @@ def save_or_update_course(course):
 
     logger.debug(f"Exit {method_name}, Success")
 
-def fetch_and_prepare_courses():
-    method_name = "fetch_and_prepare_courses"
+def fetch_and_prepare_courses_v2():
+    method_name = "fetch_and_prepare_courses_v2"
     logger.debug(f"Entry {method_name}")
+    # relationships_list = [Course.tags, CourseTagMapping.tag, Course.topics]
     courses = fetch_courses()
     # Convert list of model instances to list of dictionaries
     courses_list = []
     for course in courses:
+        print('course', course)
+        editBtn = "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editCourse('{}')\">Edit</button>".format(course.unique_id, course.unique_id)
         if course.is_active:
             cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateCourse('{}')\">Deactivate</button>".format(
                 course.unique_id, course.unique_id)
@@ -87,8 +90,10 @@ def fetch_and_prepare_courses():
             "unique_id": course.unique_id,
             "title": course.title,
             "description": course.description,
-            "image_url": course.thumbnail_url,
+            "tags": [tag.tag_id for tag in course.tags],
+            "topics_count": len(course.topics),
             "is_active": course.is_active,
+            "edit": editBtn,
             "cta": cta,
             # "is_active": user.is_active,
             # "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editUser('{}')\">Edit</button>".format(user.unique_id, user.unique_id),
@@ -96,11 +101,11 @@ def fetch_and_prepare_courses():
         })
     return courses_list
 
-def fetch_courses(filter_list=[]):
+def fetch_courses(filter_list=[], relationships_list=[]):
     method_name = "fetch_courses"
 
     try:
-        db_res = course_model().get_details_by_filter_list(filter_list)
+        db_res = course_model_v2().get_details_by_filter_list(filter_list, relationships_list = relationships_list)
     except InternalServerError as ey:
         logger.error(
             f"Error while fetching courses InternalServerError ::{ey.reason}")

@@ -28,7 +28,7 @@ urlpatterns = [
     path("editor/activateEntityTag/<str:uniqueId>/", views.activate_entity_tag),
     path("editor/addMedia/", views.add_media),
     path("editor/addCourse/", views.addCourse),
-    path("editor/viewCourses/", views.viewCourses),
+    path("editor/viewCourses/", views.viewCoursesV2),
     path("editor/upsertCourse/", views.upsertCourse),
     path("editor/upsertCourseV2/", views.upsertCourseV2),
     path("editor/deactivateCourse/<str:uniqueId>/", views.deactivate_course),

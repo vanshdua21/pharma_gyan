@@ -1,0 +1,399 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<!-- <link href="/static/pharma_gyan/css/bstreeview.min.css">
+<script src="/static/pharma_gyan/js/bstreeview.min.js"></script> -->
+<link rel="stylesheet" href="/static/pharma_gyan/css/acl-tree-view.css" />
+<script src="/static/pharma_gyan/js/acl-tree-view.js"></script>
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-hdr">
+                <h2>
+                    All <span class="fw-900"><i>Courses</i></span>
+                </h2>
+                <div class="panel-toolbar">
+                    <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                    <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                    <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="panel-tag">
+                        <p>Below is a list of all courses configured in the system</p>
+                    </div>
+                    <!-- datatable start -->
+                    <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                        <thead class="bg-primary-600">
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Tags</th>
+                            <th>Topics Count</th>
+                            <th>Active</th>
+                            <th>Edit</th>
+                            <th>CTA</th>
+
+                        </tr>
+                        </thead>
+                        <tbody id="colors-data">
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Tags</th>
+                                <th>Topics Count</th>
+                                <th>Active</th>
+                                <th>Edit</th>
+                                <th>CTA</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <!-- datatable end -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="courseTreeModel" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Course Structure</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="example">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var data = JSON.parse('{{ courses|escapejs }}');
+    var userPermissions = "{{ project_permissions }}";
+
+    function validatePermissions() {
+        if (!userPermissions.includes("editContent")) {
+            alert("User does not have permission to edit Content");
+            return false;
+        }
+        return true;
+    }
+
+    var datatable;
+    $(document).ready(function()
+    {
+        data.forEach(item => {
+            if(item.is_active){
+                item.is_active = "YES"
+            }else{
+                item.is_active = "NO"
+            }
+        })
+        // initialize datatable
+        datatable = $('#dt-basic-example').dataTable(
+            {
+                responsive: true,
+                lengthChange: false,
+                data : data,
+                columns: [
+                    { data: "title" },
+                    { data: "description" },
+                    { data: "tags" },
+                    { data: "topics_count" },
+                    { data: "is_active" },
+                    { data: "edit"},
+                    { data: "cta"}
+                ],
+                dom:
+                /*	--- Layout Structure
+                    --- Options
+                    l	-	length changing input control
+                    f	-	filtering input
+                    t	-	The table!
+                    i	-	Table information summary
+                    p	-	pagination control
+                    r	-	processing display element
+                    B	-	buttons
+                    R	-	ColReorder
+                    S	-	Select
+
+                    --- Markup
+                    < and >				- div element
+                    <"class" and >		- div with a class
+                    <"#id" and >		- div with an ID
+                    <"#id.class" and >	- div with an ID and a class
+
+                    --- Further reading
+                    https://datatables.net/reference/option/dom
+                    --------------------------------------
+                 */
+                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [
+                    /*{
+                        extend:    'colvis',
+                        text:      'Column Visibility',
+                        titleAttr: 'Col visibility',
+                        className: 'mr-sm-3'
+                    },*/
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        titleAttr: 'Generate CSV',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        titleAttr: 'Copy to clipboard',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm'
+                    }
+                ]
+            });
+
+    });
+
+
+    function editCourse(id) {
+        if (!validatePermissions()) return;
+        window.open("#editCourse?id=" + id, "_blank");
+    }
+
+    function openTreeModal(id) {
+        // const myData = [
+        //     {
+        //         "label": "Course Name",
+        //         "ul": 
+        //         [
+        //             {
+        //                 "label": "Semester 1",
+        //                 "ul": 
+        //                 [
+        //                     {
+        //                         "label": "Subject 1-1",
+        //                         "ul": 
+        //                         [
+        //                             {
+        //                                 "label": "Topic 1-1-1"
+        //                             }
+        //                         ]
+        //                     }
+        //                 ]
+        //             }, 
+        //             {
+        //                 "label": "Semester 2",
+        //                 "ul": 
+        //                 [
+        //                     {
+        //                         "label": "Subject 2-1",
+        //                         "ul": 
+        //                         [
+        //                             {
+        //                                 "label": "Topic 2-1-1"
+        //                             },
+        //                             {
+        //                                 "label": "Topic 2-1-2"
+        //                             }
+        //                         ]
+        //                     }
+        //                 ]
+        //             }, 
+        //             {
+        //                 "label": "Semester 3",
+        //                 "ul": 
+        //                 [
+        //                     {
+        //                         "label": "Subject 1",
+        //                         "ul": 
+        //                         [
+        //                             {
+        //                                 "label": "Topic 3-1-1"
+        //                             },
+        //                             {
+        //                                 "label": "Topic 3-1-2"
+        //                             },
+        //                             {
+        //                                 "label": "Topic 3-1-3"
+        //                             }
+        //                         ]
+        //                     }, 
+        //                     {
+        //                         "label": "Subject 2"
+        //                     },
+        //                     {
+        //                         "label": "Subject 3"
+        //                     }
+        //                 ]
+        //             }
+        //         ]
+        //     },
+        //     // more items here
+        // ]
+
+        lock = true;
+        $("#err-div").hide();
+        $("#success-div").hide();
+        $.post('/pharma_gyan/editor/getCourseTreeJson/' + id + '/',function(data)
+            {
+                lock=false;
+                if(data['result']=='SUCCESS')
+                {
+                    const myData = data.data;
+                    // Clear the existing tree view content
+                    $('#example').empty();
+                    $('#example').aclTreeView({ 
+                    // options here
+                    }, myData);
+                    $('#courseTreeModel').modal('show');
+                    return;
+                }
+                else
+                {
+                    alert('Error while fetching course tree data');
+                    return;
+                }
+
+            }
+        )   
+    }
+
+    function deactivateCourse(id)
+    {
+        if (!validatePermissions()) return;
+        if(lock==true)
+            return;
+
+        var confirmDeactivate = confirm("Do you really want to deactivate this course?");
+        if(confirmDeactivate==false)
+            return;
+
+        lock = true;
+        $("#err-div").hide();
+        $("#success-div").hide();
+        $.post('/pharma_gyan/editor/deactivateCourse/' + id + '/',function(data)
+            {
+                lock=false;
+                if(data['result']=='SUCCESS')
+                {
+                    location.reload();
+                    return;
+                }
+                else
+                {
+                    alert('Error while deactivating course');
+                    return;
+                }
+
+            }
+        )
+        ;
+    }
+
+    function activateCourse(id)
+    {
+        if (!validatePermissions()) return;
+        if(lock==true)
+            return;
+
+        var confirmActivate = confirm("Do you really want to activate this course?");
+        if(confirmActivate==false)
+            return;
+
+        lock = true;
+        $("#err-div").hide();
+        $("#success-div").hide();
+        $.post('/pharma_gyan/editor/activateCourse/' + id + '/',function(data)
+            {
+                lock=false;
+                if(data['result']=='SUCCESS')
+                {
+                    location.reload();
+                    lock = false;
+                    return;
+                }
+                else
+                {
+                    alert('Error while activating course.');
+                    lock = false;
+                    return;
+                }
+
+            }
+        ).fail(function(jqXHR, textStatus, errorThrown) {
+                    result = jqXHR['responseJSON']
+                    console.log(result)
+                    alert("Error! "+result['detailed_message']);
+                    lock = false;
+                    return;
+        });
+    }
+
+    var lock = false;
+    var baseUrl = '<?=$baseUrl?>';
+
+    // function delUser(id)
+    // {
+    //     if(lock==true)
+    //         return;
+
+    //     var confirmDelete = confirm("Do you really want to delete this user?");
+    //     if(confirmDelete==false)
+    //         return;
+
+    //     lock = true;
+    //     $("#err-div").hide();
+    //     $("#success-div").hide();
+    //     $.post('/pharma_gyan/editor/deleteUser/' + id + '/',function(data)
+    //         {
+    //             lock=false;
+    //             if(data['result']=='SUCCESS')
+    //             {
+    //                 location.reload();
+    //                 return;
+    //             }
+    //             else
+    //             {
+    //                 alert('Error while deleting user');
+    //                 return;
+    //             }
+
+    //         }
+    //     )
+    //     ;
+    // }
+
+
+</script>

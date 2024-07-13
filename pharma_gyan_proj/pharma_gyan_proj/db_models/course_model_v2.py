@@ -1,5 +1,5 @@
 from pharma_gyan_proj.orm_models.v2.all_models import Course
-from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
+from pharma_gyan_proj.utils.sqlalchemy_helper import fetch_rows_with_join, sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
     update
 
 
@@ -17,7 +17,7 @@ class course_model_v2:
         return dict(status=True, response=res)
 
     def get_details_by_filter_list(self, filter_list, columns_list=[], relationships_list=[]):
-        res = fetch_rows_limited(self.engine, self.table, filter_list, columns=columns_list,
+        res = fetch_rows_with_join(self.engine, self.table, filter_list, columns=columns_list,
                                  relationships=relationships_list)
         if res is None or len(res) <= 0:
             return []

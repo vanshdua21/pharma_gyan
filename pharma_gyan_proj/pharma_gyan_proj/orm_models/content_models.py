@@ -12,7 +12,7 @@ class Orm_helper:
             setattr(self, key, value)
 
 class PgCourse(Base, Orm_helper):
-    __tablename__ = 'course'
+    __tablename__ = 'course_v1'
 
     id = Column("id", Integer, autoincrement=True, primary_key=True)
     unique_id = Column("unique_id", String, primary_key=True)
