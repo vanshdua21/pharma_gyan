@@ -72,7 +72,7 @@ def save_or_update_promo_code(promo_code):
         db_res = promo_code_model().upsert(promo_code)
         if not db_res.get("status"):
             raise InternalServerError(method_name=method_name,
-                                      reason="Unable to save campaign whatsapp content details")
+                                      reason="Unable to save promo code details")
         # prepare_and_save_activity_logs(wa_content)
     except InternalServerError as ey:
         logger.error(

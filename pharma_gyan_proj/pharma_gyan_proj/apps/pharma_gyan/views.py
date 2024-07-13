@@ -3,10 +3,12 @@ import logging
 import os
 import uuid
 
-from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter, \
+    fetch_and_prepare_chapter_view
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
+from pharma_gyan_proj.exceptions.failure_exceptions import InternalServerError
 
 from pharma_gyan_proj.utils.s3_utils import S3Wrapper
 
@@ -40,7 +42,8 @@ import json
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import prepare_and_save_course_v2
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
-from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit
+from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit, \
+    prepare_and_save_topic
 
 from django.views.decorators.csrf import csrf_exempt
 import re
@@ -202,6 +205,15 @@ def upsert_chapter(request):
 
 
 @csrf_exempt
+def upsert_topic_v2(request):
+    method_name = "upsert_topic_v2"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    response = prepare_and_save_topic(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
 def upsert_promo_code(request):
     method_name = "upsert_promo_code"
     print(f'{method_name}, Before decode: {request.body}')
@@ -324,6 +336,15 @@ def addCourse(request):
     with open(tags_json_file_path, 'r') as file:
         tags = json.load(file)
     rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"user": user, "mode": "create", "topics": json.dumps(topics), "tags": json.dumps(tags)})
+    return HttpResponse(rendered_page)
+
+
+def add_topic(request):
+    user = request.user
+    chapters = fetch_and_prepare_chapter_view()
+    if chapters is None or len(chapters) < 1:
+        raise InternalServerError(reason="Error while fetching chapter!")
+    rendered_page = render_to_string('pharma_gyan/add_topic.html', {"user": user, "mode": "create", "chapters": json.dumps(chapters)})
     return HttpResponse(rendered_page)
 
 def editCourse(request):

@@ -335,6 +335,32 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </ul>
         </li>
         {% endif %}
+    {% if "editTopic" in project_permissions or "viewTopics" in project_permissions %}
+    <li class="nav-title">Topic</li>
+        <li>
+        <a href="#" title="Users" data-filter-tags="application intel">
+            <i class="fal fa-file-alt"></i>
+            <span class="nav-link-text" data-i18n="nav.application_intel">Topic</span>
+        </a>
+        <ul>
+            <li>
+                {% if "editTopic" in project_permissions %}
+                    <a href="#addTopic" title="Add Topic" data-filter-tags="application intel">
+                        <i class="fal fa-file-alt"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel">Add</span>
+                    </a>
+                {% endif %}
+            </li>
+                {% if "viewTopics" in project_permissions %}
+                    <a href="#viewTopics" title="View saved config" data-filter-tags="application intel introduction">
+                        <i class="fal fa-eye"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
+                    </a>
+                {% endif %}
+            </li>
+        </ul>
+        </li>
+        {% endif %}
     {% if "editUsers" in project_permissions or "viewUsers" in project_permissions %}
     <li class="nav-title">Users</li>
         <li>

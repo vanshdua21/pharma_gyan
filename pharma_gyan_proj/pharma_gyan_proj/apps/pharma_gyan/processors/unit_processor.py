@@ -9,7 +9,8 @@ from django.core.files.storage import FileSystemStorage
 from pharma_gyan_proj.common.constants import TAG_FAILURE, TAG_SUCCESS, AdminUserPermissionType
 from pharma_gyan_proj.exceptions.failure_exceptions import BadRequestException, InternalServerError
 from pharma_gyan_proj.db_models.unit_model import unit_model
-from pharma_gyan_proj.orm_models.content_models import PgCourse, PgSemester, PgSubject, PgUnit, PgChapter
+from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
+from pharma_gyan_proj.orm_models.content_models import PgCourse, PgSemester, PgSubject, PgTopic, PgChapter
 
 logger = logging.getLogger("apps")
 
@@ -17,7 +18,7 @@ def prepare_and_save_unit(request_body):
     method_name = "prepare_and_save_unit"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
-    unit = PgUnit()
+    unit = PgTopic()
     if (request_body.get('id')):
         unit.id = request_body.get('id')
     unit.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
@@ -45,6 +46,62 @@ def prepare_and_save_unit(request_body):
         logger.error(f"Error while saving or updating unit ::{e}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
     
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+
+def prepare_and_save_topic(request_body):
+    method_name = "prepare_and_save_topic"
+    logger.debug(f"Entry {method_name}, request_body: {request_body}")
+
+    session = Session()
+
+    validate_topic_details(request_body)
+    if request_body.get('id') is not None:
+        filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
+        try:
+            topic = topic_model().get_details_by_filter_list(filter_list)
+            db_resp = topic_model().get_max_version_by_uid(request_body.get('unique_id'))
+            if db_resp is not None and len(db_resp) > 0:
+                logger.error(f"{method_name} :: Error while fetching latest version! "
+                             f"Error: {db_resp.get('result', None)}")
+                return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                            details_message="While fetching latest version!")
+        except InternalServerError as ey:
+            logger.error(
+                f"Error while fetching users InternalServerError ::{ey.reason}")
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        details_message="Something went wrong!")
+        except Exception as e:
+            logger.error(f"Error while fetching users ::{e}")
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        details_message="Something went wrong !")
+        if topic is None:
+            return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                        details_message="Topic is not found. Please add topic first!")
+        topic = topic[0]
+        topic.version = db_resp[0].version + 1
+    else:
+        topic = PgTopic()
+        topic.unique_id = uuid.uuid4().hex
+        topic.version = 1
+    topic.title = request_body.get('title')
+    topic.description = request_body.get('description')
+    topic.version = request_body.get('discount_type')
+    topic.discount = request_body.get('discount')
+    topic.created_by = session.admin_user_session.user_name
+
+    try:
+        db_res = topic_model().upsert(topic)
+        if not db_res.get("status"):
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="Unable to save topic details!")
+        # prepare_and_save_activity_logs(wa_content)
+    except Exception as e:
+        logger.error(f"Error while saving or updating topic Exception ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                    detailed_message="Error while saving or updating topic!")
+
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
 
