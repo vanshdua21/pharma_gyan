@@ -37,6 +37,12 @@ def prepare_and_save_chapter(request_body):
         filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
         try:
             chapter = chapter_model().get_details_by_filter_list(filter_list)
+            db_resp = chapter_model().get_max_version_by_uid(request_body.get('unique_id'))
+            if db_resp is not None and len(db_resp) > 0:
+                logger.error(f"{method_name} :: Error while fetching latest version! "
+                             f"Error: {db_resp.get('result', None)}")
+                return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                            details_message="While fetching latest version!")
         except InternalServerError as ey:
             logger.error(
                 f"Error while fetching users InternalServerError ::{ey.reason}")
@@ -50,13 +56,15 @@ def prepare_and_save_chapter(request_body):
             return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                         details_message="Promo code is not found. Please add Chapter first!")
         chapter = chapter[0]
+        chapter.version = db_resp[0].version + 1
     else:
         chapter = pg_chapter()
         chapter.unique_id = uuid.uuid4().hex
+        chapter.version = 1
     chapter.title = request_body.get('title')
-    chapter.content=request_body.get('content')
-    chapter.mark_as_free=request_body.get('is_free')
-    chapter.unit_id = 1
+    chapter.content = request_body.get('content')
+    chapter.mark_as_free = request_body.get('is_free')
+    chapter.client_id = '123'
     chapter.created_by = session.admin_user_session.user_name
 
     try:

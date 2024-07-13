@@ -1,5 +1,5 @@
 from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
-    update
+    update, execute_query
 from pharma_gyan_proj.db_models.pharma_gyan import pg_chapter
 
 
@@ -29,3 +29,8 @@ class chapter_model:
     def get_chapter_by_title(self, title):
         filter_list = [{"column": "title", "value": title, "op": "=="}]
         return self.get_details_by_filter_list(filter_list)
+
+    def get_max_version_by_uid(self, unique_id):
+        query = f"""SELECT max(version) as version from chapter where UniqueId = '{unique_id}'"""
+        res = execute_query(self.engine, query)
+        return res

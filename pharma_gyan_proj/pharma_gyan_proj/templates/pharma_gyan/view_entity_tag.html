@@ -147,6 +147,12 @@ $(document).ready(function()
 
     });
 
+
+    function cloneEntityTag(unique_id) {
+        if (!validatePermissions()) return;
+        window.open("#cloneEntityTag?unique_id=" + unique_id, "_blank");
+    }
+
     function validatePermissions() {
         if (!userPermissions.includes("editEntityTag")) {
             alert("User does not have permission to edit Entity Tag");

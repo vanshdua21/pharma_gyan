@@ -42,6 +42,8 @@
   }
 
 </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
 
     <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
     "><strong>Congratulations!</strong> <span id="success-text"></span>
@@ -113,10 +115,12 @@
     var baseUrl = "{{ baseUrl }}";
     var mode = "{{mode}}";
     var data = JSON.parse('{{ tag_category|escapejs }}');
-    console.log("data for tag catagory" , data);
+    var $tagCategory;
+    var client_id;
     $(document).ready(function() {
+            client_id = Cookies.get('client_id');
                     // Populate the tag category dropdown
-            var $tagCategory = $('#tagCategory');
+            $tagCategory = $('#tagCategory');
             data.forEach(function(item) {
                 var option = $('<option></option>')
                     .attr('value', item.unique_id)
@@ -135,7 +139,21 @@
                 $("#progress-bar").width(currWidth + 50);
             }
 
+            if(mode=="clone"){
+            var entity_tag = JSON.parse('{{ entity_tag|escapejs }}');
+            setCloneMode(entity_tag);
+
+        }
+
 });
+function setCloneMode(entity_tag){
+       $("#main_title").html('Add Entity Tag');
+       var tag_category_dict = entity_tag["tag_category_dict"];
+
+        $("#title").val(entity_tag["title"]);
+        $("#Description").val(entity_tag["description"]);
+        $tagCategory.val(tag_category_dict['unique_id']).change();
+    }
 
     function redirectToAddET(){
         window.location.reload();
@@ -210,7 +228,8 @@
         let data = {
         'title':($('#title').val()),
         'description':($('#Description').val()),
-        'tag_category': $('#tagCategory').val()
+        'tag_category': $('#tagCategory').val(),
+        'client_id': client_id
          };
         console.log('data',data);
 

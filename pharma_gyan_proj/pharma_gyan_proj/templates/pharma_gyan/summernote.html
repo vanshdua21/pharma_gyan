@@ -87,14 +87,13 @@
 }
 </style>
 
-<!-- <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
 "><strong>Congratulations!</strong> <span id="success-text"></span>
 
     </div>
     <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
     <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button>
-</div> -->
-
+</div>
 <div id="main-form-div">
     <div class="row">
         <div class="col-xl-12">
@@ -367,6 +366,11 @@
                     $("#success-text").html("Chapter added Successfully");
                 }
                 $("#main-form-div").hide();
+                localStorage.removeItem('markAsFree');
+                localStorage.removeItem('Chapter_title');
+                localStorage.removeItem('summernoteData');
+                localStorage.removeItem('uploadedImageURLs');
+                localStorage.removeItem('uploadedVideoURLs');
                 return;
 
             },
@@ -412,7 +416,7 @@
         }    
     $(document).ready(function () 
     {
-   
+
         // Custom video button
         var videoButton = function (context) {
             var ui = $.summernote.ui;

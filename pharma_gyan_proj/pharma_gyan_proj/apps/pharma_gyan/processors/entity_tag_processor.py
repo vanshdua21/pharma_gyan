@@ -40,7 +40,8 @@ def fetch_and_prepare_entity_tag():
     if entity_tag is None:
         return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                     details_message="Entity tag not found. Please add entity first!")
-# Convert list of model instances to list of dictionaries
+
+    # Convert list of model instances to list of dictionaries
     entity_tag_list = []
     for entity in entity_tag:
 
@@ -59,9 +60,39 @@ def fetch_and_prepare_entity_tag():
             "created_by": entity.created_by,
             "is_active": entity.is_active,
             "cta": cta,
-            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneEntityTag('{}')\">Clone</button>",
+            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneEntityTag('{}')\">Clone</button>".format(entity.unique_id, entity.unique_id),
         })
     return entity_tag_list
+
+
+def fetch_entity_tag_by_unique_id(unique_id):
+    filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+    try:
+        entity_tag = entity_tag_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching entity tag InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching entity tag ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if entity_tag is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Entity tag is not found. Please add entity tag first!")
+    entity_tag = entity_tag[0]
+    # Fetch tag categories
+    active_tag_categories = tag_category_model().get_details_by_filter_list(
+        [{"column": "unique_id", "value": entity_tag.tag_category_id, "op": "=="}])
+
+    if active_tag_categories is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="No active tag categories found!")
+    entity_tag_dict = {
+        "title": entity_tag.title,
+        "description": entity_tag.description,
+        "tag_category_dict": dict(unique_id=entity_tag.tag_category_id, title=active_tag_categories[0].title)
+    }
+    return entity_tag_dict
 
 def prepare_and_save_entity_tag(request_body):
     method_name = "prepare_and_save_entity_tag"
@@ -76,7 +107,7 @@ def prepare_and_save_entity_tag(request_body):
         if existing_entity_tag is not None and len(existing_entity_tag) > 0:
             if request_body.get('id') is None or existing_entity_tag[0].unique_id != request_body.get('unique_id'):
                 return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
-                            details_message="Duplicate entity tag found. Please use a different entity title or different level.")
+                            details_message="Duplicate entity tag found. Please use a different entity title or different tag category!.")
 
     except InternalServerError as ey:
         logger.error(f"Error while fetching entity tag by title InternalServerError :: {ey.reason}")
@@ -89,7 +120,7 @@ def prepare_and_save_entity_tag(request_body):
 
     entity_tag = pg_entity_tag()
     entity_tag.unique_id = uuid.uuid4().hex
-    entity_tag.client_id = '123'
+    entity_tag.client_id = request_body.get('client_id')
     entity_tag.title = request_body.get('title')
     entity_tag.description = request_body.get('description')
     entity_tag.tag_category_id = request_body.get('tag_category')

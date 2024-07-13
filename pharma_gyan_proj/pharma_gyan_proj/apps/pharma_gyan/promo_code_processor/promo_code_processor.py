@@ -187,7 +187,7 @@ def fetch_and_prepare_promo_code():
             "created_by": promo.created_by,
             "last_update": promo.ut.strftime('%d %b %Y, %I:%M %p'),
             "usage_left": usage_left,
-            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPromoCode('{}')\">Clone</button>".format(promo.unique_id, promo.unique_id),
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"clonePromoCode('{}')\">Clone</button>".format(promo.unique_id, promo.unique_id),
             "cta": cta
         })
     return promo_code_list

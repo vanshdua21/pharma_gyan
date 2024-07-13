@@ -5,7 +5,7 @@ import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
-    prepare_and_save_entity_tag, deactivate_entity, activate_entity
+    prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
 
 from pharma_gyan_proj.utils.s3_utils import S3Wrapper
@@ -123,7 +123,7 @@ def preview_chapter_content(request):
     method_name = "preview_chapter_content"
     print(f'{method_name}, Before decode: {request.body}')
     request_body = json.loads(request.body.decode("utf-8"))
-    unique_id = request_body.get('uniqueId')
+    unique_id = request_body.get('unique_id')
     title = request_body.get('title')
     content = request_body.get('content')
     if unique_id is not None and unique_id != '':
@@ -150,6 +150,26 @@ def edit_promo_code(request):
     print(promo_code)
     rendered_page = render_to_string('pharma_gyan/add_promo_code.html',
                                      {"promoCode": json.dumps(promo_code, default=str), "baseUrl": baseUrl, "mode": "edit"})
+    return HttpResponse(rendered_page)
+
+
+def clone_entity_tag(request):
+    baseUrl = settings.BASE_PATH
+    # Retrieve the id parameter from the query string
+    unique_id = request.GET.get('unique_id')
+    entity_tag = fetch_entity_tag_by_unique_id(unique_id)
+    if entity_tag is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No Entity tag with this Id")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    entity_tag_json = json.dumps(entity_tag)
+    tag_category = fetch_and_prepare_tag_category()
+    tag_category_json = json.dumps(tag_category)
+    if tag_category_json is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No Entity tag category found!")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code,
+                            content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_entity_tag.html',
+                                     {"baseUrl": baseUrl, "mode": "clone", "entity_tag": entity_tag_json, "tag_category": tag_category_json})
     return HttpResponse(rendered_page)
 
 
