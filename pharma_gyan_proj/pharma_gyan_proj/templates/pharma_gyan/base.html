@@ -282,6 +282,33 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </ul>
         </li>
         {% endif %}
+        {% if "editEntityTag" in project_permissions or "viewEntityTag" in project_permissions %}
+    <li class="nav-title">ENTITY TAG</li>
+        <li>
+        <a href="#" title="Users" data-filter-tags="application intel">
+            <i class="fal fa-file-alt"></i>
+            <span class="nav-link-text" data-i18n="nav.application_intel">Entity Tag</span>
+        </a>
+        <ul>
+            <li>
+                {% if "editEntityTag" in project_permissions %}
+                    <a href="#entityTag" title="Add Entity" data-filter-tags="application intel">
+                        <i class="fal fa-file-alt"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel">Add</span>
+                    </a>
+                {% endif %}
+            </li>
+                {% if "viewEntityTag" in project_permissions %}
+                    <a href="#viewEntityTag" title="View saved config" data-filter-tags="application intel introduction">
+                        <i class="fal fa-eye"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
+                    </a>
+                {% endif %}
+           </li>
+        </ul>
+        </li>
+        {% endif %}
+
     {% if "editChapter" in project_permissions or "viewChapters" in project_permissions %}
     <li class="nav-title">Chapters</li>
         <li>

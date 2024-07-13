@@ -4,6 +4,9 @@ import os
 import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
+from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
+    prepare_and_save_entity_tag, deactivate_entity, activate_entity
+from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
 
 from pharma_gyan_proj.utils.s3_utils import S3Wrapper
 
@@ -109,7 +112,12 @@ def promo_code(request):
 
     rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"baseUrl": baseUrl, "mode": "create"})
     return HttpResponse(rendered_page)
-
+def entity_tag(request):
+    baseUrl = settings.BASE_PATH
+    tag_category = fetch_and_prepare_tag_category()
+    tag_category_json = json.dumps(tag_category)
+    rendered_page = render_to_string('pharma_gyan/add_entity_tag.html', {"baseUrl": baseUrl, "mode": "create", "tag_category": tag_category_json})
+    return HttpResponse(rendered_page)
 @csrf_exempt
 def preview_chapter_content(request):
     method_name = "preview_chapter_content"
@@ -152,7 +160,11 @@ def view_promo_code(request):
     rendered_page = render_to_string('pharma_gyan/view_promo_code.html', {"promo_code": promo_code_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
-
+def view_entity_tag(request):
+    entity_tag = fetch_and_prepare_entity_tag()
+    entity_tag_json = json.dumps(entity_tag)
+    rendered_page = render_to_string('pharma_gyan/view_entity_tag.html', {"entity_tag": entity_tag_json, "project_permissions": Session().get_admin_user_permissions()})
+    return HttpResponse(rendered_page)
 def add_chapter(request):
     user = settings.BASE_PATH
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
@@ -178,6 +190,14 @@ def upsert_promo_code(request):
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
+@csrf_exempt
+def upsert_entity_tag(request):
+    method_name = "upsert_entity_tag"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    response = prepare_and_save_entity_tag(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
 @csrf_exempt
 def secure_login(request):
@@ -263,7 +283,17 @@ def activate_promo_code(request, uniqueId):
     response = activate_promo(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+@csrf_exempt
+def deactivate_entity_tag(request, uniqueId):
+    response = deactivate_entity(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
+@csrf_exempt
+def activate_entity_tag(request, uniqueId):
+    response = activate_entity(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 def addCourse(request):
     user = request.user
     json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'topics.json')

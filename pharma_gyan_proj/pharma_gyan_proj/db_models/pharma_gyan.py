@@ -6,3 +6,4 @@ from pharma_gyan_proj.orm_models.user_permissions_orm_model import pg_user_permi
 from pharma_gyan_proj.orm_models.user_sessions_orm_model import pg_user_sessions
 from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
 from pharma_gyan_proj.orm_models.entity_tag_orm_model import pg_entity_tag
+from pharma_gyan_proj.orm_models.tag_category_orm_model import pg_tag_category
