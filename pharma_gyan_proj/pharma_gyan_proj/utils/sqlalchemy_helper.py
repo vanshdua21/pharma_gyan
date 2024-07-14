@@ -288,7 +288,7 @@ def save(engine, table, entity):
         else:
             session.commit()
 
-def fetch_rows_with_join(engine, table, join_list, columns=[], relationships=[], limit=None):
+def fetch_rows_with_join(engine, table, filter_list, columns=[], relationships=[], limit=None):
     """
         Function to fetch multiple rows from table.
         parameters:
@@ -306,11 +306,9 @@ def fetch_rows_with_join(engine, table, join_list, columns=[], relationships=[],
                 joinedload(table.tags),
                 joinedload(table.topics)
             )
-            # for filters in filter_list:
-            #     q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
-            # q = add_columns_projections(q, columns)
-            # q = add_relationshsip_projections(q, relationships)
-            print('---- query ----', q)
+            for filters in filter_list:
+                q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
+            q = add_columns_projections(q, columns)
             entity = q.limit(limit).all() if limit is not None else q.all()
             return entity
         except Exception as ex:

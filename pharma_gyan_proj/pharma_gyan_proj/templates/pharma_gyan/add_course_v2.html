@@ -249,7 +249,7 @@
 <script type="text/javascript">
     var baseUrl = '<?=$baseUrl?>';
     var mode = "{{mode}}";
-    var currentCustomerData = {};
+    var currentCourseData = {};
     var available_topics = JSON.parse('{{ topics|escapejs }}');
     var tags = JSON.parse('{{ tags|escapejs }}');
 
@@ -314,24 +314,17 @@
             $("#progress-bar").width(currWidth + 50);
         }
 
-        if(mode=="edit"){
-            currentCustomerData = JSON.parse('{{ user|escapejs }}');
-            console.log('Data-',currentCustomerData);
-            setEditMode(currentCustomerData);
-        }
-
         // Initial blur and opacity effect on page load
         document.getElementById('panel-5').classList.add('blur-effect', 'opacity-effect');
         document.getElementById('panel-5').style.pointerEvents = 'none';
-
-        // Load data from localStorage if it exists
-        loadCourse();
 
         // Save form data to localStorage on input change
         $('#title, #desc, #hierarchical-select').on('change', saveCourse);
 
         // Save selected topics
         $('#topics-container').on('DOMSubtreeModified', saveCourse);
+
+        loadCourse();
     });
 
     function saveCourse() {
@@ -352,13 +345,41 @@
             topics: topics
         };
 
-        localStorage.setItem('course', JSON.stringify(courseData));
+        if (mode == "edit") {
+            var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
+            editCourses[currentCourseData["unique_id"]] = courseData;
+            localStorage.setItem('edit_courses', JSON.stringify(editCourses));
+        }
+        else {
+            localStorage.setItem('course', JSON.stringify(courseData));
+        }    
     }
 
     function loadCourse() {
-        let courseData = JSON.parse(localStorage.getItem('course'));
+        let courseData = '';
+        if (mode == "edit") {
+            currentCourseData = JSON.parse('{{ course|escapejs }}') || {};
+            currentCourseData = JSON.parse(currentCourseData);
+            console.log('currentCourseData', currentCourseData);
+            console.log('currentCourseData["unique_id"]', currentCourseData["unique_id"]);
+            var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
+            courseData = editCourses[currentCourseData["unique_id"]];
+            if (!courseData) {
+                console.log('in edit currentCourseData', currentCourseData);
+                courseData = currentCourseData;
+                editCourses[currentCourseData["unique_id"]] = courseData;
+                localStorage.setItem('edit_courses', JSON.stringify(editCourses));
+            }
+        }
+        else {
+            console.log('in add');
+            courseData = JSON.parse(localStorage.getItem('course'));
+        }    
 
+        console.log('after add');
         if (courseData) {
+            console.log('in after again');
+            console.log('courseData', courseData);
             $('#title').val(courseData.title);
             $('#desc').val(courseData.description);
             $('#hierarchical-select').val(courseData.tags).trigger('change');
@@ -481,28 +502,6 @@
         window.location='#viewCourses';
     }
 
-    function setEditMode(customerData){
-        $("#main_title").html('Edit User Data');
-
-        $("#mobile").val(customerData["mobile_number"]);
-        $("#pass").val(customerData["password"]);
-        $("#name").val(customerData["display_name"]);
-        $("#userName").val(customerData["user_name"]);
-        $("#email").val(customerData["email_id"]);
-
-
-        $('#perm input:checked').each(function() {
-            $('input:checkbox').attr('checked',false);
-        });
-
-        let permissions = customerData["permissions"];
-        for(let key in permissions){
-            if(permissions[key] == 1){
-                $("#"+key).attr("checked", true);
-            }
-        }
-    }
-
     function setError(domId,msg){
         $("#"+domId+"-error").html(msg);
         $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
@@ -557,26 +556,29 @@
         initProgressBar();
 
         $("#err-div").html('');
-        let courseData = JSON.parse(localStorage.getItem('course'));
+        let courseData = '';
+        if (mode == "edit") {
+            var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
+            // Find the course by unique_id
+            var currentCourseUniqueId = currentCourseData["unique_id"];
+            courseData = editCourses[currentCourseUniqueId];
+            courseData['unique_id'] = currentCourseUniqueId;
+            courseData["id"] = currentCourseData["id"];
+            courseData["is_active"] = currentCourseData["is_active"];
+            courseData["ct"] = currentCourseData["ct"];
+        }
+        else {
+            courseData = JSON.parse(localStorage.getItem('course'))
+        }
         var barInterval = setInterval('incBar()',25);
 
         //let data = {'title':title, 'description':description,'image':imageFile};
         console.log(courseData);
-        if(mode=="edit"){
-            editUniqueId = currentCustomerData["unique_id"];
-            editId = currentCustomerData["id"];
-            is_active = currentCustomerData["is_active"];
-            ct = currentCustomerData["ct"];
-            data['unique_id'] = editUniqueId;
-            data["id"] = editId;
-            data["is_active"] = is_active;
-            data["ct"] = ct;
-        }
 
         $.ajax({
             type : 'POST',
             url : 'upsertCourseV2/',
-            data : localStorage.getItem('course'),
+            data : JSON.stringify(courseData),
             processData: false,
             contentType: false,
             success :function(data)

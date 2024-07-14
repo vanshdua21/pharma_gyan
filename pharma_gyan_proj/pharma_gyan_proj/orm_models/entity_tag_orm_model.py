@@ -2,7 +2,7 @@ from pharma_gyan_proj.orm_models.base_model import *
 
 
 class pg_entity_tag(Base, Orm_helper):
-    __tablename__ = 'entity_tag_v1'
+    __tablename__ = 'entity_tag'
 
     id = Column("id", Integer, autoincrement=True)
     title = Column("title", String)

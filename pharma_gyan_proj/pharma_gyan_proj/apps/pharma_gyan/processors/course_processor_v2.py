@@ -11,6 +11,7 @@ from pharma_gyan_proj.exceptions.failure_exceptions import BadRequestException, 
 from pharma_gyan_proj.db_models.course_model import course_model
 from pharma_gyan_proj.orm_models.v2.all_models import Course, CourseTagMapping, CourseTopicMapping
 from pharma_gyan_proj.db_models.course_model_v2 import course_model_v2
+from pharma_gyan_proj.db_models.entity_tag import entity_tag_model
 
 logger = logging.getLogger("apps")
 
@@ -79,6 +80,10 @@ def fetch_and_prepare_courses_v2():
     courses_list = []
     for course in courses:
         print('course', course)
+        tag_ids = [tag.tag_id for tag in course.tags]
+        filter_list = [{"column": "unique_id", "value": tag_ids, "op": "IN"}]
+        tags = entity_tag_model().get_details_by_filter_list(filter_list=filter_list)
+        print('tags', tags)
         editBtn = "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editCourse('{}')\">Edit</button>".format(course.unique_id, course.unique_id)
         if course.is_active:
             cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateCourse('{}')\">Deactivate</button>".format(
@@ -90,7 +95,7 @@ def fetch_and_prepare_courses_v2():
             "unique_id": course.unique_id,
             "title": course.title,
             "description": course.description,
-            "tags": [tag.tag_id for tag in course.tags],
+            "tags": [tag.title for tag in tags],
             "topics_count": len(course.topics),
             "is_active": course.is_active,
             "edit": editBtn,
@@ -100,6 +105,25 @@ def fetch_and_prepare_courses_v2():
             # "del": "<button id=\"del-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"delUser('{}')\">Delete</button>".format(user.unique_id, user.unique_id)
         })
     return courses_list
+
+def fetch_course_from_id_v2(course_id):
+    print('fetch_course_from_id_v2, course_id', course_id)
+    filter_list = [{"column": "unique_id", "value": course_id, "op": "=="}]
+    courses = fetch_courses(filter_list)
+    print('length', len(courses))
+    if (len(courses) == 0):
+        return None
+    course = courses[0]
+    print('course', course)
+    course_json = course.to_json()
+    return course_json
+    return {
+        "unique_id": course.unique_id,
+        "title": course.title,
+        "description": course.description,
+        "tags": course.tags,
+        "topics": course.topics
+    }
 
 def fetch_courses(filter_list=[], relationships_list=[]):
     method_name = "fetch_courses"

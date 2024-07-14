@@ -33,7 +33,7 @@ urlpatterns = [
     path("editor/upsertCourseV2/", views.upsertCourseV2),
     path("editor/deactivateCourse/<str:uniqueId>/", views.deactivate_course),
     path("editor/activateCourse/<str:uniqueId>/", views.activate_course),
-    path("editor/editCourse/", views.editCourse),
+    path("editor/editCourse/", views.editCourseV2),
     path("editor/getCourseTreeJson/<str:uniqueId>/", views.get_course_tree_json),
     path("editor/addTopicChapters/", views.addTopicChapters),
     path("editor/upsertTopic/", views.upsertTopic),

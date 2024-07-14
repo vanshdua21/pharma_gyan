@@ -37,7 +37,7 @@ import json
 from django.http import JsonResponse
 import json
 
-from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import fetch_and_prepare_courses_v2, prepare_and_save_course_v2
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import fetch_and_prepare_courses_v2, fetch_course_from_id_v2, prepare_and_save_course_v2
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit
@@ -334,6 +334,23 @@ def editCourse(request):
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No course with this ID")
         return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
     rendered_page = render_to_string('pharma_gyan/add_course.html', {"course": course, "mode": "edit"})
+    return HttpResponse(rendered_page)
+
+def editCourseV2(request):
+    # Retrieve the id parameter from the query string
+    course_id = request.GET.get('id')
+    course = fetch_course_from_id_v2(course_id)
+    user = request.user
+    json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'topics.json')
+    with open(json_file_path, 'r') as file:
+        topics = json.load(file)
+    tags_json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'tags.json')
+    with open(tags_json_file_path, 'r') as file:
+        tags = json.load(file)
+    if course is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No course with this ID")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"course": json.dumps(course),"mode": "edit", "topics": json.dumps(topics), "tags": json.dumps(tags)})
     return HttpResponse(rendered_page)
 
 def viewCourses(request):

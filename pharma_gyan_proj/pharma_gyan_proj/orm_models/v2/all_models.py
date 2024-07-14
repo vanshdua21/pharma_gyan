@@ -1,3 +1,4 @@
+import json
 from pharma_gyan_proj.orm_models.base_model import *
 
 class Course(Base):
@@ -17,19 +18,18 @@ class Course(Base):
     tags = relationship('CourseTagMapping', back_populates='course', cascade='all, delete, delete-orphan')
     topics = relationship('CourseTopicMapping', back_populates='course', cascade='all, delete, delete-orphan')
 
-class EntityTag(Base):
-    __tablename__ = 'entity_tag'
-    __table_args__ = {'extend_existing': True}
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    unique_id = Column(String(255), unique=True, nullable=False)
-    client_id = Column(String(255), nullable=False)
-    title = Column(String(255), nullable=False)
-    description = Column(Text, nullable=False)
-    tag_category_id = Column(String(255), nullable=False)
-    created_by = Column(String(64))
-    is_active = Column(Boolean, default=False)
-    ct = Column(DateTime, default=datetime.utcnow)
-    ut = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "unique_id": self.unique_id,
+            "title": self.title,
+            "description": self.description,
+            "tags": [tag.tag_id for tag in self.tags],
+            "topics": [topic.topic_id for topic in self.topics]
+        }
+
+    def to_json(self):
+        return json.dumps(self.to_dict(), indent=4)
 
 class CourseTagMapping(Base):
     __tablename__ = 'course_tag_mapping'
