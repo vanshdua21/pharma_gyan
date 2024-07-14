@@ -29,7 +29,8 @@ from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import vali
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
-from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS, BUCKET_NAME
+from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS, BUCKET_NAME, \
+    ACTIVE_CHAPTER_CHECK
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, fetch_course_from_id, fetch_course_tree_from_id, prepare_and_save_course, process_activate_course, process_deactivate_course
 
@@ -43,7 +44,7 @@ from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import pre
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit, \
-    prepare_and_save_topic
+    prepare_and_save_topic, fetch_and_prepare_topic
 
 from django.views.decorators.csrf import csrf_exempt
 import re
@@ -188,6 +189,14 @@ def view_entity_tag(request):
     entity_tag_json = json.dumps(entity_tag)
     rendered_page = render_to_string('pharma_gyan/view_entity_tag.html', {"entity_tag": entity_tag_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
+
+
+def view_topic(request):
+    topic = fetch_and_prepare_topic()
+    rendered_page = render_to_string('pharma_gyan/view_topics.html', {"topic": json.dumps(topic), "project_permissions": Session().get_admin_user_permissions()})
+    return HttpResponse(rendered_page)
+
+
 def add_chapter(request):
     user = settings.BASE_PATH
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
@@ -341,7 +350,7 @@ def addCourse(request):
 
 def add_topic(request):
     user = request.user
-    chapters = fetch_and_prepare_chapter_view()
+    chapters = fetch_and_prepare_chapter_view(ACTIVE_CHAPTER_CHECK)
     if chapters is None or len(chapters) < 1:
         raise InternalServerError(reason="Error while fetching chapter!")
     rendered_page = render_to_string('pharma_gyan/add_topic.html', {"user": user, "mode": "create", "chapters": json.dumps(chapters)})

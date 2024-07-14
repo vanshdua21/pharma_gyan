@@ -119,12 +119,15 @@ def fetch_and_prepare_chapter_preview(unique_id):
     return chapter
 
 
-def fetch_and_prepare_chapter_view():
+def fetch_and_prepare_chapter_view(is_active=False):
     method_name = "fetch_and_prepare_chapter_view"
     logger.debug(f"Entry {method_name}")
 
     try:
-        chapter = chapter_model().get_details_by_filter_list([])
+        filter_list = []
+        if is_active:
+            filter_list.append({"column": "is_active", "value": 1, "op": "=="})
+        chapter = chapter_model().get_details_by_filter_list(filter_list)
     except InternalServerError as ey:
         logger.error(
             f"Error while fetching chapter InternalServerError ::{ey.reason}")

@@ -138,8 +138,8 @@
     "><strong>Congratulations!</strong> <span id="success-text"></span>
 
         </div>
-
-        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewCourses()>View courses</button>
+        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddAnotherTopic()>Add Another Topic</button>
+        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewTopics()>View Topic</button>
 
         </div>
 
@@ -243,12 +243,18 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
 <script type="text/javascript">
     var baseUrl = '<?=$baseUrl?>';
     var mode = "{{mode}}";
     var currentCustomerData = {};
     var available_chapters = JSON.parse('{{ chapters|escapejs }}');
     console.log('available_chapters', available_chapters)
+    var client_id;
+    $(document).ready(function() {
+            client_id = Cookies.get('client_id');
+            console.log('client_id', client_id);
+            });
 
     // Function to remove blur and opacity effects
     function removeBlurOpacity() {
@@ -344,10 +350,18 @@
             $('#desc').val(topicData.description);
 
             topicData.chapters.forEach(chapterId => {
-                chapters = available_chapters.find(chapters => chapters.unique_id == chapterId);
-                addChapter(chapterId, chapters.title, chapters.version);
+                chapters = available_chapters.find(chapters => chapters.unique_id+'-version-'+chapters.version == chapterId);
+                addChapter(chapters.unique_id, chapters.title, chapters.version);
             });
         }
+    }
+
+    function redirectToAddAnotherTopic(){
+        window.location.reload();
+    }
+
+    function redirectToViewTopics(){
+        window.location='#viewTopic';
     }
 
     function clearAllData() {
@@ -370,7 +384,7 @@
                 reverseButtons: true,
             }).then(function(result) {
                 if (result.isConfirmed) {
-                    localStorage.removeItem('course');
+                    localStorage.removeItem('topic');
                     location.reload();
                 }
             });
@@ -383,7 +397,7 @@
         const topicContainer = document.getElementById('topics-container');
         const newTopicCard = document.createElement('div');
         newTopicCard.className = "row mb-3 topic-card-header";
-        newTopicCard.id = `topic-card-${uuid}`;
+        newTopicCard.id = `topic-card-${uuid}-version-${version}`;
         newTopicCard.innerHTML = `<div class="col-12">
                                     <div class="card">
                                         <div class="card-body d-flex justify-content-between align-items-center">
@@ -391,7 +405,7 @@
                                                 <h5 class="card-title mb-0">${title}</h5>
                                                 <small class="text-muted">Version: ${version}</small>
                                             </div>
-                                            <button class="btn btn-danger btn-sm" onclick="removeTopic('${uuid}')">
+                                            <button class="btn btn-danger btn-sm" onclick="removeTopic('${uuid}', ${version})">
                                                 <i class="fal fa-trash-alt"></i>
                                             </button>
                                         </div>
@@ -432,13 +446,13 @@
         }
     }
 
-    function removeTopic(uuid) {
-        const topicCard = document.getElementById(`topic-card-${uuid}`);
+    function removeTopic(uuid, version) {
+        const topicCard = document.getElementById(`topic-card-${uuid}-version-${version}`);
         if (topicCard) {
             topicCard.remove();
         }
 
-        const buttonId = `add-topic-${uuid}`;
+        const buttonId = `add-chapter-${uuid}`;
         const addButton = document.getElementById(buttonId);
         if (addButton) {
             addButton.disabled = false;
@@ -538,6 +552,7 @@
 
         $("#err-div").html('');
         let topicData = JSON.parse(localStorage.getItem('topic'));
+        topicData['client_id'] = client_id;
         var barInterval = setInterval('incBar()',25);
 
         //let data = {'title':title, 'description':description,'image':imageFile};
@@ -545,18 +560,14 @@
         if(mode=="edit"){
             editUniqueId = currentCustomerData["unique_id"];
             editId = currentCustomerData["id"];
-            is_active = currentCustomerData["is_active"];
-            ct = currentCustomerData["ct"];
-            data['unique_id'] = editUniqueId;
-            data["id"] = editId;
-            data["is_active"] = is_active;
-            data["ct"] = ct;
+            topicData['unique_id'] = editUniqueId;
+            topicData["id"] = editId;
         }
 
         $.ajax({
             type : 'POST',
             url : 'upsertTopicV2/',
-            data : localStorage.getItem('topic'),
+            data : JSON.stringify(topicData),
             processData: false,
             contentType: false,
             success :function(data)
@@ -568,12 +579,12 @@
                 console.log('Success', data);
                 if(data['result']=='SUCCESS')
                 {
-                    localStorage.removeItem('course');
+                    localStorage.removeItem('topic');
                     $("#success-div").show();
                     if(mode == "edit"){
-                        $("#success-text").html("Course edited Successfully");
+                        $("#success-text").html("Topic edited Successfully");
                     }else{
-                        $("#success-text").html("Course added Successfully");
+                        $("#success-text").html("Topic added Successfully");
                     }
 
                     $("#main-form-div").hide();

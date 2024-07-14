@@ -1,0 +1,285 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+<!--added new changes-->
+    <!-- Include SweetAlert2 CSS with Bootstrap 4 theme -->
+    <!-- Other necessary CSS files -->
+    <link id="vendorsbundle" rel="stylesheet" media="screen, print" href="css/vendors.bundle.css">
+    <link id="appbundle" rel="stylesheet" media="screen, print" href="css/app.bundle.css">
+    <link id="myskin" rel="stylesheet" media="screen, print" href="css/skins/skin-master.css">
+    <link rel="stylesheet" media="screen, print" href="css/theme-demo.css">
+
+<!-- Include SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-hdr">
+                <h2>
+                    All <span class="fw-900"><i>Entity Tags</i></span>
+                </h2>
+                <div class="panel-toolbar">
+                    <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                    <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                    <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="panel-tag">
+                        <p>Below is a list of all entity tags configured in the system</p>
+                    </div>
+                    <!-- datatable start -->
+                    <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                        <thead class="bg-primary-600">
+                        <tr>
+                            <th>Title</th>
+                            <th>description</th>
+                            <th>Active</th>
+                            <th>Created By</th>
+                            <th>Clone</th>
+                            <th>Call To Action</th>
+
+                        </tr>
+                        </thead>
+                        <tbody id="colors-data">
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Title</th>
+                                <th>description</th>
+                                <th>Active</th>
+                                <th>Created By</th>
+                                <th>Clone</th>
+                                <th>Call To Action</th>
+
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <!-- datatable end -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+var data = JSON.parse('{{ entity_tag|escapejs }}');
+var userPermissions = "{{ project_permissions }}";
+var datatable;
+// console.log("userPermissions",userPermissions);
+console.log('data from view',data);
+
+$(document).ready(function()
+    {
+        data.forEach(item => {
+            if(item.is_active){
+                item.is_active = "YES"
+            }else{
+                item.is_active = "NO"
+            }
+            if(item.description)
+            {
+                item.description = item.description;
+            }
+            else{
+                item.description = 'None';
+            }
+        })
+
+        // initialize datatable
+        datatable = $('#dt-basic-example').dataTable(
+            {
+                responsive: true,
+                lengthChange: false,
+                data : data,
+                columns: [
+                    { data: "title" },
+                    { data: "description" },
+                    { data: "is_active" },
+                    { data: "created_by" },
+                    // { data: "last_update" },
+                    { data: "clone"},
+                    { data: "cta"}
+                ],
+                dom:
+
+                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        titleAttr: 'Generate CSV',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        titleAttr: 'Copy to clipboard',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm'
+                    }
+                ]
+            });
+
+    });
+
+
+    function cloneEntityTag(unique_id) {
+        if (!validatePermissions()) return;
+        window.open("#cloneEntityTag?unique_id=" + unique_id, "_blank");
+    }
+
+    function validatePermissions() {
+        if (!userPermissions.includes("editEntityTag")) {
+            alert("User does not have permission to edit Entity Tag");
+            return false;
+        }
+        return true;
+    }
+    var lock = false;
+    var baseUrl = '<?=$baseUrl?>';
+
+    function deactivateEntityTag(id) {
+            if (!validatePermissions()) return;
+            if (lock == true) return;
+
+            // Create the SweetAlert2 mixin for custom styling
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+            // Display the confirmation dialog
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'User won\'t be able to use this Entity Tag!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, deactivate it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true,
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    // Proceed with deactivation if confirmed
+                    lock = true;
+                    $('#err-div').hide();
+                    $('#success-div').hide();
+                    $.post('/pharma_gyan/editor/deactivateEntityTag/' + id + '/', function(data) {
+                        lock = false;
+                        if (data['result'] == 'SUCCESS') {
+                            swalWithBootstrapButtons.fire(
+                                'Deactivated!',
+                                'The entity tag has been deactivated.',
+                                'success'
+                            ).then(function() {
+                                location.reload(); // Reload after showing success message
+                            });
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'Error',
+                                'Error while deactivating entity tag',
+                                'error'
+                            );
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire(
+                        'Cancelled',
+                        'Your entity tag is safe :)',
+                        'error'
+                    );
+                }
+            });
+        }
+
+    function activateEntityTag(id) {
+            if (!validatePermissions()) return;
+            if (lock == true) return;
+
+            // Create the SweetAlert2 mixin for custom styling
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+
+            console.log('swalWithBootstrapButtons', swalWithBootstrapButtons); // Debugging
+
+            // Display the confirmation dialog
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to activate this entity tag?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, activate it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    // Proceed with activation if confirmed
+                    lock = true;
+                    $('#err-div').hide();
+                    $('#success-div').hide();
+                    $.post('/pharma_gyan/editor/activateEntityTag/' + id + '/', function(data) {
+                        lock = false;
+                        if (data['result'] == 'SUCCESS') {
+                            swalWithBootstrapButtons.fire(
+                                'Activated!',
+                                'The entity tag has been activated.',
+                                'success'
+                            ).then(function() {
+                                location.reload(); // Reload after showing success message
+                            });
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'Error',
+                                'Error while activating entity tag',
+                                'error'
+                            );
+                        }
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        var result = jqXHR['responseJSON'];
+                        console.log(result);
+                        swalWithBootstrapButtons.fire(
+                            'Error',
+                            'Error while activating entity tag: ' + result['detailed_message'],
+                            'error'
+                        );
+                        lock = false;
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire(
+                        'Cancelled',
+                        'Activation cancelled.',
+                        'error'
+                    );
+                }
+            });
+        }
+
+</script>

@@ -77,7 +77,6 @@ class PgSubject(Base, Orm_helper):
     created_by = Column("created_by", String)
     ct = Column("ct", DateTime, default=datetime.utcnow)
 
-    units = relationship("PgTopic", backref="subject", cascade="all, delete-orphan")
 
     def __init__(self, data={}):
         Orm_helper.__init__(self, data)
@@ -87,8 +86,7 @@ class PgSubject(Base, Orm_helper):
             "id": self.id,
             "unique_id": self.unique_id,
             "title": self.name,
-            "description": self.description,
-            "topics": [unit.to_dict() for unit in self.units]
+            "description": self.description
         }
 
 class PgTopic(Base, Orm_helper):
@@ -105,8 +103,6 @@ class PgTopic(Base, Orm_helper):
     ct = Column("ct", DateTime, default=datetime.utcnow)
     ut = Column("ut", TIMESTAMP,
                 server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-
-    chapters = relationship("PgChapter", backref="unit", cascade="all, delete-orphan")
 
     def __init__(self, data={}):
         Orm_helper.__init__(self, data)

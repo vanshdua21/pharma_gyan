@@ -41,4 +41,5 @@ urlpatterns = [
     # path("editor/previewChapterContent/<str:uniqueId>/", views.preview_chapter_content),
     path("editor/previewChapterContent/", views.preview_chapter_content),
     path("editor/addTopic/", views.add_topic),
+    path('editor/viewTopics/', views.view_topic),
 ]

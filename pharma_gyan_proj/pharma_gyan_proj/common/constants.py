@@ -24,4 +24,6 @@ class AdminUserPermissionType(Enum):
 
 
 BUCKET_NAME = "pharma-gyan-test-media"
+
+ACTIVE_CHAPTER_CHECK = False
     
