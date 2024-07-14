@@ -1,6 +1,7 @@
 import http
 import json
 import logging
+import re
 from urllib.parse import unquote_plus
 import uuid
 from datetime import datetime
@@ -82,7 +83,7 @@ def fetch_and_prepare_users():
     users_list = []
     for user in users:
         user_permission = []
-        permissions_list = user.permissions.split(', ') if user.permissions != '' else []
+        permissions_list = re.split(r'\s*,\s*', user.permissions) if user.permissions != '' else []
         for permission in permissions_list:
             user_permission.append(AdminUserPermissionType[permission].value)
         users_list.append({
@@ -122,7 +123,7 @@ def fetch_user_from_id(user_id):
         return None
     user = users[0]
     permissions = {permission.name: 0 for permission in AdminUserPermissionType}
-    set_permissions = set(user.permissions.split(', '))
+    set_permissions = set(re.split(r'\s*,\s*', user.permissions))
     for perm in set_permissions:
         permissions[perm] = 1
     # Convert list of model instances to list of dictionaries
