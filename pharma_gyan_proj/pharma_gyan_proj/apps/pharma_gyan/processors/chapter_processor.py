@@ -54,7 +54,7 @@ def prepare_and_save_chapter(request_body):
                         details_message="Something went wrong !")
         if chapter is None:
             return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
-                        details_message="Promo code is not found. Please add Chapter first!")
+                        details_message="Chapter is not found. Please add Chapter first!")
         chapter = chapter[0]
         chapter.version = db_resp[0].version + 1
     else:
@@ -64,7 +64,7 @@ def prepare_and_save_chapter(request_body):
     chapter.title = request_body.get('title')
     chapter.content = request_body.get('content')
     chapter.mark_as_free = request_body.get('is_free')
-    chapter.client_id = '123'
+    chapter.client_id = request_body.get('client_id')
     chapter.created_by = session.admin_user_session.user_name
 
     try:
@@ -117,3 +117,103 @@ def fetch_and_prepare_chapter_preview(unique_id):
     chapter = chapter[0]._asdict()
     chapter['ct'] = chapter['ct'].strftime('%d %b %Y, %I:%M %p')
     return chapter
+
+def fetch_and_prepare_chapters():
+    method_name = "fetch_and_prepare_chapters"
+    logger.debug(f"Entry {method_name}")
+    try:
+        chapters = chapter_model().get_details_by_filter_list([])
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching users InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching users ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if chapters is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Chapter is not found. Please add chapter first!")
+
+# Convert list of model instances to list of dictionaries
+    chapter_list = []
+    for chapter in chapters:
+        if chapter.is_active:
+            cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateChapter('{}')\">Deactivate</button>".format(
+                chapter.unique_id, chapter.unique_id)
+        else:
+            cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activateChapter('{}')\">Activate</button>".format(
+                chapter.unique_id, chapter.unique_id)
+        chapter_list.append({
+            "unique_id": chapter.unique_id,
+            "title": chapter.title,
+            "mark_as_free": chapter.mark_as_free,
+            "version": chapter.version,
+            "is_active": chapter.is_active,
+            "created_by": chapter.created_by,
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editChapter('{}')\">Edit</button>".format(
+                 chapter.unique_id, chapter.unique_id),
+            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneChapter('{}')\">Clone</button>".format(chapter.unique_id, chapter.unique_id),
+            "cta": cta
+        })
+    return chapter_list
+
+def deactivate_chapter_view(unique_id):
+    method_name = "deactivate_chapter_view"
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        chapter_model().update_by_filter_list(filter_list, dict(is_active=0))
+    except Exception as e:
+        logger.error(f"Error while deleting chapter ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+def activate_chapter_view(unique_id):
+    method_name = "activate_chapter_view"
+
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        chapter = chapter_model().get_details_by_filter_list(filter_list)
+        if chapter is None or len(chapter) < 1:
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="chapter id is incorrect!")
+        chapter_model().update_by_filter_list(filter_list, dict(is_active=1))
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching chapter InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while deleting chapter ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+
+def fetch_chapter_by_unique_id(unique_id):
+    filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+    try:
+        chapter = chapter_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching chapter InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching chapter ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if chapter is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="chapter is not found. Please add chapter first!")
+    chapter = chapter[0]
+    chapter_dict = {
+        "title": chapter.title,
+        "content": chapter.content,
+        "mark_as_free": chapter.mark_as_free,
+        'unique_id': chapter.unique_id,
+        'id': chapter.id
+    }
+    return chapter_dict
+
+
+

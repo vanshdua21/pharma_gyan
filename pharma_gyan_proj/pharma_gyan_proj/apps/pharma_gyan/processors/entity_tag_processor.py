@@ -190,7 +190,7 @@ def deactivate_entity(unique_id):
         filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
         entity_tag_model().update_by_filter_list(filter_list, dict(is_active=0))
     except Exception as e:
-        logger.error(f"Error while deleting user ::{e}")
+        logger.error(f"Error while deleting entity tag ::{e}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
 
     logger.debug(f"Exit {method_name}, Success")
@@ -208,10 +208,10 @@ def activate_entity(unique_id):
         entity_tag_model().update_by_filter_list(filter_list, dict(is_active=1))
     except InternalServerError as ey:
         logger.error(
-            f"Error while fetching users InternalServerError ::{ey.reason}")
+            f"Error while fetching entity tag InternalServerError ::{ey.reason}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
     except Exception as e:
-        logger.error(f"Error while deleting user ::{e}")
+        logger.error(f"Error while deleting entity tag ::{e}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
 
     logger.debug(f"Exit {method_name}, Success")

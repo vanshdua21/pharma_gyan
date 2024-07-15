@@ -1,3 +1,4 @@
+
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 <style>
@@ -92,7 +93,7 @@
 
     </div>
     <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
-    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Preview Chapter</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Psreview Chapter</button>
 </div>
 <div id="main-form-div">
     <div class="row">
@@ -147,22 +148,26 @@
 </div>
 <script src="/static/pharma_gyan/js/summernote.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
 <script>
     var interval;
+    var baseUrl = "{{ baseUrl }}";
     var mode = "{{mode}}";
     var uniqueId;
+    var client_id;
     var focusedVideoElement = null;
-    // Save to local storage
     var saveToLocal = function () {
         var summernoteContent = $('#saveToLocal').summernote("code");
         var summernoteContentString = JSON.stringify(summernoteContent);
-        localStorage.setItem('summernoteData',summernoteContentString);
+        localStorage.setItem('summernoteData', summernoteContentString);
         console.log("Saved to local storage");
+        
         const mark_as_free = $('#markAsFree').is(':checked') ? 1 : 0;
         console.log('chapter mark as free', mark_as_free);
-        localStorage.setItem('markAsFree',mark_as_free );
-        var title =  JSON.stringify($('#title').val());
-        localStorage.setItem('Chapter_title',title );
+        localStorage.setItem('markAsFree', mark_as_free);
+        
+        var title = JSON.stringify($('#title').val());
+        localStorage.setItem('Chapter_title', title);
     };
 
     // Remove from local storage
@@ -170,6 +175,10 @@
         localStorage.removeItem("summernoteData");
         $('#saveToLocal').summernote('reset');
         console.log("Removed from local storage");
+        localStorage.removeItem('markAsFree');
+                localStorage.removeItem('Chapter_title');
+                localStorage.removeItem('uploadedImageURLs');
+                localStorage.removeItem('uploadedVideoURLs');
     };
 
     // Timer function for auto-save
@@ -340,22 +349,39 @@
         var content = $('#saveToLocal').summernote("code");
         var title = $('#title').val();
         var is_free = $('#markAsFree').is(':checked') ? 1 : 0;
-
-            console.log('Title:', title);
-            console.log('Is Free:', is_free);
             lock = true;
+            var data_to_save = {
+        'content': content,
+        'title': title,
+        'is_free': is_free,
+        'client_id': client_id
+          };
+
+        if (mode == "edit") {
+            var Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
+            data_to_save['id'] = Chapter.id;
+            data_to_save['unique_id'] = Chapter.unique_id;
+            data_to_save['mode']='edit';
+        }
 
         initProgressBar();
 
         $.ajax({
             type: 'POST',
             url: '/pharma_gyan/editor/upsertChapter/',
-            data: JSON.stringify({'content': content, 'title': title, 'is_free': is_free ,'index':1}),
+          
+            // data: JSON.stringify(
+            //     {'content': content,
+            //      'title': title,
+            //       'is_free': is_free ,
+            //     //   'index':1,
+            //       'client_id':client_id                
+            //     }),
+            data: JSON.stringify(data_to_save),
             contentType: 'application/json',
             dataType: 'json',
             success: function (response) {
                 lock=false;
-    // <!--            clearInterval(barInterval);-->
                 console.log(response);
                 uniqueId = response['data']['unique_id']
                 $("#progress-bar").css({"width":"100%"});
@@ -384,18 +410,20 @@
                 return;
             }
         });
+        // removeFromLocal();
         
     }
+
     // Validate filename (only alphanumeric, underscores, dots, and dashes allowed)
     function validateFilename(filename) {
         return /^[a-zA-Z0-9_.-]*$/.test(filename);
     }
 
     function redirectToAddChapter(){
-        window.location.reload();
+        window.location='#addChapter/';
     }
 
-    function redirectToPreviewChapter(){
+    function redirectToPreviewChapter(uniqueId){
         window.location='#previewChapterContent/'+uniqueId;
     }
 
@@ -405,18 +433,32 @@
 
         } 
     function loadFromLocal() {
-        var summernoteContent = localStorage.getItem('summernoteData');
-        var chapterTitle = localStorage.getItem('Chapter_title');
+            var summernoteContent = localStorage.getItem('summernoteData');
+            var chapterTitle = localStorage.getItem('Chapter_title');
+            var markAsFree = localStorage.getItem('markAsFree'); // Retrieve checkbox state
+
             if (summernoteContent) {
                 $('#saveToLocal').summernote('code', JSON.parse(summernoteContent));
             }
             if (chapterTitle) {
                 $('#title').val(JSON.parse(chapterTitle));
             }
-        }    
+            if (markAsFree !== null) { // Set the checkbox state
+                $('#markAsFree').prop('checked', JSON.parse(markAsFree));
+            }
+        }   
     $(document).ready(function () 
     {
+        client_id = Cookies.get('client_id');
+        // Listen for changes in the title input field
+        $('#title').on('input', function() {
+            saveToLocal();
+        });
 
+        // Listen for changes in the markAsFree checkbox
+        $('#markAsFree').on('change', function() {
+            saveToLocal();
+        });
         // Custom video button
         var videoButton = function (context) {
             var ui = $.summernote.ui;
@@ -568,6 +610,7 @@
                         uploadImages(files);
                     },
                     onChange: function (contents, $editable) {
+                        saveToLocal();
                         clearInterval(interval);
                         timer();
                     }
@@ -578,6 +621,43 @@
                         },
             });
         }
-       loadFromLocal();
-    });
+        //   Check mode and set clone if applicable
+          if (mode == "clone") {
+        var Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
+        setCloneMode(Chapter);
+    } 
+    else if(mode=='edit')
+    {
+        var Chapter = JSON.parse('{{ edit_chapter|escapejs }}'); 
+        setEditeMode(Chapter);  
+        
+    }
+    else{
+         loadFromLocal();
+    }
+       
+    
+   
+    })
+;
+function setCloneMode(Chapter) {
+    
+    $("#title").val(Chapter["title"]);
+    // Set the Summernote content
+    $('#saveToLocal').summernote('code', Chapter["content"]);  // Do not parse the content as JSON
+    // Update the "mark as free" checkbox
+    var is_free = Chapter["mark_as_free"];
+    $('#markAsFree').prop('checked', is_free);
+}
+function setEditeMode(Chapter) {
+    $("#title").val(Chapter["title"]);
+    // Set the Summernote content
+    $('#saveToLocal').summernote('code', Chapter["content"]);  // Do not parse the content as JSON
+    // Update the "mark as free" checkbox
+    var is_free = Chapter["mark_as_free"];
+    $('#markAsFree').prop('checked', is_free);
+}
+
+
 </script>
+

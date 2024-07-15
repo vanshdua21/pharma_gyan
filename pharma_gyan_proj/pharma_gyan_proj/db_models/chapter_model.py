@@ -34,3 +34,7 @@ class chapter_model:
         query = f"""SELECT max(version) as version from chapter where UniqueId = '{unique_id}'"""
         res = execute_query(self.engine, query)
         return res
+
+    def get_chapter_by_unique_id(self, unique_id):
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        return self.get_details_by_filter_list(filter_list)
