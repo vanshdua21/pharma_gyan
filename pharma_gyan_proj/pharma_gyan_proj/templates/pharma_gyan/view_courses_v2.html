@@ -303,7 +303,7 @@
         lock = true;
         $("#err-div").hide();
         $("#success-div").hide();
-        $.post('/pharma_gyan/editor/deactivateCourse/' + id + '/',function(data)
+        $.post('/pharma_gyan/editor/deactivateCourseV2?id=' + id, function(data)
             {
                 lock=false;
                 if(data['result']=='SUCCESS')
@@ -335,7 +335,7 @@
         lock = true;
         $("#err-div").hide();
         $("#success-div").hide();
-        $.post('/pharma_gyan/editor/activateCourse/' + id + '/',function(data)
+        $.post('/pharma_gyan/editor/activateCourseV2?id=' + id,function(data)
             {
                 lock=false;
                 if(data['result']=='SUCCESS')

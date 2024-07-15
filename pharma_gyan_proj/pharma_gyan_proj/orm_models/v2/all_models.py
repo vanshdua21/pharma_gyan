@@ -5,7 +5,7 @@ class Course(Base):
     __tablename__ = 'course'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
-    unique_id = Column(String(255), unique=True, nullable=False)
+    unique_id = Column(String(255), nullable=False)
     client_id = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
@@ -16,7 +16,7 @@ class Course(Base):
     ut = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     tags = relationship('CourseTagMapping', back_populates='course', cascade='all, delete, delete-orphan')
-    topics = relationship('CourseTopicMapping', back_populates='course', cascade='all, delete, delete-orphan')
+    topics = relationship('CourseTopicMapping', back_populates='course', cascade='all, delete, delete-orphan', order_by='CourseTopicMapping.order')
 
     def to_dict(self):
         return {
@@ -36,8 +36,8 @@ class CourseTagMapping(Base):
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     unique_id = Column(String(255), unique=True, nullable=False)
-    course_id = Column(String(255), ForeignKey('course.unique_id'), nullable=False)
-    tag_id = Column(String(255), ForeignKey('entity_tag.unique_id'), nullable=False)
+    course_id = Column(String(255), ForeignKey('course.id'), nullable=False)
+    tag_id = Column(String(255), nullable=False)
     ct = Column(DateTime, default=datetime.utcnow)
     ut = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -56,7 +56,7 @@ class CourseTopicMapping(Base):
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     unique_id = Column(String(255), unique=True, nullable=False)
-    course_id = Column(String(255), ForeignKey('course.unique_id'), nullable=False)
+    course_id = Column(String(255), ForeignKey('course.id'), nullable=False)
     topic_id = Column(String(255), nullable=False)
     order = Column(Integer, nullable=False)
     version = Column(Integer, nullable=False)

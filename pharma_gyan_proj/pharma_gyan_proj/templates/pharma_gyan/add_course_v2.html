@@ -347,7 +347,7 @@
 
         if (mode == "edit") {
             var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
-            editCourses[currentCourseData["unique_id"]] = courseData;
+            editCourses[currentCourseData["id"]] = courseData;
             localStorage.setItem('edit_courses', JSON.stringify(editCourses));
         }
         else {
@@ -361,13 +361,13 @@
             currentCourseData = JSON.parse('{{ course|escapejs }}') || {};
             currentCourseData = JSON.parse(currentCourseData);
             console.log('currentCourseData', currentCourseData);
-            console.log('currentCourseData["unique_id"]', currentCourseData["unique_id"]);
+            console.log('currentCourseData["id"]', currentCourseData["id"]);
             var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
-            courseData = editCourses[currentCourseData["unique_id"]];
+            courseData = editCourses[currentCourseData["id"]];
             if (!courseData) {
                 console.log('in edit currentCourseData', currentCourseData);
                 courseData = currentCourseData;
-                editCourses[currentCourseData["unique_id"]] = courseData;
+                editCourses[currentCourseData["id"]] = courseData;
                 localStorage.setItem('edit_courses', JSON.stringify(editCourses));
             }
         }
@@ -559,11 +559,11 @@
         let courseData = '';
         if (mode == "edit") {
             var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
-            // Find the course by unique_id
-            var currentCourseUniqueId = currentCourseData["unique_id"];
-            courseData = editCourses[currentCourseUniqueId];
-            courseData['unique_id'] = currentCourseUniqueId;
-            courseData["id"] = currentCourseData["id"];
+            // Find the course by id
+            var currentCourseId = currentCourseData["id"];
+            courseData = editCourses[currentCourseId];
+            courseData['unique_id'] = currentCourseData["unique_id"];
+            //courseData["id"] = currentCourseData["id"];
             courseData["is_active"] = currentCourseData["is_active"];
             courseData["ct"] = currentCourseData["ct"];
         }

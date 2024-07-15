@@ -39,4 +39,6 @@ urlpatterns = [
     path("editor/upsertTopic/", views.upsertTopic),
     # path("editor/previewChapterContent/<str:uniqueId>/", views.preview_chapter_content),
     path("editor/previewChapterContent/", views.preview_chapter_content),
+    path("editor/activateCourseV2", views.activate_course_v2),
+    path("editor/deactivateCourseV2", views.deactivate_course_v2),
 ]

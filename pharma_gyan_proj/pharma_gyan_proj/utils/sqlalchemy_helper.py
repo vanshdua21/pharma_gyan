@@ -1,7 +1,7 @@
 import logging
 from pharma_gyan_proj.orm_models.v2.all_models import CourseTagMapping
-from sqlalchemy import inspect, column ,text
-from sqlalchemy.orm import Session, joinedload, load_only
+from sqlalchemy import inspect, column ,text, func
+from sqlalchemy.orm import Session, joinedload, load_only, aliased
 from pharma_gyan_proj.utils.sqlalchemy_engine import SqlAlchemyEngine
 
 
@@ -49,6 +49,7 @@ def update(engine, table, filter_list, update_dict):
             update_filter_dict = {}
             for attr, value in update_dict.items():
                 update_filter_dict.update({getattr(table, attr): value})
+            print('query', q)
             q = q.update(update_filter_dict)
         except Exception as ex:
             session.rollback()
@@ -289,27 +290,38 @@ def save(engine, table, entity):
             session.commit()
 
 def fetch_rows_with_join(engine, table, filter_list, columns=[], relationships=[], limit=None):
-    """
-        Function to fetch multiple rows from table.
-        parameters:
-            table: table class name
-            filter_list: list of dict of filters, format - [{"column": "col", "value": "val", "op": "=="}]
-            columns: list of columns to be fetched , ["id","unique_id"]
-            relationships: list of relationships to be fetched , ["tag_mapping.tag","url_mapping.url"]
-            limit: no of rows to be fetched
-        returns: List of class object of table
-    """
     with Session(engine) as session:
         session.begin()
         try:
-            q = session.query(table).options(
-                joinedload(table.tags),
-                joinedload(table.topics)
+            # Create an alias for the course table to be used in the subquery
+            latest_course_alias = aliased(table)
+            
+            # Subquery to get the latest version for each unique_id
+            subquery = (
+                session.query(
+                    latest_course_alias.unique_id,
+                    func.max(latest_course_alias.version).label('latest_version')
+                )
+                .group_by(latest_course_alias.unique_id)
+                .subquery()
+            )
+            # Main query to get courses with the latest version, joining with tags and topics
+            q = (
+                session.query(table)
+                .join(
+                    subquery,
+                    (table.unique_id == subquery.c.unique_id) & (table.version == subquery.c.latest_version)
+                )
+                .options(
+                    joinedload(table.tags),
+                    joinedload(table.topics)
+                )
             )
             for filters in filter_list:
                 q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
             q = add_columns_projections(q, columns)
-            entity = q.limit(limit).all() if limit is not None else q.all()
+            print("query - ", q)
+            entity = q.limit(limit).all() if limit is not None else q.all()      
             return entity
         except Exception as ex:
             logging.error(f"error while fetching from table, Error: ", ex)

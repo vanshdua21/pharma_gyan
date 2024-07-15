@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy import inspect, JSON, TIMESTAMP, text, Text, Column, Integer, Numeric, String, ForeignKey, DateTime, \
     Time, Boolean, func, Date
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, aliased
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 

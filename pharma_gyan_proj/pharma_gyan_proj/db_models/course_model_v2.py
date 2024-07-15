@@ -1,5 +1,5 @@
 from pharma_gyan_proj.orm_models.v2.all_models import Course
-from pharma_gyan_proj.utils.sqlalchemy_helper import fetch_rows_with_join, sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
+from pharma_gyan_proj.utils.sqlalchemy_helper import fetch_count, fetch_rows_with_join, sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
     update
 
 
@@ -25,3 +25,6 @@ class course_model_v2:
 
     def update_by_filter_list(self, filter_list, update_dict):
         return update(self.engine, self.table, filter_list, update_dict)
+    
+    def fetch_count_by_filter(self, filter_list):
+        return fetch_count(self.engine, self.table, filter_list)
