@@ -4,7 +4,8 @@ import os
 import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter, \
-    fetch_and_prepare_chapters, deactivate_chapter_view, activate_chapter_view, fetch_chapter_by_unique_id
+    fetch_and_prepare_chapters, deactivate_chapter_view, activate_chapter_view, fetch_chapter_by_unique_id, \
+    fetch_chapter_by_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
@@ -60,9 +61,10 @@ def admin_login(request):
 def editor(request):
     session = Session()
     project_permissions = session.get_admin_user_permissions()
+    client_id = session.admin_user_session.client_id
     permissions_list = re.split(r'\s*,\s*', project_permissions)
     rendered_page = render_to_string('pharma_gyan/base.html',
-                                     {"project_permissions": permissions_list, "tab_permissions": get_user_tab_permissions(request.user)})
+                                     {"project_permissions": permissions_list,"client_id":client_id, "tab_permissions": get_user_tab_permissions(request.user)})
     return HttpResponse(rendered_page)
 
 
@@ -118,7 +120,7 @@ def entity_tag(request):
     rendered_page = render_to_string('pharma_gyan/add_entity_tag.html', {"baseUrl": baseUrl, "mode": "create", "tag_category": tag_category_json})
     return HttpResponse(rendered_page)
 @csrf_exempt
-def preview_chapter_content(request):
+def preview_chapter_content(request,uniqueId):
     method_name = "preview_chapter_content"
     print(f'{method_name}, Before decode: {request.body}')
     request_body = json.loads(request.body.decode("utf-8"))
@@ -156,6 +158,8 @@ def edit_chapter(request):
     # Retrieve the id parameter from the query string
     unique_id = request.GET.get('unique_id')
     chapter = fetch_chapter_by_unique_id(unique_id)
+    # id = request.GET.get('id')
+    # chapter = fetch_chapter_by_id(id)
     if chapter is None:
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No chapter with this Id")
         return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
@@ -213,8 +217,8 @@ def add_chapter(request):
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
     return HttpResponse(rendered_page)
 
-def view_chapters(request):
-    chapters = fetch_and_prepare_chapters()
+def view_chapters(request,client_id):
+    chapters = fetch_and_prepare_chapters(client_id)
     chapters_json = json.dumps(chapters)
     rendered_page = render_to_string('pharma_gyan/view_chapters.html', {"chapters": chapters_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)

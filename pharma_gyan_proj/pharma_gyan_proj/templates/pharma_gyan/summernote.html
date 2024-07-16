@@ -92,8 +92,10 @@
 "><strong>Congratulations!</strong> <span id="success-text"></span>
 
     </div>
+    <div id="action-buttons"></div>
+<!--     
     <button class="btn-outline-success btn-sm mr-1" onclick=redirectToAddChapter()>Add Another Chapter</button>
-    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Psreview Chapter</button>
+    <button class="btn-outline-success btn-sm mr-1" onclick=redirectToPreviewChapter()>Psreview Chapter</button> -->
 </div>
 <div id="main-form-div">
     <div class="row">
@@ -369,20 +371,11 @@
         $.ajax({
             type: 'POST',
             url: '/pharma_gyan/editor/upsertChapter/',
-          
-            // data: JSON.stringify(
-            //     {'content': content,
-            //      'title': title,
-            //       'is_free': is_free ,
-            //     //   'index':1,
-            //       'client_id':client_id                
-            //     }),
             data: JSON.stringify(data_to_save),
             contentType: 'application/json',
             dataType: 'json',
             success: function (response) {
                 lock=false;
-                console.log(response);
                 uniqueId = response['data']['unique_id']
                 $("#progress-bar").css({"width":"100%"});
                 $("#success-div").show();
@@ -397,6 +390,12 @@
                 localStorage.removeItem('summernoteData');
                 localStorage.removeItem('uploadedImageURLs');
                 localStorage.removeItem('uploadedVideoURLs');
+
+                $("#action-buttons").html(`
+                <button onclick="redirectToAddChapter()" class="btn-outline-success btn-sm mr-1">Add Chapter</button>
+                <button onclick="redirectToPreviewChapter('${uniqueId}')" class="btn-outline-success btn-sm mr-1">Preview Chapter</button>
+            `);
+
                 return;
 
             },
@@ -446,7 +445,7 @@
             if (markAsFree !== null) { // Set the checkbox state
                 $('#markAsFree').prop('checked', JSON.parse(markAsFree));
             }
-        }   
+        }  
     $(document).ready(function () 
     {
         client_id = Cookies.get('client_id');
@@ -628,15 +627,13 @@
     } 
     else if(mode=='edit')
     {
-        var Chapter = JSON.parse('{{ edit_chapter|escapejs }}'); 
-        setEditeMode(Chapter);  
+            setEditeMode();
         
     }
     else{
          loadFromLocal();
     }
        
-    
    
     })
 ;
@@ -649,14 +646,39 @@ function setCloneMode(Chapter) {
     var is_free = Chapter["mark_as_free"];
     $('#markAsFree').prop('checked', is_free);
 }
-function setEditeMode(Chapter) {
-    $("#title").val(Chapter["title"]);
-    // Set the Summernote content
-    $('#saveToLocal').summernote('code', Chapter["content"]);  // Do not parse the content as JSON
-    // Update the "mark as free" checkbox
-    var is_free = Chapter["mark_as_free"];
-    $('#markAsFree').prop('checked', is_free);
+function setEditeMode() {
+    var localData = localStorage.getItem('summernoteData');
+    var chapterTitle = localStorage.getItem('Chapter_title');
+    var markAsFree = localStorage.getItem('markAsFree');
+    Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
+    if (localData) 
+    {
+        $('#saveToLocal').summernote('code', JSON.parse(localData));
+    }
+    else 
+    {
+         $('#saveToLocal').summernote('code', Chapter["content"]); 
+    }
+    if (chapterTitle) 
+    {
+        $('#title').val(JSON.parse(chapterTitle));
+    }
+    else{
+        $("#title").val(Chapter["title"]);
+    }
+    if (markAsFree !== null) 
+    { 
+      $('#markAsFree').prop('checked', JSON.parse(markAsFree));
+    }
+    else{
+        var is_free = Chapter["mark_as_free"];
+        $('#markAsFree').prop('checked', is_free);
+    }
+    
+
+        
 }
+
 
 
 </script>

@@ -29,12 +29,16 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
 </head>
 <body class="mod-bg-1 ">
 <!-- DOC: script to save and load page settings -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
 <script>
     /**
      *	This script should be placed right after the body tag for fast execution
      *	Note: the script is written in pure javascript and does not depend on thirdparty library
      **/
     'use strict';
+    var client_id;
+    client_id = Cookies.get('client_id');
+    console.log("client_id",client_id);
 
     var classHolder = document.getElementsByTagName("BODY")[0],
         /**
@@ -86,6 +90,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
     {
         localStorage.setItem("themeSettings", "");
     }
+   
 
 </script>
 <!-- BEGIN Page Wrapper -->
@@ -326,7 +331,8 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
                 {% endif %}
             </li>
                 {% if "viewChapters" in project_permissions %}
-                    <a href="#viewChapters" title="View saved config" data-filter-tags="application intel introduction">
+                   <!-- <a href="#viewChapters" title="View saved config" data-filter-tags="application intel introduction"> -->
+                   <a href="{% url 'view_chapters' client_id %}" title="View saved config" data-filter-tags="application intel introduction">
                         <i class="fal fa-eye"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
                     </a>

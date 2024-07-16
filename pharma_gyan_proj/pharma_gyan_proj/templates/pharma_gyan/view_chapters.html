@@ -88,8 +88,14 @@ $(document).ready(function()
             else{
                 item.mark_as_free ="NO"
             }
-        })
-
+        }
+        )
+        localStorage.removeItem("summernoteData");
+        localStorage.removeItem('markAsFree');
+         localStorage.removeItem('Chapter_title');
+        localStorage.removeItem('uploadedImageURLs');
+        localStorage.removeItem('uploadedVideoURLs');
+        console.log("removed local storage from view");
         // initialize datatable
         datatable = $('#dt-basic-example').dataTable(
             {
@@ -154,6 +160,7 @@ $(document).ready(function()
     }
     function editChapter(unique_id) {
         if (!validatePermissions()) return;
+  
         window.open("#editChapter?unique_id=" +  unique_id, "_blank");
     }
 
