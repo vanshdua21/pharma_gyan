@@ -8,6 +8,7 @@ from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fe
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
 
+from pharma_gyan_proj.apps.pharma_gyan.processors.package_processor import fetch_and_prepare_packages, fetch_package_from_id, prepare_and_save_package, process_activate_package, process_deactivate_package
 from pharma_gyan_proj.utils.s3_utils import S3Wrapper
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import fetch_and_prepare_chapter_preview
@@ -37,7 +38,7 @@ import json
 from django.http import JsonResponse
 import json
 
-from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import fetch_and_prepare_courses_v2, fetch_course_from_id_v2, prepare_and_save_course_v2, process_activate_course_v2, process_deactivate_course_v2
+from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import fetch_all_courses, fetch_and_prepare_courses_v2, fetch_course_from_id_v2, prepare_and_save_course_v2, process_activate_course_v2, process_deactivate_course_v2
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit
@@ -315,6 +316,7 @@ def activate_entity_tag(request, uniqueId):
     response = activate_entity(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
 def addCourse(request):
     user = request.user
     json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'topics.json')
@@ -324,6 +326,13 @@ def addCourse(request):
     with open(tags_json_file_path, 'r') as file:
         tags = json.load(file)
     rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"user": user, "mode": "create", "topics": json.dumps(topics), "tags": json.dumps(tags)})
+    return HttpResponse(rendered_page)
+
+def addPackage(request):
+    user = request.user
+    courses = fetch_all_courses()
+    print('courses', json.dumps(courses))
+    rendered_page = render_to_string('pharma_gyan/add_package.html', {"user": user, "mode": "create", "courses": json.dumps(courses)})
     return HttpResponse(rendered_page)
 
 def editCourse(request):
@@ -354,6 +363,18 @@ def editCourseV2(request):
     rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"course": json.dumps(course),"mode": "edit", "topics": json.dumps(topics), "tags": json.dumps(tags)})
     return HttpResponse(rendered_page)
 
+def editPackage(request):
+    # Retrieve the id parameter from the query string
+    package_id = request.GET.get('id')
+    package = fetch_package_from_id(package_id)
+    user = request.user
+    courses = fetch_all_courses()
+    if package is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No package with this ID")
+        return HttpResponse(json.dumps(response, default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_package.html', {"package": json.dumps(package),"mode": "edit", "courses": json.dumps(courses)})
+    return HttpResponse(rendered_page)
+
 def viewCourses(request):
     courses = fetch_and_prepare_courses()
     # Convert list of dictionaries to JSON
@@ -366,6 +387,13 @@ def viewCoursesV2(request):
     # Convert list of dictionaries to JSON
     courses_json = json.dumps(courses)
     rendered_page = render_to_string('pharma_gyan/view_courses_v2.html', {"courses": courses_json, "project_permissions": Session().get_admin_user_permissions()})
+    return HttpResponse(rendered_page)
+
+def viewPackages(request):
+    packages = fetch_and_prepare_packages()
+    # Convert list of dictionaries to JSON
+    packages_json = json.dumps(packages)
+    rendered_page = render_to_string('pharma_gyan/view_packages.html', {"packages": packages_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
 
 @csrf_exempt
@@ -420,6 +448,30 @@ def upsertCourseV2(request):
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
+# upsertPackage
+@csrf_exempt
+def upsertPackage(request):
+    unique_id = request.POST.get('unique_id')
+    title = request.POST.get('title')
+    description = request.POST.get('description')
+    price = request.POST.get('price')
+    image_file = request.FILES.get('image')
+    courses = json.loads(request.POST.get('courses', '[]'))
+    imageUrl = save_file_to_s3(image_file)
+    # Collect the data in a dictionary
+    package = {
+        'id': id,
+        'unique_id': unique_id,
+        'title': title,
+        'description': description,
+        'price': price,
+        'imageUrl': imageUrl,  # This is the uploaded file
+        'courses': courses,
+    }
+    response = prepare_and_save_package(package)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
@@ -459,6 +511,20 @@ def activate_course_v2(request):
 def deactivate_course_v2(request):
     course_id = request.GET.get('id')
     response = process_deactivate_course_v2(course_id)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
+def activate_package(request):
+    course_id = request.GET.get('id')
+    response = process_activate_package(course_id)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
+def deactivate_package(request):
+    course_id = request.GET.get('id')
+    response = process_deactivate_package(course_id)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 

@@ -118,6 +118,21 @@ def fetch_course_from_id_v2(course_id):
     course_json = course.to_json()
     return course_json
 
+def fetch_all_courses(filter_list=[], relationships_list=[]):
+    method_name = "fetch_all_courses"
+    logger.debug(f"Entry {method_name}")
+    courses = fetch_courses()
+    courses_list = []
+    for course in courses:
+        courses_list.append({
+            "id": course.id,
+            "unique_id": course.unique_id,
+            "title": course.title,
+            "topics_count": len(course.topics),
+            "add": "<button id=\"add-course-{}\" class='btn-outline-success btn-sm mr-1' onclick=\"addCourse('{}', '{}', '{}')\">Add</button>".format(course.unique_id, course.unique_id, course.title, len(course.topics))
+        })
+    return courses_list
+
 def fetch_courses(filter_list=[], relationships_list=[]):
     method_name = "fetch_courses"
 

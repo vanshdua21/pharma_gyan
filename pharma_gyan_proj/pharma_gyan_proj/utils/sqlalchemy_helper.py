@@ -289,6 +289,42 @@ def save(engine, table, entity):
         else:
             session.commit()
 
+def fetch_package_rows_with_join(engine, table, filter_list, columns=[], relationships=[], limit=None):
+    with Session(engine) as session:
+        session.begin()
+        try:
+            # Create an alias for the course table to be used in the subquery
+            latest_package_alias = aliased(table)
+            
+            # Subquery to get the latest version for each unique_id
+            subquery = (
+                session.query(
+                    latest_package_alias.unique_id,
+                    func.max(latest_package_alias.version).label('latest_version')
+                )
+                .group_by(latest_package_alias.unique_id)
+                .subquery()
+            )
+            # Main query to get courses with the latest version, joining with tags and topics
+            q = (
+                session.query(table)
+                .join(
+                    subquery,
+                    (table.unique_id == subquery.c.unique_id) & (table.version == subquery.c.latest_version)
+                )
+                .options(
+                    joinedload(table.courses)
+                )
+            )
+            for filters in filter_list:
+                q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
+            q = add_columns_projections(q, columns)
+            entity = q.limit(limit).all() if limit is not None else q.all()      
+            return entity
+        except Exception as ex:
+            logging.error(f"error while fetching from table, Error: ", ex)
+            raise ex
+
 def fetch_rows_with_join(engine, table, filter_list, columns=[], relationships=[], limit=None):
     with Session(engine) as session:
         session.begin()
@@ -320,7 +356,6 @@ def fetch_rows_with_join(engine, table, filter_list, columns=[], relationships=[
             for filters in filter_list:
                 q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
             q = add_columns_projections(q, columns)
-            print("query - ", q)
             entity = q.limit(limit).all() if limit is not None else q.all()      
             return entity
         except Exception as ex:

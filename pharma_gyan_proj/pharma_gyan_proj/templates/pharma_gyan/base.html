@@ -387,6 +387,30 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
             </li>
         </ul>
     </li>
+    <li class="nav-title">Packages</li>
+        <li>
+        <a href="#" title="Packages" data-filter-tags="application intel">
+            <i class="fal fa-file-alt"></i>
+            <span class="nav-link-text" data-i18n="nav.application_intel">Packages</span>
+        </a>
+        <ul>
+            <li>
+                {% if "editContent" in project_permissions %}
+                    <a href="#addPackage" title="Add Course" data-filter-tags="application intel">
+                        <i class="fal fa-file-alt"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel">Add Package</span>
+                    </a>
+                {% endif %}
+                </li>
+                {% if "viewContent" in project_permissions %}
+                    <a href="#viewPackages" title="View saved packages" data-filter-tags="application intel introduction">
+                        <i class="fal fa-eye"></i>
+                        <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
+                    </a>
+                {% endif %}
+            </li>
+        </ul>
+    </li>
     {% endif %}
 
     

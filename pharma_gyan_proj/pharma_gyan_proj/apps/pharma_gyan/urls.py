@@ -41,4 +41,11 @@ urlpatterns = [
     path("editor/previewChapterContent/", views.preview_chapter_content),
     path("editor/activateCourseV2", views.activate_course_v2),
     path("editor/deactivateCourseV2", views.deactivate_course_v2),
+    # package
+    path("editor/addPackage/", views.addPackage),
+    path("editor/viewPackages/", views.viewPackages),
+    path("editor/editPackage/", views.editPackage),
+    path("editor/upsertPackage/", views.upsertPackage),
+    path("editor/activatePackage", views.activate_package),
+    path("editor/deactivatePackage", views.deactivate_package),
 ]

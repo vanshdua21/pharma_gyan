@@ -1,0 +1,716 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+
+
+<style type="text/css">
+    .form-field-custom{
+        font-weight:bold;
+        font-size:14px;
+    }
+
+    body{
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    .form-group{
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label{
+        width: 15%
+    }
+
+    .permissionWrapper{
+        margin: 15px 0;
+    }
+
+    .perHead{
+        font-size: 18px;
+        padding: 10px 0;
+    }
+
+    #perm{
+        padding: 10px 40px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #perm >div{
+        width: 50%;
+        padding: 8px;
+    }
+    .highlighted-row{
+        background-color: #d4edda !important;
+    }
+    .disabled-btn {
+        background-color: #c3e6cb;
+        border-color: #c3e6cb;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    .blur-effect {
+        filter: blur(5px); /* Adjust blur intensity as needed */
+    }
+    .opacity-effect {
+        opacity: 0.5; /* Adjust opacity level (0.0 to 1.0) */
+    }
+    .panel-container {
+        position: relative;
+    }
+    #add-topics-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 300px; /* Adjust width as needed */
+        height: 100px; /* Adjust height as needed */
+        background-color: #f8f9fa; /* Light background color */
+        border: 2px dashed #886ab5; /* Dashed border with primary color */
+        border-radius: 10px; /* Rounded corners */
+        cursor: pointer;
+        margin: 20px auto; /* Center horizontally */
+        transition: background-color 0.3s, border-color 0.3s; /* Smooth transitions */
+    }
+
+    #add-topics-box .add {
+        text-align: center;
+    }
+
+    #add-topics-box p {
+        margin: 0;
+        font-size: 0.9em; /* Larger font size */
+        color: #886ab5; /* Primary color */
+    }
+
+    #add-topics-box i {
+        font-size: 1.5em; /* Larger icon */
+        color: #886ab5; /* Primary color */
+    }
+
+    #add-topics-box:hover {
+        background-color: #886ab5; /* Primary color on hover */
+        border-color: #886ab5; /* Darker border color on hover */
+    }
+
+    #add-topics-box:hover p, 
+    #add-topics-box:hover i {
+        color: #fff; /* White color on hover */
+        
+    }
+
+    .select2-container .select2-selection--multiple {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #886ab5;
+        border: 1px solid #886ab5;
+        border-radius: 0.2rem;
+        color: #fff;
+        padding-right: 5px;
+    }
+
+    .select2-container--default .select2-results__option[aria-selected=true]::before {
+        content: '✔';
+        color: #886ab5;
+        margin-right: 10px;
+    }
+
+    .select2-container--default .select2-selection--multiple::after {
+        content: "\f078"; /* Font Awesome Unicode for 'fal fa-chevron-down' */
+        font-family: 'Font Awesome 5 Pro'; /* Ensure the use of the Font Awesome 5 Pro */
+        font-weight: 300; /* Light weight */
+        position: absolute;
+        right: 5px; /* Adjust the position of the icon */
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        font-size: 16px; /* Adjust the size of the icon */
+        color: #999; /* Adjust the color of the icon */
+    }
+
+</style>
+
+
+<div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
+    "><strong>Congratulations!</strong> <span id="success-text"></span>
+    
+        </div>
+    
+        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewCourses()>View courses</button>
+    
+        </div>
+
+<div id="main-form-div">
+    <div class="row">
+        <div class="col-xl-7">
+            <div id="panel-1" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Add Package
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div>
+                            <div class="p-20">
+                                <div id="uploadForm">
+                                    <div class="form-group">
+                                        <label class="form-label" for="title">Title</label>
+                                        <input type="text" id="title" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="desc">Description</label>
+                                        <input type="text" id="desc" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="price">Price</label>
+                                        <input type="text" id="price" class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="pic">Course Thumbnail</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" name="image-file" id="image-file" accept=".jpg, .jpeg, .png, .gif">
+                                            <label class="custom-file-label" for="image-file">Upload Image</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image preview area -->
+                                    <div class="form-group" id="image-preview-group" hidden>
+                                        <label class="form-label" for="title">Image Preview:</label>
+                                        <img id="image-preview" src="#" alt="Image Preview" style="height: 150px;width: 130px;">
+                                    </div>
+                                    
+
+                                    <div class="container mt-4" style="padding: 0;">
+                                        <div>
+                                            <label class="form-label">Courses</label>
+                                        </div>
+                                        <div id="topics-container">
+                                            <h3 id="add-topics-box">
+                                                <div id="add-topics-content" class="add" onclick="removeBlurOpacity()">
+                                                    <p>Click here to add Courses</p>
+                                                    <p><i class="fal fa-plus-circle"></i></p>
+                                                </div>
+                                            </h3>
+                                        </div>
+                                        
+                                        <!-- Add more topics as needed -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="emailCTA" style="display: flex; justify-content: space-between; align-items: center; margin-top: 50px;">
+                            <button class="btn btn-small btn-success" onclick="addPackage()" style="width: 100px;">
+                                Save
+                            </button>
+                            <div>
+                                <span class="clear-data-text" onclick="clearAllData()" style="cursor: pointer; font-style: italic; text-decoration: underline;">
+                                    Clear all data
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="err-div" style="display: none;margin-top:20px;"></div>
+                    <div id="progress-bar-div" style="margin-top:20px;margin-bottom:20px;width:100%;display:none;" class="progress progress-striped active">
+                        <div id="progress-bar" class="progress-bar bg-success-500 bg-danger-gradient" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5">
+            <div id="panel-5" class="panel">
+                <div class="panel-hdr">
+                    <h2 id="main_title">
+                        Available Courses
+                    </h2>
+                </div>
+                <div class="panel-container show">
+                    <div class="panel-content">
+                        <div>
+                            <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                                <thead class="bg-primary-600">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Topic Count</th>
+                                    <th>Add</th>
+                                </tr>
+                                </thead>
+                                <tbody id="colors-data">
+                                    
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+    var baseUrl = '<?=$baseUrl?>';
+    var mode = "{{mode}}";
+    var currentPackageData = {};
+    var available_courses = JSON.parse('{{ courses|escapejs }}');
+
+    // Function to remove blur and opacity effects
+    function removeBlurOpacity() {
+        document.getElementById('panel-5').classList.remove('blur-effect', 'opacity-effect');
+        document.getElementById('panel-5').style.pointerEvents = 'all';
+        document.getElementById('add-topics-content').innerHTML = `<p>Pick courses from the table on your right.</p>`;
+        document.getElementById('add-topics-content').style.cursor = "auto";
+    }
+
+    function onSortableReady(callback) {
+        var checkInterval = setInterval(function() {
+            if (typeof Sortable !== 'undefined') {
+                clearInterval(checkInterval);
+                callback();
+            }
+        }, 100); // Check every 100 milliseconds
+    }
+
+    onSortableReady(function() {
+        datatable = $('#dt-basic-example').dataTable(
+            {
+                responsive: true,
+                lengthChange: false,
+                data : available_courses,
+                columns: [
+                    { data: "title" },
+                    { data: "topics_count" },
+                    { data: "add" }
+                ],
+                scrollY: `550px`,
+                scrollCollapse: true,
+                paging: false
+            });
+
+        function initProgressBar() {
+            document.getElementById("progress-bar").style.width = '20%';
+            $("#progress-bar-div").show();
+
+        }
+
+        function incBar() {
+            var currWidth = $("#progress-bar").width();
+            $("#progress-bar").width(currWidth + 50);
+        }
+
+        // Initial blur and opacity effect on page load
+        document.getElementById('panel-5').classList.add('blur-effect', 'opacity-effect');
+        document.getElementById('panel-5').style.pointerEvents = 'none';
+
+        $('#topics-container').on('DOMSubtreeModified', savePackage);
+        document.getElementById('image-file').addEventListener('change', handleImageUpload);
+
+        loadPackage();
+    });
+
+    function handleImageUpload(event) {
+        const imageFile = event.target.files[0];
+        if (!imageFile) return;
+
+        // Convert the image to base64
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            const imagePreviewGroup = document.getElementById('image-preview-group');
+            imagePreviewGroup.hidden = false;
+            const base64String = reader.result;
+            const imagePreview = document.getElementById('image-preview');
+            imagePreview.src = base64String;
+            imagePreview.style.display = 'block'; // Show the image element
+            const imageLabel = document.querySelector('.custom-file-label');
+            imageLabel.textContent = 'Image Selected'; // Update label text to indicate an image is selected
+
+            if (mode == "edit") {
+                var editPackages = JSON.parse(localStorage.getItem('edit_packages')) || {};
+                var packageData = editPackages[currentPackageData["id"]] || {};
+                packageData.thumbnail_url = base64String;
+                editPackages[currentPackageData["id"]] = packageData;
+                localStorage.setItem('edit_packages', JSON.stringify(editPackages));
+            }
+            else {
+                var packageData = JSON.parse(localStorage.getItem('package')) || {};
+                packageData.thumbnail_url = base64String;
+                localStorage.setItem('package', JSON.stringify(packageData));
+            }    
+        };
+        reader.readAsDataURL(imageFile);
+    }
+
+    function savePackage() {   
+
+        let title = $('#title').val();
+        let description = $('#desc').val();
+        let price = $('#price').val();
+
+        let courses = [];
+
+        $('#topics-container .topic-card-header').each(function() {
+            let courseId = $(this).attr('id').replace('topic-card-', '');
+            courses.push(courseId);
+        });
+
+        let packageData = {
+            title: title,
+            description: description,
+            price: price,
+            courses: courses
+        };
+
+        if (mode == "edit") {
+            var editPackages = JSON.parse(localStorage.getItem('edit_packages')) || {};
+            packageData.thumbnail_url = editPackages[currentPackageData["id"]]?.thumbnail_url;
+            editPackages[currentPackageData["id"]] = packageData;
+            localStorage.setItem('edit_packages', JSON.stringify(editPackages));
+        }
+        else {
+            var existingPackage =  JSON.parse(localStorage.getItem('package')) || {};
+            packageData.thumbnail_url = existingPackage.thumbnail_url;
+            localStorage.setItem('package', JSON.stringify(packageData));
+        }    
+    }
+
+    function loadPackage() {
+        let packageData = '';
+        if (mode == "edit") {
+            currentPackageData = JSON.parse('{{ package|escapejs }}') || {};
+            currentPackageData = JSON.parse(currentPackageData);
+            var editPackages = JSON.parse(localStorage.getItem('edit_packages')) || {};
+            packageData = editPackages[currentPackageData["id"]];
+            if (!packageData) {
+                packageData = currentPackageData;
+                console.log('packageData', packageData);
+                editPackages[currentPackageData["id"]] = packageData;
+                localStorage.setItem('edit_packages', JSON.stringify(editPackages));
+            }
+        }
+        else {
+            packageData = JSON.parse(localStorage.getItem('package'));
+        }    
+
+        if (packageData) {
+            $('#title').val(packageData.title);
+            $('#desc').val(packageData.description);
+            $('#price').val(packageData.price);
+
+            packageData.courses.forEach(courseId => {
+                course = available_courses.find(course => course.unique_id == courseId);
+                addCourse(courseId, course.title, course.topics_count);
+            });
+
+            const image = packageData.thumbnail_url;
+            if (image) {
+                const imageLabel = document.querySelector('.custom-file-label');
+                imageLabel.textContent = 'Image Selected'; // Update label text to indicate an image is selected
+
+                const imagePreviewGroup = document.getElementById('image-preview-group');
+                imagePreviewGroup.hidden = false;
+
+                const imagePreview = document.getElementById('image-preview');
+                imagePreview.src = image;
+                imagePreview.style.display = 'block'; // Show the image element
+
+                // Convert the base64 string to a Blob
+                fetch(image)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        // Create a new File object from the Blob
+                        const file = new File([blob], "image.jpg", { type: blob.type });
+                        
+                        // Create a DataTransfer to set the File object to the file input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        
+                        const fileInput = document.getElementById('image-file');
+                        fileInput.files = dataTransfer.files;
+                    })
+                    .catch(err => console.error('Error creating Blob from base64 string:', err));
+            }
+            else {
+                const imagePreview = document.getElementById('image-preview-group');
+                imagePreview.hidden = true;
+            }
+        }
+    }
+
+    function clearAllData() {
+        // Create the SweetAlert2 mixin for custom styling
+        var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+        // Display the confirmation dialog
+        swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'All data on the page will be reset!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Clear!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true,
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('package');
+                    location.reload();
+                }
+            });
+    }
+
+
+    function addCourse(uuid, title, topics_count) {
+        document.getElementById('add-topics-box').hidden = true;
+        const topicContainer = document.getElementById('topics-container');
+        const newTopicCard = document.createElement('div');
+        newTopicCard.className = "row mb-3 topic-card-header";
+        newTopicCard.id = `topic-card-${uuid}`;
+        newTopicCard.innerHTML = `<div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="card-title mb-0">${title}</h5>
+                                                <small class="text-muted">Chapter Count: ${topics_count}</small>
+                                            </div>
+                                            <button class="btn btn-danger btn-sm" onclick="removeCourse('${uuid}')">
+                                                <i class="fal fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>`;
+        topicContainer.appendChild(newTopicCard);
+        // id="add-topic-07d971d2-3ea6-11ef-a04f-5a57a4320fb5"
+        const buttonId = `add-course-${uuid}`;
+        const addButton = document.getElementById(buttonId);
+        if (addButton) {
+            addButton.disabled = true;
+            addButton.classList.add('disabled-btn');
+            const row = addButton.closest('tr');
+            if (row) {
+                row.classList.add('highlighted-row');
+            }
+        }
+
+        if (topicContainer.childElementCount > 1) {
+            removeBlurOpacity();
+        }
+        if (topicContainer.childElementCount > 1 ) {
+            const sortable = new Sortable(topicContainer, {
+            animation: 150,
+            handle: '.topic-card-header',
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                console.log('Item moved from index', evt.oldIndex, 'to', evt.newIndex);
+                // const chapters_positions = JSON.parse(localStorage.getItem('chapters_positions'));
+                // if (chapters_positions) {
+                //     const temp = chapters_positions[evt.oldIndex];
+                //     chapters_positions[evt.oldIndex] = chapters_positions[evt.newIndex];
+                //     chapters_positions[evt.newIndex] = temp;
+                //     localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
+                // }
+            },
+        });
+        }
+    }
+
+    function removeCourse(uuid) {
+        const topicCard = document.getElementById(`topic-card-${uuid}`);
+        if (topicCard) {
+            topicCard.remove();
+        }
+
+        const buttonId = `add-course-${uuid}`;
+        const addButton = document.getElementById(buttonId);
+        if (addButton) {
+            addButton.disabled = false;
+            addButton.classList.remove('disabled-btn');
+            const row = addButton.closest('tr');
+            if (row) {
+                row.classList.remove('highlighted-row');
+            }
+        }
+
+        const topicContainer = document.getElementById('topics-container');
+        if (topicContainer.childElementCount == 1) {
+            document.getElementById('add-topics-box').hidden = false;
+        }
+    }
+
+
+    function redirectToViewCourses(){
+        window.location='#viewPackages';
+    }
+
+    function setError(domId,msg){
+        $("#"+domId+"-error").html(msg);
+        $("#"+domId+"-err-icon").html('<i class="glyphicon glyphicon-remove-circle"></i>');
+        $("#"+domId+"-group").addClass('has-error');
+    }
+
+    function setSuccess(domId){
+        $("#"+domId+"-err-icon").html('<i class="fal fa-check"></i>');
+
+        $("#"+domId+"-group").removeClass('has-error');
+        $("#"+domId+"-group").addClass('has-success');
+    }
+
+    function initProgressBar()
+    {
+
+        document.getElementById("progress-bar").style.width='20%';
+        $("#progress-bar-div").show();
+
+    }
+
+    function incBar()
+    {
+        var currWidth = $("#progress-bar").width();
+        $("#progress-bar").width(currWidth+50);
+    }
+
+    var lock = false;
+    function addPackage(){
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Title ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("title");
+
+        if(!($('#desc').val())){
+            setError("desc");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Description ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        setSuccess("desc");
+
+        if(!($('#price').val())){
+            setError("price");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill Price ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
+        // Check if the price is numeric
+        var priceValue = $('#price').val();
+        if (!$.isNumeric(priceValue)) {
+            setError("price");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Price must be numeric!</span></div>');
+            $("#err-div").show();
+            return;
+        }
+
+        setSuccess("price");
+
+        lock = true;
+
+        initProgressBar();
+
+        $("#err-div").html('');
+        let title = $('#title').val();
+        let description = $('#desc').val();
+        let price = $('#price').val();
+        var imageFile = document.getElementById('image-file').files[0];
+
+        let courses = [];
+
+        $('#topics-container .topic-card-header').each(function() {
+            let courseId = $(this).attr('id').replace('topic-card-', '');
+            courses.push(courseId);
+        });
+        var barInterval = setInterval('incBar()',25);
+
+        let formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('price', price);
+        formData.append('image', imageFile);
+        formData.append('courses', JSON.stringify(courses));
+        for (let pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+
+        if(mode=="edit"){
+            formData.append('unique_id', currentPackageData["unique_id"]);
+        }
+
+        $.ajax({
+            type : 'POST',
+            url : 'upsertPackage/',
+            data : formData,
+            processData: false,
+            contentType: false,
+            success :function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+                $("#progress-bar").css({"width":"100%"});
+
+                console.log('Success', data);
+                if(data['result']=='SUCCESS')
+                {
+                    localStorage.removeItem('package');
+                    $("#success-div").show();
+                    if(mode == "edit"){
+                        $("#success-text").html("Course edited Successfully");
+                    }else{
+                        $("#success-text").html("Course added Successfully");
+                    }
+
+                    $("#main-form-div").hide();
+                    return;
+                }
+                else
+                {
+
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").show();
+                    $("#progress-bar-div").hide();
+
+                    return;
+                }
+
+
+            },
+            error : function(data)
+            {
+                lock=false;
+                clearInterval(barInterval);
+
+                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
+                $("#err-div").show();
+                $("#progress-bar-div").hide();
+
+                return;
+            }
+
+        });
+    }
+
+</script>
+
+
