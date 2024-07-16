@@ -249,11 +249,17 @@
     var mode = "{{mode}}";
     var currentCustomerData = {};
     var available_chapters = JSON.parse('{{ chapters|escapejs }}');
+    var topic_data = {};
     console.log('available_chapters', available_chapters)
     var client_id;
     $(document).ready(function() {
             client_id = Cookies.get('client_id');
             console.log('client_id', client_id);
+            if(mode=="clone" || mode=="edit"){
+            topic_data = JSON.parse('{{ topic_data|escapejs }}');
+            console.log('Data-',topic_data);
+            localStorage.setItem('topic', JSON.stringify(topic_data));
+            }
             });
 
     // Function to remove blur and opacity effects
@@ -301,12 +307,6 @@
         function incBar() {
             var currWidth = $("#progress-bar").width();
             $("#progress-bar").width(currWidth + 50);
-        }
-
-        if(mode=="edit"){
-            currentCustomerData = JSON.parse('{{ user|escapejs }}');
-            console.log('Data-',currentCustomerData);
-            setEditMode(currentCustomerData);
         }
 
         // Initial blur and opacity effect on page load
@@ -361,7 +361,7 @@
     }
 
     function redirectToViewTopics(){
-        window.location='#viewTopic';
+        window.location='#viewTopics';
     }
 
     function clearAllData() {
@@ -557,11 +557,13 @@
 
         //let data = {'title':title, 'description':description,'image':imageFile};
         console.log(topicData);
+        console.log('mode', mode);
         if(mode=="edit"){
-            editUniqueId = currentCustomerData["unique_id"];
-            editId = currentCustomerData["id"];
+            editUniqueId = topic_data["unique_id"];
+            editId = topic_data["id"];
             topicData['unique_id'] = editUniqueId;
             topicData["id"] = editId;
+            console.log('topicData new', topicData);
         }
 
         $.ajax({

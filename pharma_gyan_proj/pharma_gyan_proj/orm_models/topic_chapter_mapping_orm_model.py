@@ -8,7 +8,8 @@ class pg_topic_chapter_mapping(Base):
     chapter_id = Column(Integer, nullable=False)
     topic_id = Column(String(255), nullable=False)
     order = Column(Integer, nullable=False)
-    version = Column(Integer, nullable=False)
+    chap_version = Column(Integer, nullable=False)
+    topic_version = Column(Integer, nullable=False)
     ct = Column(DateTime, default=datetime.utcnow)
     ut = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

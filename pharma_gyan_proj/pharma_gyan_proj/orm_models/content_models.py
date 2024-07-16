@@ -93,7 +93,7 @@ class PgTopic(Base, Orm_helper):
     __tablename__ = 'topic'
 
     id = Column("id", Integer, autoincrement=True, primary_key=True)
-    unique_id = Column("unique_id", String, primary_key=True)
+    unique_id = Column("unique_id", String)
     client_id = Column("client_id", String)
     title = Column("title", String)
     description = Column("description", String)

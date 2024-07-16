@@ -8,7 +8,7 @@ from django.core.files.storage import FileSystemStorage
 
 from pharma_gyan_proj.apps.pharma_gyan.app_settings import MAX_ALLOWED_TOPIC_NAME_LENGTH, MIN_ALLOWED_TOPIC_NAME_LENGTH, \
     MIN_ALLOWED_DESCRIPTION_LENGTH, MAX_ALLOWED_DESCRIPTION_LENGTH
-from pharma_gyan_proj.common.comman import is_valid_alpha_numeric_space_under_score
+from pharma_gyan_proj.common.comman import is_valid_alpha_numeric_space_under_score, get_latest_id_list_of_dict
 from pharma_gyan_proj.common.constants import TAG_FAILURE, TAG_SUCCESS, AdminUserPermissionType, ACTIVE_CHAPTER_CHECK
 from pharma_gyan_proj.db_models.chapter_model import chapter_model
 from pharma_gyan_proj.db_models.topic_chapter_mapping_model import topic_chapter_mapping_model
@@ -81,11 +81,10 @@ def prepare_and_save_topic(request_body):
     if request_body.get('id') is not None:
         filter_list = [{"column": "unique_id", "value": request_body.get('unique_id'), "op": "=="}]
         try:
-            topic = topic_model().get_details_by_filter_list(filter_list)
+            topic_db_obj = topic_model().get_details_by_filter_list(filter_list)
             db_resp = topic_model().get_max_version_by_uid(request_body.get('unique_id'))
-            if db_resp is not None and len(db_resp) > 0:
-                logger.error(f"{method_name} :: Error while fetching latest version! "
-                             f"Error: {db_resp.get('result', None)}")
+            if db_resp is not None and len(db_resp) < 0:
+                logger.error(f"{method_name} :: Error while fetching latest version!")
                 return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                             details_message="While fetching latest version!")
         except InternalServerError as ey:
@@ -97,17 +96,24 @@ def prepare_and_save_topic(request_body):
             logger.error(f"Error while fetching users ::{e}")
             return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                         details_message="Something went wrong !")
-        if topic is None:
+        if topic_db_obj is None:
             return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                         details_message="Topic is not found. Please add topic first!")
-        topic = topic[0]
-        topic.version = db_resp[0].version + 1
-        unique_id = topic.unique_id
+
+        topic_db_obj = topic_db_obj[0]
+        topic = PgTopic()
+        version = db_resp[0].get('version') + 1
+        unique_id = topic_db_obj.unique_id
+        topic.version = version
+        topic.ct = topic_db_obj.ct
+        topic.unique_id = topic_db_obj.unique_id
+        topic.id = None
     else:
+        version = 1
         unique_id = uuid.uuid4().hex
         topic = PgTopic()
         topic.unique_id = unique_id
-        topic.version = 1
+        topic.version = version
     topic.title = request_body.get('title')
     topic.description = request_body.get('description')
     topic.client_id = request_body.get('client_id')
@@ -118,7 +124,7 @@ def prepare_and_save_topic(request_body):
         if not db_res.get("status"):
             return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
                         detailed_message="Unable to save topic details!")
-        prepare_and_save_chapter_mapping(request_body.get('chapters'), unique_id)
+        prepare_and_save_chapter_mapping(request_body.get('chapters'), unique_id, version)
     except Exception as e:
         logger.error(f"Error while saving or updating topic Exception ::{e}")
         return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
@@ -127,6 +133,51 @@ def prepare_and_save_topic(request_body):
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
 
+
+def process_activate_topic(unique_id, version):
+    method_name = "process_activate_topic"
+
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="},
+                       {"column": "version", "value": version, "op": "=="}]
+        course = topic_model().get_details_by_filter_list(filter_list)
+        if course is None or len(course) < 1:
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="Topic id is incorrect!")
+        topic_model().update_by_filter_list(filter_list, dict(is_active=1))
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching topic InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching topic ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+
+def process_deactivate_topic(unique_id, version):
+    method_name = "process_deactivate_topic"
+
+    try:
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="},
+                       {"column": "version", "value": version, "op": "=="}]
+        course = topic_model().get_details_by_filter_list(filter_list)
+        if course is None or len(course) < 1:
+            return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE,
+                        detailed_message="Topic id is incorrect!")
+        topic_model().update_by_filter_list(filter_list, dict(is_active=0))
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching topic InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching topic ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+
+    logger.debug(f"Exit {method_name}, Success")
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
 
 def fetch_and_prepare_topic():
     method_name = "fetch_and_prepare_topic"
@@ -145,15 +196,17 @@ def fetch_and_prepare_topic():
         return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                     details_message="Topic not found. Please add topic first!")
 
+    topic = get_latest_id_list_of_dict(topic)
+
     # Convert list of model instances to list of dictionaries
     topic_list = []
     for topic_obj in topic:
         if topic_obj.is_active:
-            cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateEntityTag('{}')\">Deactivate</button>".format(
-                topic_obj.unique_id, topic_obj.unique_id)
+            cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateTopic('{}', '{}')\">Deactivate</button>".format(
+                topic_obj.unique_id, topic_obj.unique_id, topic_obj.version)
         else:
-            cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activateEntityTag('{}')\">Activate</button>".format(
-                topic_obj.unique_id, topic_obj.unique_id)
+            cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activateTopic('{}', '{}')\">Activate</button>".format(
+                topic_obj.unique_id, topic_obj.unique_id, topic_obj.version)
         topic_list.append({
             "unique_id": topic_obj.unique_id,
             "title": topic_obj.title,
@@ -161,19 +214,63 @@ def fetch_and_prepare_topic():
             "created_by": topic_obj.created_by,
             "is_active": topic_obj.is_active,
             "cta": cta,
-            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneEntityTag('{}')\">Clone</button>".format(topic_obj.unique_id, topic_obj.unique_id),
+            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneTopic('{}', '{}')\">Clone</button>".format(
+                topic_obj.unique_id, topic_obj.unique_id, topic_obj.version),
+            "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editTopic('{}', '{}')\">Edit</button>".format(
+                topic_obj.unique_id, topic_obj.unique_id, topic_obj.version),
         })
     return topic_list
 
-def prepare_and_save_chapter_mapping(chapters, unique_id):
+
+
+def fetch_topic_by_unique_id(unique_id, version):
+    filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="},
+                   {"column": "version", "value": version, "op": "=="}]
+    try:
+        topic = topic_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching topic InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching topic ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if topic is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Topic is not found. Please add entity tag first!")
+    topic = topic[0]
+    # Fetch tag categories
+    filter_list = [{"column": "topic_id", "value": topic.unique_id, "op": "=="},
+                   {"column": "topic_version", "value": topic.version, "op": "=="}]
+    topic_chapter_mapping = topic_chapter_mapping_model().get_details_by_filter_list(filter_list)
+
+    if topic_chapter_mapping is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Unable to fetch topic associated chapters!")
+    chapters = []
+    sorted_topic_chapter_mapping = sorted(topic_chapter_mapping, key=lambda x: x.order)
+    for chap in sorted_topic_chapter_mapping:
+        chapters.append(f"{chap.chapter_id}-version-{chap.chap_version}")
+    entity_tag_dict = {
+        "id": topic.id,
+        "unique_id": topic.unique_id,
+        "title": topic.title,
+        "description": topic.description,
+        "chapters": chapters
+    }
+    return entity_tag_dict
+
+
+def prepare_and_save_chapter_mapping(chapters, unique_id, version):
     topic_chapter_mapping = []
     order = 1
     try:
         for chap in chapters:
-            [chapter_id, version] = chap.split('-version-')
+            [chapter_id, chap_version] = chap.split('-version-')
             mapping = pg_topic_chapter_mapping()
             mapping.unique_id = uuid.uuid4().hex
-            mapping.version = version
+            mapping.chap_version = chap_version
+            mapping.topic_version = version
             mapping.chapter_id = chapter_id
             mapping.topic_id = unique_id
             mapping.order = order

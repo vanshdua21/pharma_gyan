@@ -44,7 +44,8 @@ from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import pre
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit, \
-    prepare_and_save_topic, fetch_and_prepare_topic
+    prepare_and_save_topic, fetch_and_prepare_topic, fetch_topic_by_unique_id, process_activate_topic, \
+    process_deactivate_topic
 
 from django.views.decorators.csrf import csrf_exempt
 import re
@@ -174,6 +175,26 @@ def clone_entity_tag(request):
                             content_type="application/json")
     rendered_page = render_to_string('pharma_gyan/add_entity_tag.html',
                                      {"baseUrl": baseUrl, "mode": "clone", "entity_tag": entity_tag_json, "tag_category": tag_category_json})
+    return HttpResponse(rendered_page)
+
+
+def edit_or_clone_topic(request):
+    baseUrl = settings.BASE_PATH
+    # Retrieve the id parameter from the query string
+    unique_id = request.GET.get('unique_id')
+    mode = request.GET.get('mode')
+    version = request.GET.get('version')
+    topic = fetch_topic_by_unique_id(unique_id, version)
+    if topic is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No Topic with this Id")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+
+    chapters = fetch_and_prepare_chapter_view(ACTIVE_CHAPTER_CHECK)
+    if chapters is None or len(chapters) < 1:
+        raise InternalServerError(reason="Error while fetching chapter!")
+
+    rendered_page = render_to_string('pharma_gyan/add_topic.html',
+                                     {"baseUrl": baseUrl, "mode": mode, "topic_data": json.dumps(topic), "chapters": json.dumps(chapters)})
     return HttpResponse(rendered_page)
 
 
@@ -466,3 +487,23 @@ def addTopicChapters(request):
     print(topic)
     rendered_page = render_to_string('pharma_gyan/add_topic_chapters.html', {"topic": topic, "mode": "create"})
     return HttpResponse(rendered_page)
+
+
+@csrf_exempt
+def activate_topic(request):
+    request_body = json.loads(request.body.decode("utf-8"))
+    unique_id = request_body.get('unique_id')
+    version = request_body.get('version')
+    response = process_activate_topic(unique_id, version)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+
+@csrf_exempt
+def deactivate_topic(request):
+    request_body = json.loads(request.body.decode("utf-8"))
+    unique_id = request_body.get('unique_id')
+    version = request_body.get('version')
+    response = process_deactivate_topic(unique_id, version)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

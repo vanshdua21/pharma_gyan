@@ -16,7 +16,7 @@
         <div id="panel-1" class="panel">
             <div class="panel-hdr">
                 <h2>
-                    All <span class="fw-900"><i>Entity Tags</i></span>
+                    All <span class="fw-900"><i>Topics</i></span>
                 </h2>
                 <div class="panel-toolbar">
                     <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
@@ -27,7 +27,7 @@
             <div class="panel-container show">
                 <div class="panel-content">
                     <div class="panel-tag">
-                        <p>Below is a list of all entity tags configured in the system</p>
+                        <p>Below is a list of all Topics configured in the system</p>
                     </div>
                     <!-- datatable start -->
                     <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
@@ -38,6 +38,7 @@
                             <th>Active</th>
                             <th>Created By</th>
                             <th>Clone</th>
+                            <th>Edit</th>
                             <th>Call To Action</th>
 
                         </tr>
@@ -52,6 +53,7 @@
                                 <th>Active</th>
                                 <th>Created By</th>
                                 <th>Clone</th>
+                                <th>Edit</th>
                                 <th>Call To Action</th>
 
                             </tr>
@@ -65,7 +67,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-var data = JSON.parse('{{ entity_tag|escapejs }}');
+var data = JSON.parse('{{ topic|escapejs }}');
 var userPermissions = "{{ project_permissions }}";
 var datatable;
 // console.log("userPermissions",userPermissions);
@@ -99,8 +101,8 @@ $(document).ready(function()
                     { data: "description" },
                     { data: "is_active" },
                     { data: "created_by" },
-                    // { data: "last_update" },
                     { data: "clone"},
+                    { data: "edit"},
                     { data: "cta"}
                 ],
                 dom:
@@ -145,9 +147,13 @@ $(document).ready(function()
     });
 
 
-    function cloneEntityTag(unique_id) {
+    function cloneTopic(unique_id, version) {
         if (!validatePermissions()) return;
-        window.open("#cloneEntityTag?unique_id=" + unique_id, "_blank");
+        window.open("#editOrCloneTopic?unique_id=" + unique_id + "&mode=clone" + "&version=" + version, "_blank");
+    }
+    function editTopic(unique_id, version) {
+        if (!validatePermissions()) return;
+        window.open("#editOrCloneTopic?unique_id=" + unique_id + "&mode=edit" + "&version=" + version, "_blank");
     }
 
     function validatePermissions() {
@@ -160,7 +166,7 @@ $(document).ready(function()
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
 
-    function deactivateEntityTag(id) {
+    function deactivateTopic(unique_id, version) {
             if (!validatePermissions()) return;
             if (lock == true) return;
 
@@ -175,7 +181,7 @@ $(document).ready(function()
             // Display the confirmation dialog
             swalWithBootstrapButtons.fire({
                 title: 'Are you sure?',
-                text: 'User won\'t be able to use this Entity Tag!',
+                text: 'User won\'t be able to use this Topic!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, deactivate it!',
@@ -187,12 +193,13 @@ $(document).ready(function()
                     lock = true;
                     $('#err-div').hide();
                     $('#success-div').hide();
-                    $.post('/pharma_gyan/editor/deactivateEntityTag/' + id + '/', function(data) {
+                    req_data = {'unique_id': unique_id, 'version': version}
+                    $.post('/pharma_gyan/editor/deactivateTopic/', JSON.stringify(req_data), function(data) {
                         lock = false;
                         if (data['result'] == 'SUCCESS') {
                             swalWithBootstrapButtons.fire(
                                 'Deactivated!',
-                                'The entity tag has been deactivated.',
+                                'The Topic has been deactivated.',
                                 'success'
                             ).then(function() {
                                 location.reload(); // Reload after showing success message
@@ -200,7 +207,7 @@ $(document).ready(function()
                         } else {
                             swalWithBootstrapButtons.fire(
                                 'Error',
-                                'Error while deactivating entity tag',
+                                'Error while deactivating Topic',
                                 'error'
                             );
                         }
@@ -208,14 +215,14 @@ $(document).ready(function()
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
                     swalWithBootstrapButtons.fire(
                         'Cancelled',
-                        'Your entity tag is safe :)',
+                        'Your Topic is safe :)',
                         'error'
                     );
                 }
             });
         }
 
-    function activateEntityTag(id) {
+    function activateTopic(unique_id, version) {
             if (!validatePermissions()) return;
             if (lock == true) return;
 
@@ -233,7 +240,7 @@ $(document).ready(function()
             // Display the confirmation dialog
             swalWithBootstrapButtons.fire({
                 title: 'Are you sure?',
-                text: 'Do you really want to activate this entity tag?',
+                text: 'Do you really want to activate this Topic?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, activate it!',
@@ -245,12 +252,13 @@ $(document).ready(function()
                     lock = true;
                     $('#err-div').hide();
                     $('#success-div').hide();
-                    $.post('/pharma_gyan/editor/activateEntityTag/' + id + '/', function(data) {
+                    req_data = {'unique_id': unique_id, 'version': version}
+                    $.post('/pharma_gyan/editor/activateTopic/', JSON.stringify(req_data), function(data) {
                         lock = false;
                         if (data['result'] == 'SUCCESS') {
                             swalWithBootstrapButtons.fire(
                                 'Activated!',
-                                'The entity tag has been activated.',
+                                'The Topic has been activated.',
                                 'success'
                             ).then(function() {
                                 location.reload(); // Reload after showing success message
@@ -258,7 +266,7 @@ $(document).ready(function()
                         } else {
                             swalWithBootstrapButtons.fire(
                                 'Error',
-                                'Error while activating entity tag',
+                                'Error while activating Topic',
                                 'error'
                             );
                         }
@@ -267,7 +275,7 @@ $(document).ready(function()
                         console.log(result);
                         swalWithBootstrapButtons.fire(
                             'Error',
-                            'Error while activating entity tag: ' + result['detailed_message'],
+                            'Error while activating Topic: ' + result['detailed_message'],
                             'error'
                         );
                         lock = false;

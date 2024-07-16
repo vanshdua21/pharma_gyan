@@ -31,7 +31,7 @@ urlpatterns = [
     path("editor/viewCourses/", views.viewCourses),
     path("editor/upsertCourse/", views.upsertCourse),
     path("editor/upsertCourseV2/", views.upsertCourseV2),
-    path("editor/deactivateCourse/<str:uniqueId>/", views.deactivate_course),
+    path("editor/Course/<str:uniqueId>/", views.deactivate_course),
     path("editor/activateCourse/<str:uniqueId>/", views.activate_course),
     path("editor/editCourse/", views.editCourse),
     path("editor/getCourseTreeJson/<str:uniqueId>/", views.get_course_tree_json),
@@ -42,4 +42,7 @@ urlpatterns = [
     path("editor/previewChapterContent/", views.preview_chapter_content),
     path("editor/addTopic/", views.add_topic),
     path('editor/viewTopics/', views.view_topic),
+    path('editor/editOrCloneTopic', views.edit_or_clone_topic),
+    path('editor/activateTopic/', views.activate_topic),
+    path('editor/deactivateTopic/', views.deactivate_topic),
 ]
