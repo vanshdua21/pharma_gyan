@@ -158,6 +158,17 @@
     var uniqueId;
     var client_id;
     var focusedVideoElement = null;
+    var debounce = function(func, delay) {
+    var inDebounce;
+    return function() {
+        var context = this;
+        var args = arguments;
+        clearTimeout(inDebounce);
+        inDebounce = setTimeout(function() {
+            func.apply(context, args);
+        }, delay);
+    };
+};
     var saveToLocal = function () {
         var summernoteContent = $('#saveToLocal').summernote("code");
         var summernoteContentString = JSON.stringify(summernoteContent);
@@ -171,7 +182,8 @@
         var title = JSON.stringify($('#title').val());
         localStorage.setItem('Chapter_title', title);
     };
-
+    // Debounced version of saveToLocal
+    var debouncedSaveToLocal = debounce(saveToLocal, 3000);
     // Remove from local storage
     var removeFromLocal = function () {
         localStorage.removeItem("summernoteData");
@@ -186,7 +198,8 @@
     // Timer function for auto-save
     var timer = function () {
         interval = setInterval(function () {
-            saveToLocal();
+            // saveToLocal();
+            debouncedSaveToLocal();
             clearInterval(interval);
         }, 1000);
     };
@@ -377,6 +390,8 @@
             success: function (response) {
                 lock=false;
                 uniqueId = response['data']['unique_id']
+                id = response['data']['id'];
+                
                 $("#progress-bar").css({"width":"100%"});
                 $("#success-div").show();
                 if(mode == "edit"){
@@ -393,7 +408,7 @@
 
                 $("#action-buttons").html(`
                 <button onclick="redirectToAddChapter()" class="btn-outline-success btn-sm mr-1">Add Chapter</button>
-                <button onclick="redirectToPreviewChapter('${uniqueId}')" class="btn-outline-success btn-sm mr-1">Preview Chapter</button>
+                <button onclick="redirectToPreviewChapter('${id}')" class="btn-outline-success btn-sm mr-1">Preview Chapter</button>
             `);
 
                 return;
@@ -422,8 +437,27 @@
         window.location='#addChapter/';
     }
 
-    function redirectToPreviewChapter(uniqueId){
-        window.location='#previewChapterContent/'+uniqueId;
+    function redirectToPreviewChapter(id){
+        // window.location='#previewChapterContent/'+uniqueId;
+        const data = {
+            id:id
+            }
+            $.ajax({
+                type : 'POST',
+                url : 'previewChapterContent/',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success :function(response)
+                {
+                    console.log('Success', response);
+
+                    return $('#success-div').html(response);
+                }
+                ,
+                    error: function(error) {
+                        console.error('Error:', error);
+                    }}
+                );
     }
 
     function initProgressBar() {
@@ -451,12 +485,14 @@
         client_id = Cookies.get('client_id');
         // Listen for changes in the title input field
         $('#title').on('input', function() {
-            saveToLocal();
+            // saveToLocal();
+            debouncedSaveToLocal();
         });
 
         // Listen for changes in the markAsFree checkbox
         $('#markAsFree').on('change', function() {
-            saveToLocal();
+            // saveToLocal();
+            debouncedSaveToLocal();
         });
         // Custom video button
         var videoButton = function (context) {
@@ -609,7 +645,8 @@
                         uploadImages(files);
                     },
                     onChange: function (contents, $editable) {
-                        saveToLocal();
+                        // saveToLocal();
+                        debouncedSaveToLocal();
                         clearInterval(interval);
                         timer();
                     }
@@ -620,14 +657,15 @@
                         },
             });
         }
-        //   Check mode and set clone if applicable
           if (mode == "clone") {
-        var Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
-        setCloneMode(Chapter);
+        // var Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
+        // setCloneMode(Chapter);
+         setMode() 
+
     } 
     else if(mode=='edit')
     {
-            setEditeMode();
+            setMode();
         
     }
     else{
@@ -637,20 +675,14 @@
    
     })
 ;
-function setCloneMode(Chapter) {
-    
-    $("#title").val(Chapter["title"]);
-    // Set the Summernote content
-    $('#saveToLocal').summernote('code', Chapter["content"]);  // Do not parse the content as JSON
-    // Update the "mark as free" checkbox
-    var is_free = Chapter["mark_as_free"];
-    $('#markAsFree').prop('checked', is_free);
-}
-function setEditeMode() {
+
+function setMode() {
     var localData = localStorage.getItem('summernoteData');
     var chapterTitle = localStorage.getItem('Chapter_title');
     var markAsFree = localStorage.getItem('markAsFree');
-    Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
+    if(mode=='clone'){var Chapter = JSON.parse('{{ clone_chapter|escapejs }}');}
+   else{ var Chapter = JSON.parse('{{ edit_chapter|escapejs }}');}
+
     if (localData) 
     {
         $('#saveToLocal').summernote('code', JSON.parse(localData));

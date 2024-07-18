@@ -5,7 +5,7 @@ import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter, \
     fetch_and_prepare_chapters, deactivate_chapter_view, activate_chapter_view, fetch_chapter_by_unique_id, \
-    fetch_chapter_by_id
+    fetch_chapter_by_id, fetch_and_prepare_chapter_preview_by_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
@@ -120,15 +120,18 @@ def entity_tag(request):
     rendered_page = render_to_string('pharma_gyan/add_entity_tag.html', {"baseUrl": baseUrl, "mode": "create", "tag_category": tag_category_json})
     return HttpResponse(rendered_page)
 @csrf_exempt
-def preview_chapter_content(request,uniqueId):
+def preview_chapter_content(request):
     method_name = "preview_chapter_content"
     print(f'{method_name}, Before decode: {request.body}')
     request_body = json.loads(request.body.decode("utf-8"))
+    id = request_body.get('id')
     unique_id = request_body.get('unique_id')
     title = request_body.get('title')
     content = request_body.get('content')
     if unique_id is not None and unique_id != '':
         chapter = fetch_and_prepare_chapter_preview(unique_id)
+    elif id is not None and id != '':
+        chapter = fetch_and_prepare_chapter_preview_by_id(id)
     elif title is not None and content is not None:
         chapter = {
             "title": title,
@@ -156,10 +159,8 @@ def edit_promo_code(request):
 def edit_chapter(request):
     baseUrl = settings.BASE_PATH
     # Retrieve the id parameter from the query string
-    unique_id = request.GET.get('unique_id')
-    chapter = fetch_chapter_by_unique_id(unique_id)
-    # id = request.GET.get('id')
-    # chapter = fetch_chapter_by_id(id)
+    id = request.GET.get('id')
+    chapter = fetch_chapter_by_id(id)
     if chapter is None:
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No chapter with this Id")
         return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
@@ -189,8 +190,8 @@ def clone_entity_tag(request):
 def clone_chapter(request):
     baseUrl = settings.BASE_PATH
     # Retrieve the id parameter from the query string
-    unique_id = request.GET.get('unique_id')
-    chapter = fetch_chapter_by_unique_id(unique_id)
+    id = request.GET.get('id')
+    chapter = fetch_chapter_by_id(id)
     if chapter is None:
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No chapter tag with this Id")
         return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")

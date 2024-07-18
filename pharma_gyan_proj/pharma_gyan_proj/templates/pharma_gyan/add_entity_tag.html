@@ -1,3 +1,4 @@
+<link rel="stylesheet" media="screen, print" href="/pharma_gyan_proj/pharma_gyan_proj/static/pharma_gyan/css/select2.bundle.css">
 <style type="text/css">
     .form-field-custom{
         font-weight:bold;
@@ -42,8 +43,12 @@
   }
 
 </style>
+
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
+    
 
     <div id="success-div" style="margin-top: 20px; padding: 10px;display: none;"><div id="err-info" class="alert alert-success" style="padding: 30px;font-size: 18px;
     "><strong>Congratulations!</strong> <span id="success-text"></span>
@@ -84,7 +89,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label required" for="tagCategory">Tag Category</label>
-                                        <select class="form-control select2" id="tagCategory">
+                                        <select class="form-control select2-placeholder" id="tagCategory">
                                             <option value="" disabled selected>Choose the Category</option>
                                                 <!-- Options will be populated here -->
                                             </select>

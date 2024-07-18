@@ -99,7 +99,7 @@ def prepare_and_save_chapter(request_body):
                     detailed_message="Error while saving or updating Chapter code!")
 
     logger.debug(f"Exit {method_name}, Success")
-    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS, data=dict(unique_id=chapter.unique_id))
+    return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS, data=dict(unique_id=chapter.unique_id, id=chapter.id))
 
 
 
@@ -140,6 +140,28 @@ def fetch_and_prepare_chapter_preview(unique_id):
     chapter['ct'] = chapter['ct'].strftime('%d %b %Y, %I:%M %p')
     return chapter
 
+def fetch_and_prepare_chapter_preview_by_id(id):
+    method_name = "fetch_and_prepare_chapter_preview"
+    logger.debug(f"Entry {method_name}")
+
+    try:
+        filter_list = [{"column": "id", "value": id, "op": "=="}]
+        chapter = chapter_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching chapter InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching chapter ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    if chapter is None:
+        return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
+                    details_message="Chapter is not found. Please add chapter first!")
+    logger.debug(f"Exit {method_name}")
+    chapter = chapter[0]._asdict()
+    chapter['ct'] = chapter['ct'].strftime('%d %b %Y, %I:%M %p')
+    return chapter
+
 def fetch_and_prepare_chapters(client_id):
     method_name = "fetch_and_prepare_chapters"
     logger.debug(f"Entry {method_name}")
@@ -156,7 +178,7 @@ def fetch_and_prepare_chapters(client_id):
     if chapters is None:
         return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
                     details_message="Chapter is not found. Please add chapter first!")
-
+    chapters = get_latest_id_list_of_dict(chapters)
 # Convert list of model instances to list of dictionaries
     chapter_list = []
     for chapter in chapters:
@@ -174,12 +196,30 @@ def fetch_and_prepare_chapters(client_id):
             "is_active": chapter.is_active,
             "created_by": chapter.created_by,
             "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editChapter('{}')\">Edit</button>".format(
-                 chapter.unique_id, chapter.unique_id),
-            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneChapter('{}')\">Clone</button>".format(chapter.unique_id, chapter.unique_id),
+                 chapter.id, chapter.id),
+            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneChapter('{}')\">Clone</button>".format(chapter.id, chapter.id),
             "cta": cta
         })
     return chapter_list
 
+def get_latest_id_list_of_dict(list_of_dict):
+    # Dictionary to store the maximum id for each unique_id
+    max_id_dict = {}
+
+    # Iterate through the list of dictionaries
+    for d in list_of_dict:
+        unique_id = d.unique_id
+        id_value = d.id
+
+        # If unique_id is not in the dictionary or current id is greater than the stored id
+        if unique_id not in max_id_dict or id_value > max_id_dict[unique_id].id:
+            max_id_dict[unique_id] = d
+
+    # Extract the dictionaries with the maximum id for each unique_id
+    result = list(max_id_dict.values())
+
+    # Print the result
+    return result
 def deactivate_chapter_view(id):
     method_name = "deactivate_chapter_view"
     try:

@@ -154,19 +154,19 @@ $(document).ready(function()
     });
 
 
-    function cloneChapter(unique_id) {
+    function cloneChapter(id) {
         if (!validatePermissions()) return;
-        window.open("#cloneChapter?unique_id=" + unique_id, "_blank");
+        window.open("#cloneChapter?id=" + id, "_blank");
     }
-    function editChapter(unique_id) {
+    function editChapter(id) {
         if (!validatePermissions()) return;
   
-        window.open("#editChapter?unique_id=" +  unique_id, "_blank");
+        window.open("#editChapter?id=" + id, "_blank");
     }
 
     function validatePermissions() {
-        if (!userPermissions.includes("editEntityTag")) {
-            alert("User does not have permission to edit Entity Tag");
+        if (!userPermissions.includes("editChapter")) {
+            alert("User does not have permission to edit chapter");
             return false;
         }
         return true;
@@ -227,10 +227,7 @@ $(document).ready(function()
                 }
             });
         }
-    function cloneChapter(unique_id) {
-        if (!validatePermissions()) return;
-        window.open("#cloneChapter?unique_id=" + unique_id, "_blank");
-    }
+
 
     function activateChapter(id) {
             if (!validatePermissions()) return;
