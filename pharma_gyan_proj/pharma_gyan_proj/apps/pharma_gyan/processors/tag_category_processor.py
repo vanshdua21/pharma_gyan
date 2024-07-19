@@ -33,3 +33,34 @@ def fetch_and_prepare_tag_category():
             "is_active": tag.is_active
         })
     return tag_category_list
+
+def fetch_and_prepare_tag_category_with_tags():
+    method_name = "fetch_and_prepare_tag_category_with_tags"
+    logger.debug(f"Entry {method_name}")
+
+    try:
+        filter_list = [{"column": "is_active", "value": 1, "op": "=="}]
+        relationships_list = ['pg_tag_category.tags']
+        categories = tag_category_model().get_tag_category_details_by_filter_list(filter_list, relationships_list)
+
+        # Format the data
+        result = []
+        for category in categories:
+            category_data = {
+                "unique_id": category.unique_id,
+                "title": category.title,
+                "tags": [
+                    {"unique_id": tag.unique_id, "title": tag.title}
+                    for tag in category.tags
+                ]
+            }
+            result.append(category_data)
+        return result
+
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching tags InternalServerError ::{ey.reason}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)
+    except Exception as e:
+        logger.error(f"Error while fetching users ::{e}")
+        return dict(status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR, result=TAG_FAILURE)

@@ -1,5 +1,6 @@
 import logging
 from pharma_gyan_proj.orm_models.v2.all_models import CourseTagMapping
+from pharma_gyan_proj.orm_models.tag_category_orm_model import pg_tag_category
 from sqlalchemy import inspect, column ,text, func
 from sqlalchemy.orm import Session, joinedload, load_only, aliased
 from pharma_gyan_proj.utils.sqlalchemy_engine import SqlAlchemyEngine
@@ -358,6 +359,16 @@ def fetch_rows_with_join(engine, table, filter_list, columns=[], relationships=[
             q = add_columns_projections(q, columns)
             entity = q.limit(limit).all() if limit is not None else q.all()      
             return entity
+        except Exception as ex:
+            logging.error(f"error while fetching from table, Error: ", ex)
+            raise ex
+        
+def fetch_tag_category_rows_with_tags_limited(engine):
+    with Session(engine) as session:
+        session.begin()
+        try:
+            categories = session.query(pg_tag_category).options(joinedload(pg_tag_category.tags)).all()
+            return categories
         except Exception as ex:
             logging.error(f"error while fetching from table, Error: ", ex)
             raise ex

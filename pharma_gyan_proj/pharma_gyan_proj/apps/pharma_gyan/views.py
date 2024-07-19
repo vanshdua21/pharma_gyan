@@ -6,7 +6,7 @@ import uuid
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
-from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
+from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category, fetch_and_prepare_tag_category_with_tags
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.package_processor import fetch_and_prepare_packages, fetch_package_from_id, prepare_and_save_package, process_activate_package, process_deactivate_package
 from pharma_gyan_proj.utils.s3_utils import S3Wrapper
@@ -322,9 +322,7 @@ def addCourse(request):
     json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'topics.json')
     with open(json_file_path, 'r') as file:
         topics = json.load(file)
-    tags_json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'tags.json')
-    with open(tags_json_file_path, 'r') as file:
-        tags = json.load(file)
+    tags = fetch_and_prepare_tag_category_with_tags()
     rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"user": user, "mode": "create", "topics": json.dumps(topics), "tags": json.dumps(tags)})
     return HttpResponse(rendered_page)
 
@@ -354,8 +352,8 @@ def editCourseV2(request):
     with open(json_file_path, 'r') as file:
         topics = json.load(file)
     tags_json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'tags.json')
-    with open(tags_json_file_path, 'r') as file:
-        tags = json.load(file)
+    tags = fetch_and_prepare_tag_category_with_tags()
+    print(tags)
     if course is None:
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No course with this ID")
         return HttpResponse(json.dumps(response, default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")

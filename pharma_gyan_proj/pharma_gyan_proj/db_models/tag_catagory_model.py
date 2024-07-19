@@ -1,5 +1,5 @@
 from pharma_gyan_proj.orm_models.tag_category_orm_model import pg_tag_category
-from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
+from pharma_gyan_proj.utils.sqlalchemy_helper import fetch_tag_category_rows_with_tags_limited, sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
     update, execute_query
 
 
@@ -19,6 +19,12 @@ class tag_category_model:
     def get_details_by_filter_list(self, filter_list, columns_list=[], relationships_list=[]):
         res = fetch_rows_limited(self.engine, self.table, filter_list, columns=columns_list,
                                  relationships=relationships_list)
+        if res is None or len(res) <= 0:
+            return None
+        return res
+    
+    def get_tag_category_details_by_filter_list(self, filter_list, columns_list=[], relationships_list=[]):
+        res = fetch_tag_category_rows_with_tags_limited(self.engine)
         if res is None or len(res) <= 0:
             return None
         return res

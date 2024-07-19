@@ -9,12 +9,14 @@ class pg_entity_tag(Base, Orm_helper):
     unique_id = Column("unique_id", String, primary_key=True)
     client_id = Column("client_id", String)
     description = Column("description", String)
-    tag_category_id = Column("tag_category_id", String)
+    tag_category_id = Column("tag_category_id", String, ForeignKey('tag_category.unique_id'))
     is_active = Column("is_active", Integer, default=1)
     created_by = Column("created_by", String)
     ct = Column("ct", DateTime, default=datetime.utcnow())
     ut = Column("ut", TIMESTAMP,
                            server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
+    
+    category = relationship("pg_tag_category", back_populates="tags")
 
     def __init__(self, data={}):
         Orm_helper.__init__(self, data)
