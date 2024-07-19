@@ -254,10 +254,15 @@
     var client_id;
     $(document).ready(function() {
             client_id = Cookies.get('client_id');
-            console.log('client_id', client_id);
-            if(mode=="clone" || mode=="edit"){
+            if(mode=="edit"){
             topic_data = JSON.parse('{{ topic_data|escapejs }}');
             console.log('Data-',topic_data);
+            localStorage.setItem('topic', JSON.stringify(topic_data));
+            }
+            if(mode=="clone"){
+            topic_data = JSON.parse('{{ topic_data|escapejs }}');
+            delete topic_data.id;
+            delete topic_data.unique_id;
             localStorage.setItem('topic', JSON.stringify(topic_data));
             }
             });
@@ -357,6 +362,7 @@
     }
 
     function redirectToAddAnotherTopic(){
+        window.location='#addTopic';
         window.location.reload();
     }
 
@@ -385,7 +391,7 @@
             }).then(function(result) {
                 if (result.isConfirmed) {
                     localStorage.removeItem('topic');
-                    location.reload();
+                    window.location='#addTopic';
                 }
             });
     }
@@ -588,14 +594,14 @@
                     }else{
                         $("#success-text").html("Topic added Successfully");
                     }
-
+                    localStorage.removeItem("topic");
                     $("#main-form-div").hide();
                     return;
                 }
                 else
                 {
 
-                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['info']+'</span></div>');
+                    $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+result['details_message']+'</span></div>');
                     $("#err-div").show();
                     $("#progress-bar-div").hide();
 
@@ -608,7 +614,6 @@
             {
                 lock=false;
                 clearInterval(barInterval);
-
                 var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
                 $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
                 $("#err-div").show();
