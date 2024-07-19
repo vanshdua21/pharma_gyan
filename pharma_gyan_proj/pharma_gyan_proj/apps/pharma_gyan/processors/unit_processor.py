@@ -18,6 +18,7 @@ from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
 from pharma_gyan_proj.orm_models.content_models import PgCourse, PgSemester, PgSubject, PgTopic, PgChapter
 from pharma_gyan_proj.orm_models.topic_chapter_mapping_orm_model import pg_topic_chapter_mapping
+from pharma_gyan_proj.orm_models.topic_orm_model import pg_topic
 
 logger = logging.getLogger("apps")
 
@@ -101,7 +102,7 @@ def prepare_and_save_topic(request_body):
                         details_message="Topic is not found. Please add topic first!")
 
         topic_db_obj = topic_db_obj[0]
-        topic = PgTopic()
+        topic = pg_topic()
         version = db_resp[0].get('version') + 1
         unique_id = topic_db_obj.unique_id
         topic.version = version
@@ -111,7 +112,7 @@ def prepare_and_save_topic(request_body):
     else:
         version = 1
         unique_id = uuid.uuid4().hex
-        topic = PgTopic()
+        topic = pg_topic()
         topic.unique_id = unique_id
         topic.version = version
     topic.title = request_body.get('title')
