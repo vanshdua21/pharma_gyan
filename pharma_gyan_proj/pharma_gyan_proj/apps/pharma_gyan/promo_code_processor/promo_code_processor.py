@@ -21,6 +21,7 @@ def prepare_and_save_promo_code(request_body):
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
     session = Session()
+    client_id = session.admin_user_session.client_id
 
     validate_promo_code_details(request_body)
     try:
@@ -40,6 +41,7 @@ def prepare_and_save_promo_code(request_body):
     promo_code = pg_promo_code()
     promo_code.current_usage = 0
     promo_code.unique_id = uuid.uuid4().hex
+    promo_code.client_id = client_id
     promo_code.title = request_body.get('title')
     promo_code.promo_code = request_body.get('promo_code')
     promo_code.discount_type = request_body.get('discount_type')
@@ -149,8 +151,11 @@ def fetch_and_prepare_promo_code():
     method_name = "fetch_and_prepare_promo_code"
     logger.debug(f"Entry {method_name}")
 
+    session = Session()
+    client_id = session.admin_user_session.client_id
+
     try:
-        promo_code = promo_code_model().get_details_by_filter_list([])
+        promo_code = promo_code_model().get_details_by_filter_list([{"column": "client_id", "value": client_id, "op": "=="}])
     except InternalServerError as ey:
         logger.error(
             f"Error while fetching users InternalServerError ::{ey.reason}")
@@ -175,6 +180,7 @@ def fetch_and_prepare_promo_code():
         else:
             usage_left = f'{promo.max_usage - promo.current_usage}'
         promo_code_list.append({
+            "id": promo.id,
             "unique_id": promo.unique_id,
             "title": promo.title,
             "promo_code": promo.promo_code,

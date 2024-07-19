@@ -7,6 +7,7 @@ class pg_promo_code(Base, Orm_helper):
     id = Column("id", Integer, autoincrement=True)
     title = Column("title", String)
     unique_id = Column("unique_id", String, primary_key=True)
+    client_id = Column("client_id", String)
     promo_code = Column("promo_code", String)
     discount_type = Column("discount_type", String)
     discount = Column("discount", Integer)

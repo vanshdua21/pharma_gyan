@@ -183,9 +183,11 @@ def process_deactivate_topic(unique_id, version):
 def fetch_and_prepare_topic():
     method_name = "fetch_and_prepare_topic"
     logger.debug(f"Entry {method_name}")
+    session = Session()
+    client_id = session.admin_user_session.client_id
     try:
         # Fetch all entity tags
-        topic = topic_model().get_details_by_filter_list([])
+        topic = topic_model().get_details_by_filter_list([{"column": "client_id", "value": client_id, "op": "=="}])
     except InternalServerError as ey:
         logger.error(
             f"Error while fetching topic InternalServerError ::{ey.reason}")
@@ -209,6 +211,7 @@ def fetch_and_prepare_topic():
             cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activateTopic('{}', '{}')\">Activate</button>".format(
                 topic_obj.unique_id, topic_obj.unique_id, topic_obj.version)
         topic_list.append({
+            "id": topic_obj.id,
             "unique_id": topic_obj.unique_id,
             "title": topic_obj.title,
             "description": topic_obj.description,

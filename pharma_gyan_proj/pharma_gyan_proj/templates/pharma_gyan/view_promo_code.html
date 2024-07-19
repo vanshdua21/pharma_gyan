@@ -35,6 +35,7 @@
                     <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
                         <thead class="bg-primary-600">
                         <tr>
+                            <th>Id</th>
                             <th>Title</th>
                             <th>Promo Code</th>
                             <th>Discount Type</th>
@@ -56,6 +57,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
+                                <th>Id</th>
                                 <th>Title</th>
                                 <th>Promo Code</th>
                                 <th>Discount Type</th>
@@ -117,6 +119,7 @@
                 lengthChange: false,
                 data : data,
                 columns: [
+                    { data: "id" },
                     { data: "title" },
                     { data: "promo_code" },
                     { data: "discount_type" },
