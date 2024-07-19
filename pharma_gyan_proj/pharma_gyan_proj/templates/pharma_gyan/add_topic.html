@@ -614,7 +614,7 @@
             {
                 lock=false;
                 clearInterval(barInterval);
-                var message = data.responseText ? data.responseText : 'some error occured while saving, please contact administrator !';
+                var message = data.responseText ? data.responseJSON['details_message'] : 'some error occured while saving, please contact administrator !';
                 $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">'+message+'</span></div>');
                 $("#err-div").show();
                 $("#progress-bar-div").hide();
