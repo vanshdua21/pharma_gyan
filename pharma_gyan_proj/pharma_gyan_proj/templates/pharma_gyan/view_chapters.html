@@ -1,0 +1,303 @@
+<link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/datatables.bundle.css">
+<script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
+<script src="/static/pharma_gyan/js/datatables.export.js"></script>
+<!--added new changes-->
+    <!-- Include SweetAlert2 CSS with Bootstrap 4 theme -->
+    <!-- Other necessary CSS files -->
+    <link id="vendorsbundle" rel="stylesheet" media="screen, print" href="css/vendors.bundle.css">
+    <link id="appbundle" rel="stylesheet" media="screen, print" href="css/app.bundle.css">
+    <link id="myskin" rel="stylesheet" media="screen, print" href="css/skins/skin-master.css">
+    <link rel="stylesheet" media="screen, print" href="css/theme-demo.css">
+
+<!-- Include SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-1" class="panel">
+            <div class="panel-hdr">
+                <h2>
+                    All <span class="fw-900"><i>Chapters</i></span>
+                </h2>
+                <div class="panel-toolbar">
+                    <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                    <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                    <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                </div>
+            </div>
+            <div class="panel-container show">
+                <div class="panel-content">
+                    <div class="panel-tag">
+                        <p>Below is a list of all chapters configured in the system</p>
+                    </div>
+                    <!-- datatable start -->
+                    <table id="dt-basic-example" class="table table-bordered table-hover table-striped w-100">
+                        <thead class="bg-primary-600">
+                        <tr>
+                            <th>Id</th>
+                            <th>Title</th>
+                            <th>Mark as free</th>
+                            <th>Version</th>
+                            <th>Active</th>
+                            <th>Created By</th>
+                            <th>Clone</th>
+                            <th>Edit</th>
+                            <th>Call To Action</th>
+
+                        </tr>
+                        </thead>
+                        <tbody id="colors-data">
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Id</th>
+                                <th>Title</th>
+                                <th>Mark as free</th>
+                                <th>Version</th>
+                                <th>Active</th>
+                                <th>Created By</th>
+                                <th>Clone</th>
+                                <th>Edit</th>
+                                <th>Call To Action</th>
+
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <!-- datatable end -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+var data = JSON.parse('{{ chapters|escapejs }}');
+var userPermissions = "{{ project_permissions }}";
+var datatable;
+console.log('data from view',data);
+
+$(document).ready(function()
+    {
+        data.forEach(item => {
+            if(item.is_active){
+                item.is_active = "YES"
+            }else{
+                item.is_active = "NO"
+            }
+            if(item.mark_as_free){
+                item.mark_as_free = "YES"
+            }
+            else{
+                item.mark_as_free ="NO"
+            }
+        }
+        )
+        localStorage.removeItem("summernoteData");
+        localStorage.removeItem('markAsFree');
+         localStorage.removeItem('Chapter_title');
+        localStorage.removeItem('uploadedImageURLs');
+        localStorage.removeItem('uploadedVideoURLs');
+        console.log("removed local storage from view");
+        // initialize datatable
+        datatable = $('#dt-basic-example').dataTable(
+            {
+                responsive: true,
+                lengthChange: false,
+                data : data,
+                columns: [
+                    { data: "id" },
+                    { data: "title" },
+                    { data: "mark_as_free" },
+                    { data: "version" },
+                    { data: "is_active" },
+                    { data: "created_by" },
+                    { data: "clone"},
+                    { data: "edit" }, 
+                    { data: "cta"}
+                ],
+                dom:
+
+                    "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'lB>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                buttons: [
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Generate PDF',
+                        className: 'btn-outline-danger btn-sm mr-1'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Generate Excel',
+                        className: 'btn-outline-success btn-sm mr-1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        titleAttr: 'Generate CSV',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        titleAttr: 'Copy to clipboard',
+                        className: 'btn-outline-primary btn-sm mr-1'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        titleAttr: 'Print Table',
+                        className: 'btn-outline-primary btn-sm'
+                    }
+                ]
+            });
+
+    });
+
+
+    function cloneChapter(id) {
+        if (!validatePermissions()) return;
+        window.open("#cloneChapter?id=" + id, "_blank");
+    }
+    function editChapter(id) {
+        if (!validatePermissions()) return;
+  
+        window.open("#editChapter?id=" + id, "_blank");
+    }
+
+    function validatePermissions() {
+        if (!userPermissions.includes("editChapter")) {
+            alert("User does not have permission to edit chapter");
+            return false;
+        }
+        return true;
+    }
+    var lock = false;
+    var baseUrl = '<?=$baseUrl?>';
+
+    function deactivateChapter(id) {
+            if (!validatePermissions()) return;
+            if (lock == true) return;
+
+            // Create the SweetAlert2 mixin for custom styling
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+            // Display the confirmation dialog
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'User won\'t be able to use this chapter!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, deactivate it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true,
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    // Proceed with deactivation if confirmed
+                    lock = true;
+                    $('#err-div').hide();
+                    $('#success-div').hide();
+                    $.post('/pharma_gyan/editor/deactivateChapter/' + id + '/', function(data) {
+                        lock = false;
+                        if (data['result'] == 'SUCCESS') {
+                            swalWithBootstrapButtons.fire(
+                                'Deactivated!',
+                                'The chapter has been deactivated.',
+                                'success'
+                            ).then(function() {
+                                location.reload(); // Reload after showing success message
+                            });
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'Error',
+                                'Error while deactivating chapter'
+                            );
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire(
+                        'Cancelled',
+                        'Your chapter is safe :)',
+                        'error'
+                    );
+                }
+            });
+        }
+
+
+    function activateChapter(id) {
+            if (!validatePermissions()) return;
+            if (lock == true) return;
+            console.log("activate chapter clicked");
+
+            // Create the SweetAlert2 mixin for custom styling
+            var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+
+            console.log('swalWithBootstrapButtons', swalWithBootstrapButtons); // Debugging
+
+            // Display the confirmation dialog
+            swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to activate this chapter?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, activate it!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    // Proceed with activation if confirmed
+                    lock = true;
+                    $('#err-div').hide();
+                    $('#success-div').hide();
+                    $.post('/pharma_gyan/editor/activateChapter/' + id + '/', function(data) {
+                        lock = false;
+                        if (data['result'] == 'SUCCESS') {
+                            swalWithBootstrapButtons.fire(
+                                'Activated!',
+                                'The chapter has been activated.',
+                                'success'
+                            ).then(function() {
+                                location.reload(); // Reload after showing success message
+                            });
+                        } else {
+                            swalWithBootstrapButtons.fire(
+                                'Error',
+                                'Error while activating entity tag',
+                                'error'
+                            );
+                        }
+                    }).fail(function(jqXHR, textStatus, errorThrown) {
+                        var result = jqXHR['responseJSON'];
+                        console.log(result);
+                        swalWithBootstrapButtons.fire(
+                            'Error',
+                            'Error while activating chapter: ' + result['detailed_message'],
+                            'error'
+                        );
+                        lock = false;
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire(
+                        'Cancelled',
+                        'Activation cancelled.',
+                        'error'
+                    );
+                }
+            });
+        }
+
+</script>

@@ -4,8 +4,8 @@ from sqlalchemy import Column, Integer, String, Text
 class pg_chapter(Base, Orm_helper):
     __tablename__ = 'chapter'
 
-    id = Column("id", Integer, autoincrement=True)
-    unique_id = Column("unique_id", String, primary_key=True)
+    id = Column("id", Integer, autoincrement=True, primary_key=True)
+    unique_id = Column("unique_id", String)
     client_id = Column("client_id", String)
     title = Column("title", String)
     content = Column("content", Text)

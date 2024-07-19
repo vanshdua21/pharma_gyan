@@ -26,6 +26,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
 
     <!-- Place favicon.ico in the root directory -->
     <link rel="icon" type="image/png" sizes="32x32" href="/static/pharma_gyan/img/favicon/fav.png">
+    
 </head>
 <body class="mod-bg-1 ">
 <!-- DOC: script to save and load page settings -->
@@ -86,6 +87,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
     {
         localStorage.setItem("themeSettings", "");
     }
+   
 
 </script>
 <!-- BEGIN Page Wrapper -->
@@ -326,7 +328,8 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
                 {% endif %}
             </li>
                 {% if "viewChapters" in project_permissions %}
-                    <a href="#viewChapters" title="View saved config" data-filter-tags="application intel introduction">
+                   <!-- <a href="#viewChapters" title="View saved config" data-filter-tags="application intel introduction"> -->
+                   <a href="#viewChapters" title="View saved config" data-filter-tags="application intel introduction">
                         <i class="fal fa-eye"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
                     </a>

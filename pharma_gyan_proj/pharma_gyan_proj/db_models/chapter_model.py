@@ -30,7 +30,16 @@ class chapter_model:
         filter_list = [{"column": "title", "value": title, "op": "=="}]
         return self.get_details_by_filter_list(filter_list)
 
+    # def get_max_version_by_uid(self, unique_id):
+    #     query = f"""SELECT max(version) as version from chapter where UniqueId = '{unique_id}'"""
+    #     res = execute_query(self.engine, query)
+    #     return res
+
     def get_max_version_by_uid(self, unique_id):
         query = f"""SELECT max(version) as version from chapter where unique_id = '{unique_id}'"""
         res = execute_query(self.engine, query)
         return res
+
+    def get_chapter_by_unique_id(self, unique_id):
+        filter_list = [{"column": "unique_id", "value": unique_id, "op": "=="}]
+        return self.get_details_by_filter_list(filter_list)

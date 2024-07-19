@@ -5,6 +5,9 @@ import uuid
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter, \
     fetch_and_prepare_chapter_view
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter, \
+    fetch_and_prepare_chapters, deactivate_chapter_view, activate_chapter_view, fetch_chapter_by_unique_id, \
+    fetch_chapter_by_id, fetch_and_prepare_chapter_preview_by_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
@@ -38,7 +41,6 @@ from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, prepare_and_save_course, process_activate_course, process_deactivate_course
 import boto3
-import json
 from django.http import JsonResponse
 import json
 
@@ -51,7 +53,6 @@ from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_un
 
 from django.views.decorators.csrf import csrf_exempt
 import re
-from pharma_gyan_proj.orm_models.content.chapter_orm_model import pg_chapter
 
 def validate_filename(filename):
     # Check if filename contains only alphanumeric characters and underscores
@@ -68,9 +69,10 @@ def admin_login(request):
 def editor(request):
     session = Session()
     project_permissions = session.get_admin_user_permissions()
+    client_id = session.admin_user_session.client_id
     permissions_list = re.split(r'\s*,\s*', project_permissions)
     rendered_page = render_to_string('pharma_gyan/base.html',
-                                     {"project_permissions": permissions_list, "tab_permissions": get_user_tab_permissions(request.user)})
+                                     {"project_permissions": permissions_list,"client_id":client_id, "tab_permissions": get_user_tab_permissions(request.user)})
     return HttpResponse(rendered_page)
 
 
@@ -130,11 +132,14 @@ def preview_chapter_content(request):
     method_name = "preview_chapter_content"
     print(f'{method_name}, Before decode: {request.body}')
     request_body = json.loads(request.body.decode("utf-8"))
+    id = request_body.get('id')
     unique_id = request_body.get('unique_id')
     title = request_body.get('title')
     content = request_body.get('content')
     if unique_id is not None and unique_id != '':
         chapter = fetch_and_prepare_chapter_preview(unique_id)
+    elif id is not None and id != '':
+        chapter = fetch_and_prepare_chapter_preview_by_id(id)
     elif title is not None and content is not None:
         chapter = {
             "title": title,
@@ -159,6 +164,17 @@ def edit_promo_code(request):
                                      {"promoCode": json.dumps(promo_code, default=str), "baseUrl": baseUrl, "mode": "edit"})
     return HttpResponse(rendered_page)
 
+def edit_chapter(request):
+    baseUrl = settings.BASE_PATH
+    # Retrieve the id parameter from the query string
+    id = request.GET.get('id')
+    chapter = fetch_chapter_by_id(id)
+    if chapter is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No chapter with this Id")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/summernote.html',
+                                     {"edit_chapter": json.dumps(chapter, default=str), "baseUrl": baseUrl,"mode": "edit"})
+    return HttpResponse(rendered_page)
 
 def clone_entity_tag(request):
     baseUrl = settings.BASE_PATH
@@ -199,6 +215,19 @@ def edit_or_clone_topic(request):
                                      {"baseUrl": baseUrl, "mode": mode, "topic_data": json.dumps(topic), "chapters": json.dumps(chapters)})
     return HttpResponse(rendered_page)
 
+def clone_chapter(request):
+    baseUrl = settings.BASE_PATH
+    # Retrieve the id parameter from the query string
+    id = request.GET.get('id')
+    chapter = fetch_chapter_by_id(id)
+    if chapter is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No chapter tag with this Id")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+    chapter_json = json.dumps(chapter)
+    rendered_page = render_to_string('pharma_gyan/summernote.html',
+                                     {"baseUrl": baseUrl, "mode": "clone", "clone_chapter": chapter_json})
+    return HttpResponse(rendered_page)
+
 
 def view_promo_code(request):
     promo_code = fetch_and_prepare_promo_code()
@@ -225,6 +254,11 @@ def add_chapter(request):
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
     return HttpResponse(rendered_page)
 
+def view_chapters(request):
+    chapters = fetch_and_prepare_chapters()
+    chapters_json = json.dumps(chapters)
+    rendered_page = render_to_string('pharma_gyan/view_chapters.html', {"chapters": chapters_json, "project_permissions": Session().get_admin_user_permissions()})
+    return HttpResponse(rendered_page)
 
 @csrf_exempt
 def upsert_chapter(request):
@@ -357,6 +391,18 @@ def deactivate_entity_tag(request, uniqueId):
 @csrf_exempt
 def activate_entity_tag(request, uniqueId):
     response = activate_entity(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
+def deactivate_chapter(request, uniqueId):
+    response = deactivate_chapter_view(uniqueId)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+@csrf_exempt
+def activate_chapter(request, uniqueId):
+    response = activate_chapter_view(uniqueId)
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
