@@ -117,8 +117,18 @@
     var data = JSON.parse('{{ tag_category|escapejs }}');
     var $tagCategory;
     var client_id;
-    $(document).ready(function() {
-            client_id = Cookies.get('client_id');
+
+    function onCookiesReady(callback) {
+        var checkInterval = setInterval(function() {
+            if (typeof Cookies !== 'undefined') {
+                clearInterval(checkInterval);
+                callback();
+            }
+        }, 100); // Check every 100 milliseconds
+    }
+
+    onCookiesReady(function() {
+        client_id = Cookies.get('client_id');
                     // Populate the tag category dropdown
             $tagCategory = $('#tagCategory');
             data.forEach(function(item) {
@@ -144,8 +154,8 @@
             setCloneMode(entity_tag);
 
         }
+    });
 
-});
 function setCloneMode(entity_tag){
        $("#main_title").html('Add Entity Tag');
        var tag_category_dict = entity_tag["tag_category_dict"];
