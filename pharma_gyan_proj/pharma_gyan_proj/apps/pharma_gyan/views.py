@@ -218,8 +218,8 @@ def add_chapter(request):
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
     return HttpResponse(rendered_page)
 
-def view_chapters(request,client_id):
-    chapters = fetch_and_prepare_chapters(client_id)
+def view_chapters(request):
+    chapters = fetch_and_prepare_chapters()
     chapters_json = json.dumps(chapters)
     rendered_page = render_to_string('pharma_gyan/view_chapters.html', {"chapters": chapters_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)

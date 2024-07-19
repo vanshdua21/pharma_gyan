@@ -15,7 +15,7 @@ urlpatterns = [
     path("editor/upsertEntityTag/", views.upsert_entity_tag),
     path("editor/addChapter/", views.add_chapter),
     path("editor/upsertChapter/", views.upsert_chapter),
-    path("editor/viewChapters/<str:client_id>/", views.view_chapters,name='view_chapters'),
+    path("editor/viewChapters/", views.view_chapters),
     path("editor/deactivateChapter/<str:uniqueId>/", views.deactivate_chapter),
     path("editor/activateChapter/<str:uniqueId>/", views.activate_chapter),
     path('editor/cloneChapter', views.clone_chapter),

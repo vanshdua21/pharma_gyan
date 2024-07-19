@@ -162,9 +162,11 @@ def fetch_and_prepare_chapter_preview_by_id(id):
     chapter['ct'] = chapter['ct'].strftime('%d %b %Y, %I:%M %p')
     return chapter
 
-def fetch_and_prepare_chapters(client_id):
+def fetch_and_prepare_chapters():
     method_name = "fetch_and_prepare_chapters"
     logger.debug(f"Entry {method_name}")
+    session = Session()
+    client_id = session.admin_user_session.client_id
     try:
         filter_list = [{"column": "client_id", "value": client_id, "op": "=="}]
         chapters = chapter_model().get_details_by_filter_list(filter_list)
@@ -189,6 +191,7 @@ def fetch_and_prepare_chapters(client_id):
             cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activateChapter('{}')\">Activate</button>".format(
                 chapter.id, chapter.id)
         chapter_list.append({
+            "id": chapter.id,
             "unique_id": chapter.unique_id,
             "title": chapter.title,
             "mark_as_free": chapter.mark_as_free,
