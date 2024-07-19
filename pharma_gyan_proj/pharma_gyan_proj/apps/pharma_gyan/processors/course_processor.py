@@ -9,7 +9,7 @@ from django.core.files.storage import FileSystemStorage
 from pharma_gyan_proj.common.constants import TAG_FAILURE, TAG_SUCCESS, AdminUserPermissionType
 from pharma_gyan_proj.exceptions.failure_exceptions import BadRequestException, InternalServerError
 from pharma_gyan_proj.db_models.course_model import course_model
-from pharma_gyan_proj.orm_models.content_models import PgCourse, PgSemester, PgSubject, PgUnit, PgChapter
+from pharma_gyan_proj.orm_models.content_models import PgCourse, PgSemester, PgSubject, PgTopic, PgChapter
 
 logger = logging.getLogger("apps")
 
@@ -54,7 +54,7 @@ def prepare_and_save_course(request_body):
                     unitBody = sub.get('topics')
                     if unitBody:
                         for topic in unitBody:
-                            unit = PgUnit()
+                            unit = PgTopic()
                             if (topic.get('id')):
                                 unit.id = topic.get('id')
                             unit.unique_id = uuid.uuid4().hex if topic.get('unique_id') is None else topic.get('unique_id')

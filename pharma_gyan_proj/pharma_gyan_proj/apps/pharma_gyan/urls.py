@@ -37,6 +37,7 @@ urlpatterns = [
     path("editor/getCourseTreeJson/<str:uniqueId>/", views.get_course_tree_json),
     path("editor/addTopicChapters/", views.addTopicChapters),
     path("editor/upsertTopic/", views.upsertTopic),
+    path("editor/upsertTopicV2/", views.upsert_topic_v2),
     # path("editor/previewChapterContent/<str:uniqueId>/", views.preview_chapter_content),
     path("editor/previewChapterContent/", views.preview_chapter_content),
     path("editor/activateCourseV2", views.activate_course_v2),
@@ -48,4 +49,9 @@ urlpatterns = [
     path("editor/upsertPackage/", views.upsertPackage),
     path("editor/activatePackage", views.activate_package),
     path("editor/deactivatePackage", views.deactivate_package),
+    path("editor/addTopic/", views.add_topic),
+    path('editor/viewTopics/', views.view_topic),
+    path('editor/editOrCloneTopic', views.edit_or_clone_topic),
+    path('editor/activateTopic/', views.activate_topic),
+    path('editor/deactivateTopic/', views.deactivate_topic),
 ]

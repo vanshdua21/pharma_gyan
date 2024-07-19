@@ -3,9 +3,12 @@ import logging
 import os
 import uuid
 
-from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter
+from pharma_gyan_proj.apps.pharma_gyan.processors.chapter_processor import prepare_and_save_chapter, \
+    fetch_and_prepare_chapter_view
 from pharma_gyan_proj.apps.pharma_gyan.processors.entity_tag_processor import fetch_and_prepare_entity_tag, \
     prepare_and_save_entity_tag, deactivate_entity, activate_entity, fetch_entity_tag_by_unique_id
+from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category
+from pharma_gyan_proj.exceptions.failure_exceptions import InternalServerError
 from pharma_gyan_proj.apps.pharma_gyan.processors.tag_category_processor import fetch_and_prepare_tag_category, fetch_and_prepare_tag_category_with_tags
 
 from pharma_gyan_proj.apps.pharma_gyan.processors.package_processor import fetch_and_prepare_packages, fetch_package_from_id, prepare_and_save_package, process_activate_package, process_deactivate_package
@@ -28,7 +31,8 @@ from pharma_gyan_proj.apps.pharma_gyan.auth_processor.auth_processor import vali
     download_database_dump
 from pharma_gyan_proj.apps.pharma_gyan.promo_code_processor.promo_code_processor import prepare_and_save_promo_code, \
     fetch_and_prepare_promo_code, fetch_promo_code_by_unique_id, deactivate_promo, activate_promo
-from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS, BUCKET_NAME
+from pharma_gyan_proj.common.constants import TAG_FAILURE, AdminUserPermissionType, TAG_SUCCESS, BUCKET_NAME, \
+    ACTIVE_CHAPTER_CHECK
 from pharma_gyan_proj.apps.pharma_gyan.processors.user_processor import delete_user, fetch_and_prepare_users, fetch_user_from_id, fetch_users, prepare_and_save_user
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor import fetch_and_prepare_courses, fetch_course_from_id, fetch_course_tree_from_id, prepare_and_save_course, process_activate_course, process_deactivate_course
 
@@ -41,7 +45,9 @@ import json
 from pharma_gyan_proj.apps.pharma_gyan.processors.course_processor_v2 import fetch_all_courses, fetch_and_prepare_courses_v2, fetch_course_from_id_v2, prepare_and_save_course_v2, process_activate_course_v2, process_deactivate_course_v2
 
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
-from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit
+from pharma_gyan_proj.apps.pharma_gyan.processors.unit_processor import fetch_unit_from_id, prepare_and_save_unit, \
+    prepare_and_save_topic, fetch_and_prepare_topic, fetch_topic_by_unique_id, process_activate_topic, \
+    process_deactivate_topic
 
 from django.views.decorators.csrf import csrf_exempt
 import re
@@ -174,6 +180,26 @@ def clone_entity_tag(request):
     return HttpResponse(rendered_page)
 
 
+def edit_or_clone_topic(request):
+    baseUrl = settings.BASE_PATH
+    # Retrieve the id parameter from the query string
+    unique_id = request.GET.get('unique_id')
+    mode = request.GET.get('mode')
+    version = request.GET.get('version')
+    topic = fetch_topic_by_unique_id(unique_id, version)
+    if topic is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No Topic with this Id")
+        return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
+
+    chapters = fetch_and_prepare_chapter_view(ACTIVE_CHAPTER_CHECK)
+    if chapters is None or len(chapters) < 1:
+        raise InternalServerError(reason="Error while fetching chapter!")
+
+    rendered_page = render_to_string('pharma_gyan/add_topic.html',
+                                     {"baseUrl": baseUrl, "mode": mode, "topic_data": json.dumps(topic), "chapters": json.dumps(chapters)})
+    return HttpResponse(rendered_page)
+
+
 def view_promo_code(request):
     promo_code = fetch_and_prepare_promo_code()
     # Convert list of dictionaries to JSON
@@ -186,6 +212,14 @@ def view_entity_tag(request):
     entity_tag_json = json.dumps(entity_tag)
     rendered_page = render_to_string('pharma_gyan/view_entity_tag.html', {"entity_tag": entity_tag_json, "project_permissions": Session().get_admin_user_permissions()})
     return HttpResponse(rendered_page)
+
+
+def view_topic(request):
+    topic = fetch_and_prepare_topic()
+    rendered_page = render_to_string('pharma_gyan/view_topics.html', {"topic": json.dumps(topic), "project_permissions": Session().get_admin_user_permissions()})
+    return HttpResponse(rendered_page)
+
+
 def add_chapter(request):
     user = settings.BASE_PATH
     rendered_page = render_to_string('pharma_gyan/summernote.html', {"user": user, "mode": "save"})
@@ -201,6 +235,15 @@ def upsert_chapter(request):
     status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
     return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
+
+@csrf_exempt
+def upsert_topic_v2(request):
+    method_name = "upsert_topic_v2"
+    print(f'{method_name}, Before decode: {request.body}')
+    request_body = json.loads(request.body.decode("utf-8"))
+    response = prepare_and_save_topic(request_body)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
 
 @csrf_exempt
 def upsert_promo_code(request):
@@ -331,6 +374,15 @@ def addPackage(request):
     courses = fetch_all_courses()
     print('courses', json.dumps(courses))
     rendered_page = render_to_string('pharma_gyan/add_package.html', {"user": user, "mode": "create", "courses": json.dumps(courses)})
+    return HttpResponse(rendered_page)
+
+
+def add_topic(request):
+    user = request.user
+    chapters = fetch_and_prepare_chapter_view(ACTIVE_CHAPTER_CHECK)
+    if chapters is None or len(chapters) < 1:
+        raise InternalServerError(reason="Error while fetching chapter!")
+    rendered_page = render_to_string('pharma_gyan/add_topic.html', {"user": user, "mode": "create", "chapters": json.dumps(chapters)})
     return HttpResponse(rendered_page)
 
 def editCourse(request):
@@ -538,3 +590,23 @@ def addTopicChapters(request):
     print(topic)
     rendered_page = render_to_string('pharma_gyan/add_topic_chapters.html', {"topic": topic, "mode": "create"})
     return HttpResponse(rendered_page)
+
+
+@csrf_exempt
+def activate_topic(request):
+    request_body = json.loads(request.body.decode("utf-8"))
+    unique_id = request_body.get('unique_id')
+    version = request_body.get('version')
+    response = process_activate_topic(unique_id, version)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")
+
+
+@csrf_exempt
+def deactivate_topic(request):
+    request_body = json.loads(request.body.decode("utf-8"))
+    unique_id = request_body.get('unique_id')
+    version = request_body.get('version')
+    response = process_deactivate_topic(unique_id, version)
+    status_code = response.pop("status_code", http.HTTPStatus.BAD_REQUEST)
+    return HttpResponse(json.dumps(response, default=str), status=status_code, content_type="application/json")

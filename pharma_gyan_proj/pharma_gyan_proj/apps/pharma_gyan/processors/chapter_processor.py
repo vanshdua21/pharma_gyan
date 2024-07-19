@@ -117,3 +117,52 @@ def fetch_and_prepare_chapter_preview(unique_id):
     chapter = chapter[0]._asdict()
     chapter['ct'] = chapter['ct'].strftime('%d %b %Y, %I:%M %p')
     return chapter
+
+
+def fetch_and_prepare_chapter_view(is_active=False):
+    method_name = "fetch_and_prepare_chapter_view"
+    logger.debug(f"Entry {method_name}")
+
+    try:
+        filter_list = []
+        if is_active:
+            filter_list.append({"column": "is_active", "value": 1, "op": "=="})
+        chapter = chapter_model().get_details_by_filter_list(filter_list)
+    except InternalServerError as ey:
+        logger.error(
+            f"Error while fetching chapter InternalServerError ::{ey.reason}")
+        raise InternalServerError(method_name=method_name,
+                                  reason="Unable to fetch chapter details")
+    except Exception as e:
+        logger.error(f"Error while fetching chapter ::{e}")
+        raise InternalServerError(method_name=method_name,
+                                  reason="Error while fetching chapter!")
+    if chapter is None:
+        raise BadRequestException(method_name=method_name,
+                                  reason="Chapter is not found. Please add chapter first!")
+    chapter_list = []
+    for chapter_obj in chapter:
+        if chapter_obj.is_active:
+            cta = "<button id=\"deact-{}\" class=\"btn-outline-danger btn-sm mr-1\" onclick=\"deactivateChapter('{}')\">Deactivate</button>".format(
+                chapter_obj.unique_id, chapter_obj.unique_id)
+        else:
+            cta = "<button id=\"act-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"activateChapter('{}')\">Activate</button>".format(
+                chapter_obj.unique_id, chapter_obj.unique_id)
+        chapter_list.append(dict(
+            id=chapter_obj.id,
+            unique_id=chapter_obj.unique_id,
+            client_id=chapter_obj.client_id,
+            title=chapter_obj.title,
+            mark_as_free=chapter_obj.mark_as_free,
+            version=chapter_obj.version,
+            is_active=chapter_obj.is_active,
+            created_by=chapter_obj.created_by,
+            ct=chapter_obj.ct.strftime('%d %b %Y, %I:%M %p'),
+            add="<button id=\"add-chapter-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"addChapter(('{}'), ('{}'), ('{}'))\">Add</button>".format(chapter_obj.unique_id, chapter_obj.unique_id, chapter_obj.title, chapter_obj.version),
+            clone="<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneEntityTag('{}')\">Clone</button>".format(
+            chapter_obj.unique_id, chapter_obj.unique_id),
+            edit="<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editChapter('{}')\">Edit</button>".format(
+            chapter_obj.unique_id, chapter_obj.unique_id),
+            cta=cta
+        ))
+    return chapter_list

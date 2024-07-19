@@ -1,4 +1,4 @@
-from pharma_gyan_proj.orm_models.content_models import PgUnit
+from pharma_gyan_proj.orm_models.content_models import PgTopic
 from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
     update
 
@@ -6,7 +6,7 @@ from pharma_gyan_proj.utils.sqlalchemy_helper import sql_alchemy_connect, save_o
 class unit_model:
     def __init__(self, **kwargs):
         self.database = kwargs.get("db_conf_key", "default")
-        self.table = PgUnit
+        self.table = PgTopic
         self.engine = sql_alchemy_connect(self.database)
 
     def upsert(self, course_model):
