@@ -17,19 +17,20 @@ logger = logging.getLogger("apps")
 def fetch_and_prepare_entity_tag():
     method_name = "fetch_and_prepare_promo_code"
     logger.debug(f"Entry {method_name}")
+    session = Session()
+    client_id = session.admin_user_session.client_id
     try:
         # Fetch all active tag categories
-        active_tag_categories = tag_category_model().get_details_by_filter_list(
-            [{"column": "is_active", "value": 1, "op": "=="}])
+        active_tag_categories = tag_category_model().get_details_by_filter_list([])
 
         if active_tag_categories is None:
             return dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE,
-                        details_message="No active tag categories found!")
+                        details_message="No tag categories found!")
 
         # Create a dictionary for quick lookup of tag_category titles by unique_id
         tag_category_dict = {tag.unique_id: tag.title for tag in active_tag_categories}
         # Fetch all entity tags
-        entity_tag = entity_tag_model().get_details_by_filter_list([])
+        entity_tag = entity_tag_model().get_details_by_filter_list([{"column": "client_id", "value": client_id, "op": "=="}])
     except InternalServerError as ey:
         logger.error(
             f"Error while fetching users InternalServerError ::{ey.reason}")
