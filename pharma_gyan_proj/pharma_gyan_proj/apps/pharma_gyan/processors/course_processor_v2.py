@@ -12,6 +12,7 @@ from pharma_gyan_proj.db_models.course_model import course_model
 from pharma_gyan_proj.orm_models.v2.all_models import Course, CourseTagMapping, CourseTopicMapping
 from pharma_gyan_proj.db_models.course_model_v2 import course_model_v2
 from pharma_gyan_proj.db_models.entity_tag import entity_tag_model
+from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 
 logger = logging.getLogger("apps")
 
@@ -24,7 +25,8 @@ def prepare_and_save_course_v2(request_body):
     # if (request_body.get('id')):
     #     course.id = request_body.get('id')
     course.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
-    course.client_id = 'cd6b7678-3ea3-11ef-a04f-5a57a4320fb5'
+    session = Session()
+    course.client_id = session.admin_user_session.client_id
     course.title = request_body.get('title')
     course.description = request_body.get('description')
 
@@ -77,7 +79,10 @@ def save_or_update_course(course):
 def fetch_and_prepare_courses_v2():
     method_name = "fetch_and_prepare_courses_v2"
     logger.debug(f"Entry {method_name}")
-    courses = fetch_courses()
+    session = Session()
+    client_id = session.admin_user_session.client_id
+    filter_list = [{"column": "client_id", "value": client_id, "op": "=="}]
+    courses = fetch_courses(filter_list)
     courses_list = []
     for course in courses:
         tag_ids = [tag.tag_id for tag in course.tags]
@@ -108,7 +113,9 @@ def fetch_and_prepare_courses_v2():
 
 def fetch_course_from_id_v2(course_id):
     print('fetch_course_from_id_v2, course_id', course_id)
-    filter_list = [{"column": "id", "value": course_id, "op": "=="}]
+    session = Session()
+    client_id = session.admin_user_session.client_id
+    filter_list = [{"column": "id", "value": course_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
     courses = fetch_courses(filter_list)
     print('length', len(courses))
     if (len(courses) == 0):
@@ -121,7 +128,10 @@ def fetch_course_from_id_v2(course_id):
 def fetch_all_courses(filter_list=[], relationships_list=[]):
     method_name = "fetch_all_courses"
     logger.debug(f"Entry {method_name}")
-    courses = fetch_courses()
+    session = Session()
+    client_id = session.admin_user_session.client_id
+    filter_list = [{"column": "client_id", "value": client_id, "op": "=="}]
+    courses = fetch_courses(filter_list)
     courses_list = []
     for course in courses:
         courses_list.append({
@@ -153,7 +163,9 @@ def process_deactivate_course_v2(course_id):
     method_name = "process_deactivate_course_v2"
 
     try:
-        filter_list = [{"column": "id", "value": course_id, "op": "=="}]
+        session = Session()
+        client_id = session.admin_user_session.client_id
+        filter_list = [{"column": "id", "value": course_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
         course_model_v2().update_by_filter_list(filter_list, dict(is_active=0))
     except Exception as e:
         logger.error(f"Error while deactivating course ::{e}")
@@ -167,7 +179,9 @@ def process_activate_course_v2(course_id):
     method_name = "process_activate_course_v2"
 
     try:
-        filter_list = [{"column": "id", "value": course_id, "op": "=="}]
+        session = Session()
+        client_id = session.admin_user_session.client_id
+        filter_list = [{"column": "id", "value": course_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
         course_model_v2().update_by_filter_list(filter_list, dict(is_active=1))
     except InternalServerError as ey:
         logger.error(

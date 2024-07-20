@@ -139,7 +139,7 @@
     
         </div>
     
-        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewCourses()>View courses</button>
+        <button class="btn-outline-success btn-sm mr-1" onclick=redirectToViewCourses()>View Packages</button>
     
         </div>
 
@@ -171,7 +171,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label" for="pic">Course Thumbnail</label>
+                                        <label class="form-label" for="pic">Thumbnail</label>
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input" name="image-file" id="image-file" accept=".jpg, .jpeg, .png, .gif">
                                             <label class="custom-file-label" for="image-file">Upload Image</label>
@@ -256,7 +256,6 @@
 
 <script src="/static/pharma_gyan/js/datatables.bundle.js"></script>
 <script src="/static/pharma_gyan/js/datatables.export.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -274,16 +273,7 @@
         document.getElementById('add-topics-content').style.cursor = "auto";
     }
 
-    function onSortableReady(callback) {
-        var checkInterval = setInterval(function() {
-            if (typeof Sortable !== 'undefined') {
-                clearInterval(checkInterval);
-                callback();
-            }
-        }, 100); // Check every 100 milliseconds
-    }
-
-    onSortableReady(function() {
+    $(document).ready(function() {
         datatable = $('#dt-basic-example').dataTable(
             {
                 responsive: true,
@@ -510,23 +500,6 @@
         if (topicContainer.childElementCount > 1) {
             removeBlurOpacity();
         }
-        if (topicContainer.childElementCount > 1 ) {
-            const sortable = new Sortable(topicContainer, {
-            animation: 150,
-            handle: '.topic-card-header',
-            ghostClass: 'sortable-ghost',
-            onEnd: function (evt) {
-                console.log('Item moved from index', evt.oldIndex, 'to', evt.newIndex);
-                // const chapters_positions = JSON.parse(localStorage.getItem('chapters_positions'));
-                // if (chapters_positions) {
-                //     const temp = chapters_positions[evt.oldIndex];
-                //     chapters_positions[evt.oldIndex] = chapters_positions[evt.newIndex];
-                //     chapters_positions[evt.newIndex] = temp;
-                //     localStorage.setItem('chapters_positions', JSON.stringify(chapters_positions));
-                // }
-            },
-        });
-        }
     }
 
     function removeCourse(uuid) {
@@ -675,9 +648,9 @@
                     localStorage.removeItem('package');
                     $("#success-div").show();
                     if(mode == "edit"){
-                        $("#success-text").html("Course edited Successfully");
+                        $("#success-text").html("Package edited Successfully");
                     }else{
-                        $("#success-text").html("Course added Successfully");
+                        $("#success-text").html("Package added Successfully");
                     }
 
                     $("#main-form-div").hide();

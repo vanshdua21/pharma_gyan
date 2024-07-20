@@ -223,7 +223,7 @@
                                 <thead class="bg-primary-600">
                                 <tr>
                                     <th>Title</th>
-                                    <th>Chapter Count</th>
+                                    <th>Version</th>
                                     <th>Add</th>
                                 </tr>
                                 </thead>
@@ -295,7 +295,7 @@
                 data : available_topics,
                 columns: [
                     { data: "title" },
-                    { data: "chapter_count" },
+                    { data: "version" },
                     { data: "add" }
                 ],
                 scrollY: `550px`,
@@ -386,7 +386,7 @@
 
             courseData.topics.forEach(topicId => {
                 topic = available_topics.find(topic => topic.unique_id == topicId);
-                addTopic(topicId, topic.title, topic.chapter_count);
+                addTopic(topicId, topic.title, topic.version);
             });
         }
     }
@@ -418,7 +418,7 @@
     }
 
 
-    function addTopic(uuid, title, chapter_count) {
+    function addTopic(uuid, title, version) {
         console.log('adding topic');
         document.getElementById('add-topics-box').hidden = true;
         const topicContainer = document.getElementById('topics-container');
@@ -430,7 +430,7 @@
                                         <div class="card-body d-flex justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="card-title mb-0">${title}</h5>
-                                                <small class="text-muted">Chapter Count: ${chapter_count}</small>
+                                                <small class="text-muted">Version: ${version}</small>
                                             </div>
                                             <button class="btn btn-danger btn-sm" onclick="removeTopic('${uuid}')">
                                                 <i class="fal fa-trash-alt"></i>

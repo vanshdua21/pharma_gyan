@@ -218,6 +218,8 @@ def fetch_and_prepare_topic():
             "created_by": topic_obj.created_by,
             "is_active": topic_obj.is_active,
             "cta": cta,
+            "version": topic_obj.version,
+            "add": "<button id=\"add-topic-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"addTopic(('{}'), ('{}'), ('{}'))\">Add</button>".format(topic_obj.unique_id, topic_obj.unique_id, topic_obj.title, topic_obj.version),
             "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneTopic('{}', '{}')\">Clone</button>".format(
                 topic_obj.unique_id, topic_obj.unique_id, topic_obj.version),
             "edit": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editTopic('{}', '{}')\">Edit</button>".format(

@@ -409,8 +409,7 @@ def activate_chapter(request, uniqueId):
 def addCourse(request):
     user = request.user
     json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'topics.json')
-    with open(json_file_path, 'r') as file:
-        topics = json.load(file)
+    topics = fetch_and_prepare_topic()
     tags = fetch_and_prepare_tag_category_with_tags()
     rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"user": user, "mode": "create", "topics": json.dumps(topics), "tags": json.dumps(tags)})
     return HttpResponse(rendered_page)
@@ -446,10 +445,7 @@ def editCourseV2(request):
     course_id = request.GET.get('id')
     course = fetch_course_from_id_v2(course_id)
     user = request.user
-    json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'topics.json')
-    with open(json_file_path, 'r') as file:
-        topics = json.load(file)
-    tags_json_file_path = os.path.join(os.path.dirname(__file__), 'mock', 'tags.json')
+    topics = fetch_and_prepare_topic()
     tags = fetch_and_prepare_tag_category_with_tags()
     print(tags)
     if course is None:

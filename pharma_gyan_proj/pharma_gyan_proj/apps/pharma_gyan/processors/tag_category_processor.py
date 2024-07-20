@@ -4,6 +4,7 @@ from pharma_gyan_proj.common.constants import TAG_FAILURE
 from pharma_gyan_proj.db_models.tag_catagory_model import tag_category_model
 from pharma_gyan_proj.exceptions.failure_exceptions import InternalServerError
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import logger
+from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 
 
 def fetch_and_prepare_tag_category():
@@ -11,7 +12,9 @@ def fetch_and_prepare_tag_category():
     logger.debug(f"Entry {method_name}")
 
     try:
-        filter_list = [{"column": "is_active", "value": 1, "op": "=="}]
+        session = Session()
+        client_id = session.admin_user_session.client_id
+        filter_list = [{"column": "is_active", "value": 1, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
         tag_category = tag_category_model().get_details_by_filter_list(filter_list)
     except InternalServerError as ey:
         logger.error(
@@ -39,7 +42,9 @@ def fetch_and_prepare_tag_category_with_tags():
     logger.debug(f"Entry {method_name}")
 
     try:
-        filter_list = [{"column": "is_active", "value": 1, "op": "=="}]
+        session = Session()
+        client_id = session.admin_user_session.client_id
+        filter_list = [{"column": "is_active", "value": 1, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
         relationships_list = ['pg_tag_category.tags']
         categories = tag_category_model().get_tag_category_details_by_filter_list(filter_list, relationships_list)
 

@@ -12,6 +12,7 @@ from pharma_gyan_proj.orm_models.v2.all_models import Package, PackageCourseMapp
 from pharma_gyan_proj.db_models.course_model_v2 import course_model_v2
 from pharma_gyan_proj.db_models.entity_tag import entity_tag_model
 from pharma_gyan_proj.db_models.package_model import package_model
+from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
 
 logger = logging.getLogger("apps")
 
@@ -22,7 +23,8 @@ def prepare_and_save_package(request_body):
 
     package = Package()
     package.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
-    package.client_id = 'cd6b7678-3ea3-11ef-a04f-5a57a4320fb5'
+    session = Session()
+    package.client_id = session.admin_user_session.client_id
     package.title = request_body.get('title')
     package.description = request_body.get('description')
     package.price = request_body.get('price')
@@ -69,7 +71,10 @@ def save_or_update_package(package):
 def fetch_and_prepare_packages():
     method_name = "fetch_and_prepare_packages"
     logger.debug(f"Entry {method_name}")
-    packages = fetch_packages()
+    session = Session()
+    client_id = session.admin_user_session.client_id
+    filter_list = [{"column": "client_id", "value": client_id, "op": "=="}]
+    packages = fetch_packages(filter_list)
     packages_list = []
     for package in packages:
         editBtn = "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editPackage('{}')\">Edit</button>".format(package.id, package.id)
@@ -95,7 +100,9 @@ def fetch_and_prepare_packages():
 
 def fetch_package_from_id(package_id):
     print('fetch_package_from_id, package_id', package_id)
-    filter_list = [{"column": "id", "value": package_id, "op": "=="}]
+    session = Session()
+    client_id = session.admin_user_session.client_id
+    filter_list = [{"column": "id", "value": package_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
     packages = fetch_packages(filter_list)
     if (len(packages) == 0):
         return None
@@ -124,7 +131,9 @@ def process_deactivate_package(package_id):
     method_name = "process_deactivate_package"
 
     try:
-        filter_list = [{"column": "id", "value": package_id, "op": "=="}]
+        session = Session()
+        client_id = session.admin_user_session.client_id
+        filter_list = [{"column": "id", "value": package_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
         package_model().update_by_filter_list(filter_list, dict(is_active=0))
     except Exception as e:
         logger.error(f"Error while deactivating course ::{e}")
@@ -138,7 +147,9 @@ def process_activate_package(package_id):
     method_name = "process_activate_package"
 
     try:
-        filter_list = [{"column": "id", "value": package_id, "op": "=="}]
+        session = Session()
+        client_id = session.admin_user_session.client_id
+        filter_list = [{"column": "id", "value": package_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
         package_model().update_by_filter_list(filter_list, dict(is_active=1))
     except InternalServerError as ey:
         logger.error(
