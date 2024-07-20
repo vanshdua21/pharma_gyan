@@ -8,6 +8,7 @@ class pg_tag_category(Base, Orm_helper):
     unique_id = Column("unique_id", String, primary_key=True)
     title = Column("title", String)
     extra = Column("extra", String)
+    client_id = Column("client_id", String)
     is_active = Column("is_active", Integer, default=1)
     ct = Column("ct", DateTime, default=datetime.utcnow())
     ut = Column("ut", TIMESTAMP,
