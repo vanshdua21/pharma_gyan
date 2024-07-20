@@ -101,6 +101,7 @@
                     { data: "edit"},
                     { data: "del"}
                 ],
+                "order": [],
                 dom:
                 /*	--- Layout Structure
                     --- Options
@@ -177,38 +178,6 @@
 
     var lock = false;
     var baseUrl = '<?=$baseUrl?>';
-
-<!--    function delUser(id)-->
-<!--    {-->
-<!--        if (!validatePermissions()) return;-->
-<!--        if(lock==true)-->
-<!--            return;-->
-
-<!--        var confirmDelete = confirm("Do you really want to delete this user?");-->
-<!--        if(confirmDelete==false)-->
-<!--            return;-->
-
-<!--        lock = true;-->
-<!--        $("#err-div").hide();-->
-<!--        $("#success-div").hide();-->
-<!--        $.post('/pharma_gyan/editor/deleteUser/' + id + '/',function(data)-->
-<!--            {-->
-<!--                lock=false;-->
-<!--                if(data['result']=='SUCCESS')-->
-<!--                {-->
-<!--                    location.reload();-->
-<!--                    return;-->
-<!--                }-->
-<!--                else-->
-<!--                {-->
-<!--                    alert('Error while deleting user');-->
-<!--                    return;-->
-<!--                }-->
-
-<!--            }-->
-<!--        )-->
-<!--        ;-->
-<!--    }-->
 
     function delUser(id) {
     if (!validatePermissions()) return;
