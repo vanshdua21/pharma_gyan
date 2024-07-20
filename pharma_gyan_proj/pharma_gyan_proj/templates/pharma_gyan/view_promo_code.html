@@ -213,7 +213,7 @@
 
     function editPromoCode(unique_id) {
         if (!validatePermissions()) return;
-        window.open("#editPromoCode?unique_id=" + unique_id, "_blank");
+        window.open("#clonePromoCode?unique_id=" + unique_id, "_blank");
     }
 
     var lock = false;

@@ -121,12 +121,16 @@ def promo_code(request):
 
     rendered_page = render_to_string('pharma_gyan/add_promo_code.html', {"baseUrl": baseUrl, "mode": "create"})
     return HttpResponse(rendered_page)
+
+
 def entity_tag(request):
     baseUrl = settings.BASE_PATH
     tag_category = fetch_and_prepare_tag_category()
     tag_category_json = json.dumps(tag_category)
     rendered_page = render_to_string('pharma_gyan/add_entity_tag.html', {"baseUrl": baseUrl, "mode": "create", "tag_category": tag_category_json})
     return HttpResponse(rendered_page)
+
+
 @csrf_exempt
 def preview_chapter_content(request):
     method_name = "preview_chapter_content"
