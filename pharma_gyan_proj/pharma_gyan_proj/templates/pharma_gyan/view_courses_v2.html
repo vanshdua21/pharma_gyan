@@ -33,6 +33,7 @@
                             <th>Tags</th>
                             <th>Topics Count</th>
                             <th>Active</th>
+                            <th>Clone</th>
                             <th>Edit</th>
                             <th>CTA</th>
 
@@ -48,6 +49,7 @@
                                 <th>Tags</th>
                                 <th>Topics Count</th>
                                 <th>Active</th>
+                                <th>Clone</th>
                                 <th>Edit</th>
                                 <th>CTA</th>
                             </tr>
@@ -115,6 +117,7 @@
                     { data: "tags" },
                     { data: "topics_count" },
                     { data: "is_active" },
+                    { data: "clone"},
                     { data: "edit"},
                     { data: "cta"}
                 ],
@@ -190,6 +193,11 @@
     function editCourse(id) {
         if (!validatePermissions()) return;
         window.open("#editCourse?id=" + id, "_blank");
+    }
+
+    function cloneCourse(id, version) {
+        if (!validatePermissions()) return;
+        window.open("#cloneCourse?id=" + id, "_blank");
     }
 
     function openTreeModal(id) {

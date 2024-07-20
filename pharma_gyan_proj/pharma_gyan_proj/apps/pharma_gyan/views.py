@@ -447,12 +447,23 @@ def editCourseV2(request):
     user = request.user
     topics = fetch_and_prepare_topic()
     tags = fetch_and_prepare_tag_category_with_tags()
-    print(tags)
     if course is None:
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No course with this ID")
         return HttpResponse(json.dumps(response, default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
     print('course', json.dumps(course))
     rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"course": json.dumps(course),"mode": "edit", "topics": json.dumps(topics), "tags": json.dumps(tags)})
+    return HttpResponse(rendered_page)
+
+def cloneCourse(request):
+    # Retrieve the id parameter from the query string
+    course_id = request.GET.get('id')
+    course = fetch_course_from_id_v2(course_id)
+    topics = fetch_and_prepare_topic()
+    tags = fetch_and_prepare_tag_category_with_tags()
+    if course is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No course with this ID")
+        return HttpResponse(json.dumps(response, default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_course_v2.html', {"course": json.dumps(course),"mode": "clone", "topics": json.dumps(topics), "tags": json.dumps(tags)})
     return HttpResponse(rendered_page)
 
 def editPackage(request):
@@ -465,6 +476,17 @@ def editPackage(request):
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No package with this ID")
         return HttpResponse(json.dumps(response, default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
     rendered_page = render_to_string('pharma_gyan/add_package.html', {"package": json.dumps(package),"mode": "edit", "courses": json.dumps(courses)})
+    return HttpResponse(rendered_page)
+
+def clonePackage(request):
+    # Retrieve the id parameter from the query string
+    package_id = request.GET.get('id')
+    package = fetch_package_from_id(package_id)
+    courses = fetch_all_courses()
+    if package is None:
+        response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No package with this ID")
+        return HttpResponse(json.dumps(response, default=str), status=http.HTTPStatus.BAD_REQUEST, content_type="application/json")
+    rendered_page = render_to_string('pharma_gyan/add_package.html', {"package": json.dumps(package),"mode": "clone", "courses": json.dumps(courses)})
     return HttpResponse(rendered_page)
 
 def viewCourses(request):

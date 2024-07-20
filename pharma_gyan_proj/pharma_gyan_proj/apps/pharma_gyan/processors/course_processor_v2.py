@@ -103,6 +103,8 @@ def fetch_and_prepare_courses_v2():
             "tags": [tag.title for tag in tags],
             "topics_count": len(course.topics),
             "is_active": course.is_active,
+            "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneCourse('{}')\">Clone</button>".format(
+                course.id, course.id),
             "edit": editBtn,
             "cta": cta,
             # "is_active": user.is_active,

@@ -389,6 +389,18 @@
                 localStorage.setItem('edit_packages', JSON.stringify(editPackages));
             }
         }
+        else if (mode == "clone") {
+            currentPackageData = JSON.parse('{{ package|escapejs }}') || {};
+            currentPackageData = JSON.parse(currentPackageData);
+            console.log('clone current package', currentPackageData);
+            packageData = {
+                title: currentPackageData.title,
+                description: currentPackageData.description,
+                price: currentPackageData.price,
+                courses: currentPackageData.courses,
+                thumbnail_url: currentPackageData.thumbnail_url
+            };
+        }
         else {
             packageData = JSON.parse(localStorage.getItem('package'));
         }    

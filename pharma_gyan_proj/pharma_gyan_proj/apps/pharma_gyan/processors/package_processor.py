@@ -93,6 +93,7 @@ def fetch_and_prepare_packages():
             "image_url": package.thumbnail_url,
             "course_count": len(package.courses),
             "is_active": package.is_active,
+            "clone": "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"clonePackage('{}')\">Clone</button>".format(package.id, package.id),
             "edit": editBtn,
             "cta": cta,
         })

@@ -360,26 +360,30 @@
         if (mode == "edit") {
             currentCourseData = JSON.parse('{{ course|escapejs }}') || {};
             currentCourseData = JSON.parse(currentCourseData);
-            console.log('currentCourseData', currentCourseData);
-            console.log('currentCourseData["id"]', currentCourseData["id"]);
             var editCourses = JSON.parse(localStorage.getItem('edit_courses')) || {};
             courseData = editCourses[currentCourseData["id"]];
             if (!courseData) {
-                console.log('in edit currentCourseData', currentCourseData);
                 courseData = currentCourseData;
                 editCourses[currentCourseData["id"]] = courseData;
                 localStorage.setItem('edit_courses', JSON.stringify(editCourses));
             }
         }
+        else if (mode == "clone") {
+            currentCourseData = JSON.parse('{{ course|escapejs }}') || {};
+            currentCourseData = JSON.parse(currentCourseData);
+            console.log('clone current course', currentCourseData);
+            courseData = {
+                title: currentCourseData.title,
+                description: currentCourseData.description,
+                tags: currentCourseData.tags,
+                topics: currentCourseData.topics
+            };
+        }
         else {
-            console.log('in add');
             courseData = JSON.parse(localStorage.getItem('course'));
         }    
 
-        console.log('after add');
         if (courseData) {
-            console.log('in after again');
-            console.log('courseData', courseData);
             $('#title').val(courseData.title);
             $('#desc').val(courseData.description);
             $('#hierarchical-select').val(courseData.tags).trigger('change');
