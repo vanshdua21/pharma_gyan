@@ -95,7 +95,7 @@ def fetch_and_prepare_courses_v2():
     courses = fetch_courses(filter_list)
     courses_list = []
     for course in courses:
-        tag_ids = [tag.tag_id for tag in course.tags] if course.tags is not None else []
+        tag_ids = [tag.tag_id for tag in course.tags]
         filter_list = [{"column": "unique_id", "value": tag_ids, "op": "IN"}]
         tags = entity_tag_model().get_details_by_filter_list(filter_list=filter_list)
         editBtn = "<button id=\"edit-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"editCourse('{}')\">Edit</button>".format(course.id, course.id)
