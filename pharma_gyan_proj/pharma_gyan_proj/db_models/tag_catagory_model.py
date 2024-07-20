@@ -1,4 +1,4 @@
-from pharma_gyan_proj.orm_models.tag_category_orm_model import pg_tag_category
+from pharma_gyan_proj.db_models.pharma_gyan import pg_tag_category
 from pharma_gyan_proj.utils.sqlalchemy_helper import fetch_tag_category_rows_with_tags_limited, sql_alchemy_connect, save_or_update_merge, fetch_rows_limited, \
     update, execute_query
 
