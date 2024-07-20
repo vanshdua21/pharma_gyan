@@ -110,7 +110,7 @@ def fetch_and_prepare_courses_v2():
             "unique_id": course.unique_id,
             "title": course.title,
             "description": course.description,
-            "tags": [tag.title for tag in tags],
+            "tags": [tag.title for tag in tags] if tags is not None else [],
             "topics_count": len(course.topics),
             "is_active": course.is_active,
             "clone": "<button id=\"clone-{}\" class=\"btn-outline-success btn-sm mr-1\" onclick=\"cloneCourse('{}')\">Clone</button>".format(
