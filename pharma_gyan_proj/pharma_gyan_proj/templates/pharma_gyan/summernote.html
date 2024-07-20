@@ -477,8 +477,18 @@
             if (markAsFree !== null) { // Set the checkbox state
                 $('#markAsFree').prop('checked', JSON.parse(markAsFree));
             }
-        }  
-    $(document).ready(function () 
+        }
+
+    function onCookiesReady(callback) {
+        var checkInterval = setInterval(function() {
+            if (typeof Cookies !== 'undefined') {
+                clearInterval(checkInterval);
+                callback();
+            }
+        }, 100); // Check every 100 milliseconds
+    }
+
+    onCookiesReady(function ()
     {
         client_id = Cookies.get('client_id');
         // Listen for changes in the title input field
