@@ -15,12 +15,16 @@ class AdminUserPermissionType(Enum):
     editUsers = "Edit Users"
     viewPromoCodes = "View PromoCodes"
     editPromoCodes = "Edit PromoCodes"
-    viewContent = "View Content"
-    editContent = "Edit Content"
+    viewCourses = "View Courses"
+    editCourses = "Edit Courses"
+    viewPackages = "View Packages"
+    editPackages = "Edit Packages"
     viewChapters = "View Chapters"
     editChapter = "Edit Chapter"
     editEntityTag = "Edit Entity Tag"
     viewEntityTag = "View Entity Tag"
+    editTopic = "editTopic"
+    viewTopics = "viewTopics"
 
 
 BUCKET_NAME = "pharma-gyan-test-media"

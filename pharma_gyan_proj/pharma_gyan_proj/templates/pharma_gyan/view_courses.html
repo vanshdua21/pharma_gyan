@@ -88,8 +88,8 @@
     var userPermissions = "{{ project_permissions }}";
 
     function validatePermissions() {
-        if (!userPermissions.includes("editContent")) {
-            alert("User does not have permission to edit Content");
+        if (!userPermissions.includes("editCourses")) {
+            alert("User does not have permission to edit Courses");
             return false;
         }
         return true;

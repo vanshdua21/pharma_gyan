@@ -391,7 +391,7 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </li>
         {% endif %}
 
-    {% if "editContent" in project_permissions or "viewContent" in project_permissions %}
+    {% if "editCourses" in project_permissions or "viewCourses" in project_permissions %}
     <li class="nav-title">Courses</li>
         <li>
         <a href="#" title="Courses" data-filter-tags="application intel">
@@ -400,14 +400,14 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </a>
         <ul>
             <li>
-                {% if "editContent" in project_permissions %}
+                {% if "editCourses" in project_permissions %}
                     <a href="#addCourse" title="Add Course" data-filter-tags="application intel">
                         <i class="fal fa-file-alt"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel">Add Course</span>
                     </a>
                 {% endif %}
                 </li>
-                {% if "viewContent" in project_permissions %}
+                {% if "viewCourses" in project_permissions %}
                     <a href="#viewCourses" title="View saved config" data-filter-tags="application intel introduction">
                         <i class="fal fa-eye"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
@@ -416,6 +416,8 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
             </li>
         </ul>
     </li>
+    {% endif %}
+    {% if "editPackages" in project_permissions or "viewPackages" in project_permissions %}
     <li class="nav-title">Packages</li>
         <li>
         <a href="#" title="Packages" data-filter-tags="application intel">
@@ -424,14 +426,14 @@ License: You must have a valid license purchased only from wrapbootstrap.com (li
         </a>
         <ul>
             <li>
-                {% if "editContent" in project_permissions %}
+                {% if "editPackages" in project_permissions %}
                     <a href="#addPackage" title="Add Course" data-filter-tags="application intel">
                         <i class="fal fa-file-alt"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel">Add Package</span>
                     </a>
                 {% endif %}
                 </li>
-                {% if "viewContent" in project_permissions %}
+                {% if "viewPackages" in project_permissions %}
                     <a href="#viewPackages" title="View saved packages" data-filter-tags="application intel introduction">
                         <i class="fal fa-eye"></i>
                         <span class="nav-link-text" data-i18n="nav.application_intel_introduction">View</span>
