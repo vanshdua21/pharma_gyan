@@ -1,7 +1,7 @@
 import logging
 from pharma_gyan_proj.orm_models.v2.all_models import CourseTagMapping
 from pharma_gyan_proj.orm_models.tag_category_orm_model import pg_tag_category
-from sqlalchemy import inspect, column ,text, func
+from sqlalchemy import inspect, column ,text, func, desc
 from sqlalchemy.orm import Session, joinedload, load_only, aliased
 from pharma_gyan_proj.utils.sqlalchemy_engine import SqlAlchemyEngine
 
@@ -320,6 +320,7 @@ def fetch_package_rows_with_join(engine, table, filter_list, columns=[], relatio
             for filters in filter_list:
                 q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
             q = add_columns_projections(q, columns)
+            q = q.order_by(desc(table.id))
             entity = q.limit(limit).all() if limit is not None else q.all()      
             return entity
         except Exception as ex:
@@ -357,6 +358,7 @@ def fetch_rows_with_join(engine, table, filter_list, columns=[], relationships=[
             for filters in filter_list:
                 q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
             q = add_columns_projections(q, columns)
+            q = q.order_by(desc(table.id))
             entity = q.limit(limit).all() if limit is not None else q.all()      
             return entity
         except Exception as ex:
@@ -392,6 +394,7 @@ def fetch_rows_limited(engine, table, filter_list, columns=[], relationships=[],
                 q = add_filter(q, filters["value"], getattr(table, filters["column"]), filters["op"])
             q = add_columns_projections(q, columns)
             q = add_relationshsip_projections(q, relationships)
+            q = q.order_by(desc(table.id))
             entity = q.limit(limit).all() if limit is not None else q.all()
             return entity
         except Exception as ex:

@@ -21,6 +21,12 @@ def prepare_and_save_course_v2(request_body):
     method_name = "prepare_and_save_course_v2"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
+    existing_course = get_course_by_title(request_body.get('title'))
+    if existing_course is not None and len(existing_course) > 0:
+        if existing_course[0].unique_id != request_body.get('unique_id'):
+            return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
+                        details_message="Duplicate title found. Please use a different title.")
+
     course = Course()
     # if (request_body.get('id')):
     #     course.id = request_body.get('id')
@@ -57,6 +63,10 @@ def prepare_and_save_course_v2(request_body):
     
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+def get_course_by_title(title):
+        filter_list = [{"column": "title", "value": title, "op": "=="}]
+        return course_model_v2().get_details_by_filter_list(filter_list=filter_list)
 
 def save_or_update_course(course):
     method_name = "save_or_update_course"

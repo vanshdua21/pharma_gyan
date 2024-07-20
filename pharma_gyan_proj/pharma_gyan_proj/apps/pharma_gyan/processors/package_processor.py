@@ -21,6 +21,12 @@ def prepare_and_save_package(request_body):
     method_name = "prepare_and_save_package"
     logger.debug(f"Entry {method_name}, request_body: {request_body}")
 
+    existing_package = get_package_by_title(request_body.get('title'))
+    if existing_package is not None and len(existing_package) > 0:
+        if existing_package[0].unique_id != request_body.get('unique_id'):
+            return dict(status_code=http.HTTPStatus.CONFLICT, result=TAG_FAILURE,
+                        details_message="Duplicate title found. Please use a different title.")
+
     package = Package()
     package.unique_id = uuid.uuid4().hex if request_body.get('unique_id') is None else request_body.get('unique_id')
     session = Session()
@@ -49,6 +55,10 @@ def prepare_and_save_package(request_body):
     
     logger.debug(f"Exit {method_name}, Success")
     return dict(status_code=http.HTTPStatus.OK, result=TAG_SUCCESS)
+
+def get_package_by_title(title):
+        filter_list = [{"column": "title", "value": title, "op": "=="}]
+        return package_model().get_details_by_filter_list(filter_list=filter_list)
 
 def save_or_update_package(package):
     method_name = "save_or_update_package"
