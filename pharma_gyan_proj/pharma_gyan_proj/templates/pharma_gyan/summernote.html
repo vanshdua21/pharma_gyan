@@ -146,6 +146,29 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="chapterPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="chapter-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="chapter-body">
+               
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 <script src="/static/pharma_gyan/js/summernote.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
@@ -221,23 +244,27 @@
                 content: summernoteData
             }
 
+        document.getElementById('chapter-title').innerHTML = Chapter_title;
+        document.getElementById('chapter-body').innerHTML = summernoteData;
+        $('#chapterPreviewModal').modal('show');
 
-            $.ajax({
-                type : 'POST',
-                url : 'previewChapterContent/',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success :function(response)
-                {
-                    console.log('Success', response);
 
-                    return $('#main-form-div').html(response);
-                }
-                ,
-                    error: function(error) {
-                        console.error('Error:', error);
-                    }}
-                );
+            // $.ajax({
+            //     type : 'POST',
+            //     url : 'previewChapterContent/',
+            //     contentType: 'application/json',
+            //     data: JSON.stringify(data),
+            //     success :function(response)
+            //     {
+            //         console.log('Success', response);
+
+            //         return $('#main-form-div').html(response);
+            //     }
+            //     ,
+            //         error: function(error) {
+            //             console.error('Error:', error);
+            //         }}
+            //     );
         }
         else{
             // console.log(`Chapter with ID ${chapter_unique_id} not found.`);
