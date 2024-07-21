@@ -63,6 +63,7 @@ def admin_login(request):
     rendered_page = render_to_string('pharma_gyan/login.html', {"baseUrl": baseUrl})
     resp = HttpResponse(rendered_page)
     resp.delete_cookie('access_token')
+    resp.delete_cookie('client_id')
     return resp
 
 
