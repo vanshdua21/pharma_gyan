@@ -13,6 +13,10 @@
         margin-right: 10px; /* Adjust spacing between label and input */
         white-space: nowrap; /* Prevent the label from wrapping */
     }
+    .required:after {
+    content:" *";
+    color: red;
+  }
 
     .form-group input {
         flex-grow: 1; /* Allow the input to grow and take available space */
@@ -113,8 +117,8 @@
                         <div class="panel-container show">
                             <div class="panel-content">
                                 <div class="form-group">
-                                    <label for="title" style="font-size: 18px;"><strong>Chapter title</strong></label>
-                                    <input type="text" id="title" class="form-control">
+                                        <label class="form-label required" for="title">Chapter Title</label>
+                                        <input type="text" id="title" class="form-control">
                                 </div>
                                 <div class="js-summernote" id="saveToLocal"></div>
                                 <div class="mt-3">
@@ -236,6 +240,13 @@
         const summernoteData = JSON.parse(localStorage.getItem('summernoteData'));
         console.log('summernote',summernoteData);
         const Chapter_title = JSON.parse(localStorage.getItem('Chapter_title'));
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill title ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
         if(summernoteData!='' || Chapter_title!='')
         {
             const data = {
@@ -387,6 +398,13 @@
     // Function to save Summernote data via AJAX
     function saveSummernoteData() {
         var content = $('#saveToLocal').summernote("code");
+        if(!($('#title').val())){
+            setError("title");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill title ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
         var title = $('#title').val();
         var is_free = $('#markAsFree').is(':checked') ? 1 : 0;
             lock = true;
