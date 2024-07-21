@@ -562,6 +562,15 @@
 
         setSuccess("desc");
 
+        var topicsCount = $('.topic-card-header').length;
+        if (topicsCount <= 0) {
+            setError("topics-container");
+            $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please add one or more chapters ! </span></div>');
+            $("#err-div").show();
+
+            return;
+        }
+
         lock = true;
 
         initProgressBar();

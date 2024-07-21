@@ -20,7 +20,7 @@ class chapter_model:
         res = fetch_rows_limited(self.engine, self.table, filter_list, columns=columns_list,
                                  relationships=relationships_list)
         if res is None or len(res) <= 0:
-            return None
+            return []
         return res
 
     def update_by_filter_list(self, filter_list, update_dict):

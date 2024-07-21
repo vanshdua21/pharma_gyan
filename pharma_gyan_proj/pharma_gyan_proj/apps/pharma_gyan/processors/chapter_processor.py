@@ -159,9 +159,6 @@ def fetch_and_prepare_chapter_view(is_active=False):
         logger.error(f"Error while fetching chapter ::{e}")
         raise InternalServerError(method_name=method_name,
                                   reason="Error while fetching chapter!")
-    if chapter is None:
-        raise BadRequestException(method_name=method_name,
-                                  reason="Chapter is not found. Please add chapter first!")
     chapter_list = []
     for chapter_obj in chapter:
         if chapter_obj.is_active:

@@ -421,7 +421,6 @@ def addCourse(request):
 def addPackage(request):
     user = request.user
     courses = fetch_all_courses()
-    print('courses', json.dumps(courses))
     rendered_page = render_to_string('pharma_gyan/add_package.html', {"user": user, "mode": "create", "courses": json.dumps(courses)})
     return HttpResponse(rendered_page)
 
@@ -429,8 +428,6 @@ def addPackage(request):
 def add_topic(request):
     user = request.user
     chapters = fetch_and_prepare_chapter_view(ACTIVE_CHAPTER_CHECK)
-    if chapters is None or len(chapters) < 1:
-        raise InternalServerError(reason="Error while fetching chapter!")
     rendered_page = render_to_string('pharma_gyan/add_topic.html', {"user": user, "mode": "create", "chapters": json.dumps(chapters)})
     return HttpResponse(rendered_page)
 
