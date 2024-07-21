@@ -13,8 +13,6 @@ class pg_tag_category(Base, Orm_helper):
     ct = Column("ct", DateTime, default=datetime.utcnow())
     ut = Column("ut", TIMESTAMP,
                            server_default=text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
-    
-    tags = relationship("pg_entity_tag", back_populates="category", lazy='select')
 
     def __init__(self, data={}):
         Orm_helper.__init__(self, data)

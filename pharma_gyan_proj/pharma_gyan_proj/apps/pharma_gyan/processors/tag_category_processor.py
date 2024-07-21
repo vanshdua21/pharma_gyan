@@ -5,6 +5,7 @@ from pharma_gyan_proj.db_models.tag_catagory_model import tag_category_model
 from pharma_gyan_proj.exceptions.failure_exceptions import InternalServerError
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import logger
 from pharma_gyan_proj.middlewares.HttpRequestInterceptor import Session
+from pharma_gyan_proj.db_models.entity_tag import entity_tag_model
 
 
 def fetch_and_prepare_tag_category():
@@ -45,18 +46,19 @@ def fetch_and_prepare_tag_category_with_tags():
         session = Session()
         client_id = session.admin_user_session.client_id
         filter_list = [{"column": "is_active", "value": 1, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
-        relationships_list = ['pg_tag_category.tags']
-        categories = tag_category_model().get_tag_category_details_by_filter_list(filter_list, relationships_list)
+        categories = tag_category_model().get_details_by_filter_list(filter_list)
 
         # Format the data
         result = []
         for category in categories:
+            filter_list = [{"column": "tag_category_id", "value": category.unique_id, "op": "=="}, {"column": "client_id", "value": client_id, "op": "=="}]
+            tags = entity_tag_model().get_details_by_filter_list(filter_list)
             category_data = {
                 "unique_id": category.unique_id,
                 "title": category.title,
                 "tags": [
                     {"unique_id": tag.unique_id, "title": tag.title}
-                    for tag in category.tags
+                    for tag in tags
                 ]
             }
             result.append(category_data)
