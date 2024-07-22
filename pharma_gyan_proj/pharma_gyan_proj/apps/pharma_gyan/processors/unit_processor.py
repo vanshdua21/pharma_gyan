@@ -298,7 +298,7 @@ def validate_topic_details(request_body):
 
     validate_topic_title(request_body.get('title'))
     validate_topic_description(request_body.get('description'))
-    validate_topic_chapter_mapping(request_body.get('chapters', []), ACTIVE_CHAPTER_CHECK)
+    # validate_topic_chapter_mapping(request_body.get('chapters', []), ACTIVE_CHAPTER_CHECK)
 
     logger.debug(f"Exit {method_name}, Success")
 

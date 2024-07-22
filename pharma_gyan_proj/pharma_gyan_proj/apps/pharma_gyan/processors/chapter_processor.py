@@ -159,6 +159,9 @@ def fetch_and_prepare_chapter_view(is_active=False):
         logger.error(f"Error while fetching chapter ::{e}")
         raise InternalServerError(method_name=method_name,
                                   reason="Error while fetching chapter!")
+    if chapter is None:
+        return
+    chapter = get_latest_id_list_of_dict(chapter)
     chapter_list = []
     for chapter_obj in chapter:
         if chapter_obj.is_active:

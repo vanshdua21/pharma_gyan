@@ -212,9 +212,9 @@ def edit_or_clone_topic(request):
         response = dict(status_code=http.HTTPStatus.BAD_REQUEST, result=TAG_FAILURE, info="No Topic with this Id")
         return HttpResponse(json.dumps(response, default=str), status=response.status_code, content_type="application/json")
 
-    chapters = fetch_and_prepare_chapter_view(ACTIVE_CHAPTER_CHECK)
+    chapters = fetch_and_prepare_chapter_view()
     if chapters is None or len(chapters) < 1:
-        raise InternalServerError(reason="Error while fetching chapter!")
+        chapters = {}
 
     rendered_page = render_to_string('pharma_gyan/add_topic.html',
                                      {"baseUrl": baseUrl, "mode": mode, "topic_data": json.dumps(topic), "chapters": json.dumps(chapters)})
