@@ -456,7 +456,7 @@
 
                 $("#action-buttons").html(`
                 <button onclick="redirectToAddChapter()" class="btn-outline-success btn-sm mr-1">Add Another Chapter</button>
-<!--                <button onclick="redirectToPreviewChapter('${id}')" class="btn-outline-success btn-sm mr-1">Preview Chapter</button>-->
+                <button onclick="redirectToViewChapters()" class="btn-outline-success btn-sm mr-1">View Chapters</button>
             `);
 
                 return;
@@ -483,6 +483,10 @@
 
     function redirectToAddChapter(){
         window.location='#addChapter/';
+    }
+
+    function redirectToViewChapters(){
+        window.location='#viewChapters';
     }
 
     function redirectToPreviewChapter(id){
