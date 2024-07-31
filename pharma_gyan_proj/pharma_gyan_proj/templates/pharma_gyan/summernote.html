@@ -1,4 +1,3 @@
-
 <link rel="stylesheet" media="screen, print" href="/static/pharma_gyan/css/summernote.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css">
 <style>
@@ -138,8 +137,16 @@
                                 </div>
                                 </div>
 <!--                                    <div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text"></span></div>-->
+                                <div class="emailCTA" style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
                                     <button class="btn btn-small btn-success mt-3" onclick="saveSummernoteData()">Save</button>
+                                    <div>
+                                        <span class="clear-data-text" onclick="clearAllData()" style="cursor: pointer; font-style: italic; text-decoration: underline;">
+                                            Clear all data
+                                        </span>
+                                    </div>
+                                    </div>
                                 </div>
+                              
                             </div>
                         </div>
                         <div id="err-div" style="display: none;margin-top:20px;"></div>
@@ -174,8 +181,6 @@
     </div>
 </div>
 
-
-
 <script src="/static/pharma_gyan/js/summernote.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js"></script>
@@ -184,6 +189,7 @@
     var baseUrl = "{{ baseUrl }}";
     var mode = "{{mode}}";
     var uniqueId;
+    var id;
     var client_id;
     var focusedVideoElement = null;
     var debounce = function(func, delay) {
@@ -197,36 +203,107 @@
         }, delay);
     };
 };
-    var saveToLocal = function () {
+function clearAllData() {
+        var swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger mr-2'
+                },
+                buttonsStyling: false
+            });
+        // Display the confirmation dialog
+        swalWithBootstrapButtons.fire({
+                title: 'Are you sure?',
+                text: 'All data on the page will be reset!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Clear!',
+                cancelButtonText: 'No, cancel!',
+                reverseButtons: true,
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                     deleteKey();
+                    $('.js-summernote').summernote('code', '');
+                    location.reload();
+                }
+            });
+    }
+var saveToLocal = function () {
         var summernoteContent = $('#saveToLocal').summernote("code");
-        var summernoteContentString = JSON.stringify(summernoteContent);
-        localStorage.setItem('summernoteData', summernoteContentString);
-        console.log("Saved to local storage");
-        
-        const mark_as_free = $('#markAsFree').is(':checked') ? 1 : 0;
-        console.log('chapter mark as free', mark_as_free);
-        localStorage.setItem('markAsFree', mark_as_free);
-        
-        var title = JSON.stringify($('#title').val());
-        localStorage.setItem('Chapter_title', title);
-    };
-    // Debounced version of saveToLocal
-    var debouncedSaveToLocal = debounce(saveToLocal, 3000);
-    // Remove from local storage
-    var removeFromLocal = function () {
-        localStorage.removeItem("summernoteData");
-        $('#saveToLocal').summernote('reset');
-        console.log("Removed from local storage");
-        localStorage.removeItem('markAsFree');
-                localStorage.removeItem('Chapter_title');
-                localStorage.removeItem('uploadedImageURLs');
-                localStorage.removeItem('uploadedVideoURLs');
+        var chapterTitle = $('#title').val();
+        var markAsFree = $('#markAsFree').is(':checked') ? 1 : 0;
+
+        // Create an object with all the data
+        var dataToSave = {
+            "summerNoteData": summernoteContent,
+            "Chapter_title": chapterTitle,
+            "markAsFree": markAsFree
+        };
+
+        // Determine key based on mode
+        var key;
+        if (mode === "edit" ) {
+            Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
+            key = `${Chapter.id}_${mode}`;
+        } 
+        else if( mode === "clone"){
+            Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
+            key = `${Chapter.id}_${mode}`;
+        }
+        else {
+            key = "add";
+        }
+
+        // Get existing data from local storage
+        var existingData = JSON.parse(localStorage.getItem('chapterData')) || {};
+        existingData[key] = dataToSave;
+        // Save updated data to local storage
+        localStorage.setItem('chapterData', JSON.stringify(existingData));
+        console.log("Saved to local storage", dataToSave);
     };
 
+
+
+    // Debounced version of saveToLocal
+    var debouncedSaveToLocal = debounce(saveToLocal, 2000);
+    // Remove from local storage
+    // function removeFromLocal (id) {
+    //     var key = mode === "edit" || mode === "clone" ? `${id}_${mode}` : "add";
+    //     var existingData = JSON.parse(localStorage.getItem('chapterData')) || {};
+    //     console.log("key to remove",existingData[key]);
+    //     delete existingData[key];
+
+    //     localStorage.setItem('chapterData', JSON.stringify(existingData));
+    //     console.log("Removed from local storage");
+    // };
+    function deleteKey()
+    {
+       
+        var key;
+        if (mode === "edit" ) {
+            Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
+            key = `${Chapter.id}_${mode}`;
+        } 
+        else if( mode === "clone"){
+            Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
+            key = `${Chapter.id}_${mode}`;
+        }
+        else {
+            key = "add";
+        }
+    
+    var savedData = localStorage.getItem('chapterData');
+    var parsedData = savedData ? JSON.parse(savedData) : {};
+    // Check if the data for the specific key exists
+    if (parsedData && parsedData[key]) {
+        delete parsedData[key];
+        var updatedChapterData = JSON.stringify(parsedData);
+        localStorage.setItem('chapterData', updatedChapterData);
+    }
+}
     // Timer function for auto-save
     var timer = function () {
         interval = setInterval(function () {
-            // saveToLocal();
             debouncedSaveToLocal();
             clearInterval(interval);
         }, 1000);
@@ -434,6 +511,7 @@
             contentType: 'application/json',
             dataType: 'json',
             success: function (response) {
+                console.log('response',response);
                 lock=false;
                 uniqueId = response['data']['unique_id']
                 id = response['data']['id'];
@@ -446,11 +524,13 @@
                     $("#success-text").html("Chapter added Successfully");
                 }
                 $("#main-form-div").hide();
-                localStorage.removeItem('markAsFree');
-                localStorage.removeItem('Chapter_title');
-                localStorage.removeItem('summernoteData');
-                localStorage.removeItem('uploadedImageURLs');
-                localStorage.removeItem('uploadedVideoURLs');
+                // localStorage.removeItem('markAsFree');
+                // localStorage.removeItem('Chapter_title');
+                // localStorage.removeItem('summernoteData');
+                // localStorage.removeItem('uploadedImageURLs');
+                deleteKey();
+              
+                // removeFromLocal(id);
 
                 $("#action-buttons").html(`
                 <button onclick="redirectToAddChapter()" class="btn-outline-success btn-sm mr-1">Add Another Chapter</button>
@@ -470,7 +550,6 @@
                 return;
             }
         });
-        // removeFromLocal();
         
     }
 
@@ -488,7 +567,6 @@
     }
 
     function redirectToPreviewChapter(id){
-        // window.location='#previewChapterContent/'+uniqueId;
         const data = {
             id:id
             }
@@ -515,21 +593,55 @@
             $("#progress-bar-div").show();
 
         } 
+    // function loadFromLocal() {
+    //        var savedData = localStorage.getItem('chapterData');
+    //        var parsedData = JSON.parse(savedData);
+    //        if (savedData) {
+        
+    //     // Load the data into the respective elements
+    //     $('#saveToLocal').summernote('code', parsedData.summerNoteData);
+    //     $('#title').val(parsedData.Chapter_title);
+    //     $('#markAsFree').prop('checked', parsedData.markAsFree === 1);
+    //        }
+    // }
     function loadFromLocal() {
-            var summernoteContent = localStorage.getItem('summernoteData');
-            var chapterTitle = localStorage.getItem('Chapter_title');
-            var markAsFree = localStorage.getItem('markAsFree'); // Retrieve checkbox state
+    var key;
+    var Chapter;
 
-            if (summernoteContent) {
-                $('#saveToLocal').summernote('code', JSON.parse(summernoteContent));
-            }
-            if (chapterTitle) {
-                $('#title').val(JSON.parse(chapterTitle));
-            }
-            if (markAsFree !== null) { // Set the checkbox state
-                $('#markAsFree').prop('checked', JSON.parse(markAsFree));
-            }
+    // Determine the key based on the mode
+    if (mode === "edit") {
+        Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
+        key = `${Chapter.id}_${mode}`;
+    } else if (mode === "clone") {
+        Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
+        key = `${Chapter.id}_${mode}`;
+    } else {
+        key = "add";
+    }
+    // Retrieve and parse the saved data from localStorage
+    var savedData = localStorage.getItem('chapterData');
+    var parsedData = savedData ? JSON.parse(savedData) : {};
+    // Check if the data for the specific key exists
+    if (parsedData && parsedData[key]) {
+        var data = parsedData[key];
+        // console.log('Data for Key:', data);
+
+        $('#saveToLocal').summernote('code', data.summerNoteData);
+        $('#title').val(data.Chapter_title);
+        $('#markAsFree').prop('checked', data.markAsFree === 1);
+    } else {
+        // Fallback to default values or existing data
+        if (Chapter) {
+            console.log('Chapter Data:', Chapter);
+
+            $('#saveToLocal').summernote('code', Chapter["content"]);
+            $('#title').val(Chapter["title"]);
+            $('#markAsFree').prop('checked', Chapter["mark_as_free"]);
         }
+    }
+}
+
+
 
     function onCookiesReady(callback) {
         var checkInterval = setInterval(function() {
@@ -717,11 +829,8 @@
                         },
             });
         }
-          if (mode == "clone") {
-        // var Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
-        // setCloneMode(Chapter);
+     if (mode == "clone") {
          setMode() 
-
     } 
     else if(mode=='edit')
     {
@@ -731,45 +840,27 @@
     else{
          loadFromLocal();
     }
-       
-   
     })
 ;
 
 function setMode() {
-    var localData = localStorage.getItem('summernoteData');
-    var chapterTitle = localStorage.getItem('Chapter_title');
-    var markAsFree = localStorage.getItem('markAsFree');
-    if(mode=='clone'){var Chapter = JSON.parse('{{ clone_chapter|escapejs }}');}
-   else{ var Chapter = JSON.parse('{{ edit_chapter|escapejs }}');}
+    loadFromLocal();  // Load the local data first
 
-    if (localData) 
-    {
-        $('#saveToLocal').summernote('code', JSON.parse(localData));
+    // Fallbacks in case there's no local data
+    var Chapter;
+    if (mode == 'clone') {
+        Chapter = JSON.parse('{{ clone_chapter|escapejs }}');
+    } else {
+        Chapter = JSON.parse('{{ edit_chapter|escapejs }}');
     }
-    else 
-    {
-         $('#saveToLocal').summernote('code', Chapter["content"]); 
-    }
-    if (chapterTitle) 
-    {
-        $('#title').val(JSON.parse(chapterTitle));
-    }
-    else{
+
+    if (!localStorage.getItem('chapterData')) {
+        $('#saveToLocal').summernote('code', Chapter["content"]);
         $("#title").val(Chapter["title"]);
+        $('#markAsFree').prop('checked', Chapter["mark_as_free"]);
     }
-    if (markAsFree !== null) 
-    { 
-      $('#markAsFree').prop('checked', JSON.parse(markAsFree));
-    }
-    else{
-        var is_free = Chapter["mark_as_free"];
-        $('#markAsFree').prop('checked', is_free);
-    }
-    
-
-        
 }
+
 
 
 
