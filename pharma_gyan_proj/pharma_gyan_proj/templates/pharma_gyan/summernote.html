@@ -224,7 +224,9 @@ function clearAllData() {
                 if (result.isConfirmed) {
                      deleteKey();
                     $('.js-summernote').summernote('code', '');
-                    location.reload();
+                    $('#saveToLocal').summernote('code', '');
+                    $("#title").val('');
+                    $('#markAsFree').prop('checked', 0);
                 }
             });
     }
