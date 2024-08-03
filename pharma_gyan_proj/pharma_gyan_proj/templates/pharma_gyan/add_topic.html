@@ -253,7 +253,7 @@
     var mode = "{{mode}}";
     var currentCustomerData = {};
     var available_chapters = JSON.parse('{{ chapters|escapejs }}');
-    var topic_data = {};
+    // var topic_data = {};
     console.log('available_chapters', available_chapters)
     var client_id;
 
@@ -268,19 +268,18 @@
 
     onCookiesReady(function() {
             client_id = Cookies.get('client_id');
-            if(mode=="edit"){
+            if(mode=="edit"|| mode==='clone'){
             topic_data = JSON.parse('{{ topic_data|escapejs }}');
-            console.log('Data-',topic_data);
-            localStorage.setItem('topic', JSON.stringify(topic_data));
-            }
-            if(mode=="clone"){
-            topic_data = JSON.parse('{{ topic_data|escapejs }}');
-            delete topic_data.id;
-            delete topic_data.unique_id;
-            localStorage.setItem('topic', JSON.stringify(topic_data));
+            // localStorage.setItem('topic', JSON.stringify(topic_data)); 
+            // loadCourse();
+            // setMode();
+                if(mode=="clone"){
+                // delete topic_data.id;
+                delete topic_data.unique_id;
+                }
             }
             });
-
+   
     // Function to remove blur and opacity effects
     function removeBlurOpacity() {
         document.getElementById('panel-5').classList.remove('blur-effect', 'opacity-effect');
@@ -352,27 +351,68 @@
             chapters.push(chapterId);
         });
 
-        let topicData = {
+        var topicData = {
             title: title,
             description: description,
             chapters: chapters
         };
+        var key;
+        if(mode=='edit')
+        {
+        key=`${topic_data.id}_${mode}`;
 
-        localStorage.setItem('topic', JSON.stringify(topicData));
+        }
+        else if(mode=='clone')
+        {
+        key=`${topic_data.id}_${mode}`;
+        }
+        else{
+            key='create';
+        }
+        var existingData = JSON.parse(localStorage.getItem('topic')) || {};
+        existingData[key] = topicData;
+        localStorage.setItem('topic', JSON.stringify(existingData));
+        // localStorage.setItem('topic', JSON.stringify(topicData));
+        console.log("saved items",topicData);
     }
 
     function loadCourse() {
-        let topicData = JSON.parse(localStorage.getItem('topic'));
-
-        if (topicData) {
-            $('#title').val(topicData.title);
-            $('#desc').val(topicData.description);
-
-            topicData.chapters.forEach(chapterId => {
-                chapters = available_chapters.find(chapters => chapters.unique_id+'-version-'+chapters.version == chapterId);
-                addChapter(chapters.unique_id, chapters.title, chapters.version);
+        // let topic = JSON.parse(localStorage.getItem('topic')); 
+        var key;
+        if(mode === 'edit') {
+            var topic = JSON.parse('{{ topic_data|escapejs }}');
+            key = `${topic.id}_${mode}`;
+        } else if(mode === 'clone') {
+            var topic = JSON.parse('{{ topic_data|escapejs }}');
+            key = `${topic.id}_${mode}`;
+        } else {
+            key = 'create';
+        }
+        var savedData = localStorage.getItem('topic');
+        var parsedData = savedData ? JSON.parse(savedData) : {};
+        if (parsedData && parsedData[key]) {
+        var data = parsedData[key];
+        $('#title').val(data.title);
+        $('#desc').val(data.description);
+        if (data.chapters && data.chapters.length) {
+            data.chapters.forEach(chapterId => {
+                let chapter = available_chapters.find(ch => ch.unique_id + '-version-' + ch.version == chapterId);
+                if (chapter) {
+                    addChapter(chapter.unique_id, chapter.title, chapter.version);
+                }
             });
         }
+    } 
+    else if (topic && topic.chapters) {
+        $('#title').val(topic.title);
+        $('#desc').val(topic.description);
+        topic.chapters.forEach(chapterId => {
+            let chapter = available_chapters.find(ch => ch.unique_id + '-version-' + ch.version == chapterId);
+            if (chapter) {
+                addChapter(chapter.unique_id, chapter.title, chapter.version);
+            }
+        });
+    }     
     }
 
     function redirectToAddAnotherTopic(){
@@ -404,13 +444,37 @@
                 reverseButtons: true,
             }).then(function(result) {
                 if (result.isConfirmed) {
-                    localStorage.removeItem('topic');
+                    // localStorage.removeItem('topic');
+                    deleteKey();
+                    $('#title').val('');
+                    $('#desc').val('');
+
                     window.location='#addTopic';
                 }
             });
     }
+    function deleteKey(){
+        var key;
+        if(mode === 'edit') {
+            var topic = JSON.parse('{{ topic_data|escapejs }}');
+            key = `${topic.id}_${mode}`;
+        } else if(mode === 'clone') {
+            var topic = JSON.parse('{{ topic_data|escapejs }}');
+            key = `${topic.id}_${mode}`;
+        } else {
+            key = 'create';
+        }
+        var savedData = localStorage.getItem('topic');
+        var parsedData = savedData ? JSON.parse(savedData) : {};
+        if(parsedData && parsedData[key])
+        {
+            console.log("deleting key ",parsedData[key]);
+        delete parsedData[key];
+        var updatedTopic = JSON.stringify(parsedData);
+        localStorage.setItem('topic', updatedTopic);
+        }
 
-
+    }
     function addChapter(uuid, title, version) {
         console.log('adding topic');
         document.getElementById('add-topics-box').hidden = true;
@@ -580,19 +644,42 @@
         initProgressBar();
 
         $("#err-div").html('');
-        let topicData = JSON.parse(localStorage.getItem('topic'));
-        topicData['client_id'] = client_id;
+        // let topicData = JSON.parse(localStorage.getItem('topic'));
+
+        // topicData['client_id'] = client_id;
         var barInterval = setInterval('incBar()',25);
 
         //let data = {'title':title, 'description':description,'image':imageFile};
-        console.log(topicData);
+        // console.log(topicData);
+        let title = $('#title').val();
+        let description = $('#desc').val();
+        let chapters = [];
+
+        $('#topics-container .topic-card-header').each(function() {
+            let chapterId = $(this).attr('id').replace('topic-card-', '');
+            chapters.push(chapterId);
+        });
+
+        var topicData = {
+            title: title,
+            description: description,
+            chapters: chapters,
+            client_id: client_id
+        };
         console.log('mode', mode);
-        if(mode=="edit"){
-            editUniqueId = topic_data["unique_id"];
-            editId = topic_data["id"];
-            topicData['unique_id'] = editUniqueId;
-            topicData["id"] = editId;
-            console.log('topicData new', topicData);
+        // if(mode=="edit"){
+        //     editUniqueId = topic_data["unique_id"];
+        //     editId = topic_data["id"];
+        //     topicData['unique_id'] = editUniqueId;
+        //     topicData["id"] = editId;
+        //     console.log('topicData new', topicData);
+        // }
+        if(mode=='edit')
+        {
+            var edit_data = JSON.parse('{{ topic_data|escapejs }}');
+            topicData['unique_id'] = edit_data["unique_id"];
+            topicData["id"] = edit_data["id"];
+            console.log("Data to save for edit mode",topicData);
         }
 
         $.ajax({
@@ -610,14 +697,14 @@
                 console.log('Success', data);
                 if(data['result']=='SUCCESS')
                 {
-                    localStorage.removeItem('topic');
+                    deleteKey();
                     $("#success-div").show();
                     if(mode == "edit"){
                         $("#success-text").html("Topic edited Successfully");
                     }else{
                         $("#success-text").html("Topic added Successfully");
                     }
-                    localStorage.removeItem("topic");
+                    // localStorage.removeItem("topic");
                     $("#main-form-div").hide();
                     return;
                 }
