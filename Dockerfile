@@ -1,7 +1,8 @@
 FROM centos:7
 LABEL maintainer="Vansh Team"
-RUN apt-get -y update
 RUN \
+sudo apt-get update; \
+sudo apt-get -y upgrade; \
  yum install -y epel-release && \
  yum install -y wget \
                 git \
