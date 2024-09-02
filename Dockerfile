@@ -1,50 +1,69 @@
-FROM centos:7
+# Use Ubuntu as the base image
+FROM ubuntu:20.04
 LABEL maintainer="Vansh Team"
-RUN \
-sudo apt-get update; \
-sudo apt-get -y upgrade; \
- yum install -y epel-release && \
- yum install -y wget \
-                git \
-                which \
-                make \
-                python-setuptools \
-                python-pip \
-                python-dev \
-                zlib-devel \
-                openssl-devel \
-                mysql-devel \
-                python-devel \
-                gcc-c++ \
-                snappy-devel \
-                gcc \
-                postgresql \
-                postgresql-devel \
-                sqlite-devel \
-                expat-devel \
-                bzip2-devel \
-                libffi-devel \
-                zlib-devel \
-                libxslt-devel \
-                libxml2-devel \
-                python-argparse \
-                xmlsec1-devel \
-                xmlsec1-openssl-devel \
-                libtool-ltdl-devel && \
- yum install -y nginx && \
- yum install -y screen && \
- pip install --upgrade pip && \
- pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host=api.github.com supervisor --no-cache-dir && \
+ENV PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8 \
+    DEBIAN_FRONTEND=noninteractive \
+    PYTHON_VERSION=3.8
+RUN apt-get update && apt-get install -y \
+    wget \
+    git \
+    make \
+    python3-setuptools \
+    python3-pip \
+    python3-dev \
+    zlib1g-dev \
+    libssl-dev \
+    default-libmysqlclient-dev \
+    libpq-dev \
+    libsqlite3-dev \
+    libexpat1-dev \
+    libbz2-dev \
+    libffi-dev \
+    libxslt1-dev \
+    libxml2-dev \
+    xmlsec1 \
+    libxmlsec1-dev \
+    perl \
+    libpcre3-dev \
+    libtool \
+    nginx \
+    supervisor \
+    ffmpeg \
+    xfonts-75dpi \
+    xfonts-base \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-
- mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs && \
- yum clean all
+# Install supervisor
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org supervisor && \
+    mkdir -p /var/log/supervisor /etc/supervisord.d /logs /opt/logs /etc/newrelic
 
 WORKDIR /usr/local/pharma_gyan/
 ARG BUILD_ENV="uat"
 ENV BUILD_ENV=$BUILD_ENV
 
 EXPOSE 80
+
+RUN apt-get update && \
+    apt-get -y install \
+    libnss3 \
+    systemd \
+    gzip \
+    libsasl2-2 \
+    libsasl2-modules \
+    libssh2-1 \
+    libldap-2.4-2 \
+    binutils \
+    kpartx \
+    curl \
+    libcurl4 \
+    libglib2.0-0 \
+    rpm \
+    libpq-dev \
+    postgresql \
+    libssl1.1 \
+    openssl
 
 RUN \
  cd /opt && \
