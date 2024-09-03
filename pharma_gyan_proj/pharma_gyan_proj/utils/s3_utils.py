@@ -52,7 +52,7 @@ class S3Wrapper:
         except Exception as e:
             logging.error(f"log_key: upload_object_from_string, err: {e}")
             return None
-        s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file.name}"
+        s3_url = f"https://{bucket}.s3.ap-south-1.amazonaws.com/{file.name}"
         return s3_url
 
     def upload_object_from_string(self, bucket, key, data, params={}):
