@@ -72,6 +72,6 @@ ROOT_URLCONF = 'pharma_gyan_proj.urls'
 #     },
 # }
 
-BASE_PATH="http://65.0.223.156:80/"
+BASE_PATH="http://43.204.94.180:80/"
 LOGIN_PATH="/pharma_gyan/editor/adminLogin"
 SECURE_LOGIN_PATH="/pharma_gyan/editor/secureLogin/"
