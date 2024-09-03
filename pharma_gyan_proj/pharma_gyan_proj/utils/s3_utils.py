@@ -19,8 +19,6 @@ class S3Wrapper:
         if self.client is None:
             self.client = boto3.client(
                 's3',
-                aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
-                aws_secret_access_key="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",
                 region_name="ap-south-1"
             )
 

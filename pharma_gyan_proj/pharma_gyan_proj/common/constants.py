@@ -27,7 +27,7 @@ class AdminUserPermissionType(Enum):
     viewTopics = "viewTopics"
 
 
-BUCKET_NAME = "pharma-gyan-test-media"
+BUCKET_NAME = "pharma-gyan-prod-media"
 
 ACTIVE_CHAPTER_CHECK = False
     
