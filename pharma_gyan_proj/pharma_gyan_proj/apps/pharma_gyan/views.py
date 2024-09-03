@@ -105,7 +105,13 @@ def add_media(request):
             file.name = uuid.uuid4().hex + '_' + file.name
 
             file_url = S3Wrapper().upload_and_return_s3_url(BUCKET_NAME, file)
-            file_urls.append(file_url)
+            if file_url is None:
+                pass
+            else:
+                file_urls.append(file_url)
+
+        if len(file_urls) <1:
+            return JsonResponse({'result': 'failure', 'detailed_message': 'failed to upload media'}, status=400)
 
         return JsonResponse({'result': 'success', 'data': {'file_urls': file_urls}}, status=200)
     else:

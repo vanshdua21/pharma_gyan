@@ -48,7 +48,7 @@ class S3Wrapper:
 
     def upload_and_return_s3_url(self, bucket, file):
         try:
-            self.client.upload_fileobj(file, bucket, file.name, ExtraArgs={'ACL': 'public-read'})
+            self.client.upload_fileobj(file, bucket, file.name)
         except Exception as e:
             logging.error(f"log_key: upload_object_from_string, err: {e}")
             return None
