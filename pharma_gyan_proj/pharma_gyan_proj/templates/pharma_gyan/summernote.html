@@ -319,9 +319,9 @@ var saveToLocal = function () {
     //preview the chapter
     function previewChapter(){
        console.log('called preview');
-        const summernoteData = JSON.parse(localStorage.getItem('summernoteData'));
+        const summernoteData = $('#saveToLocal').summernote("code");
         console.log('summernote',summernoteData);
-        const Chapter_title = JSON.parse(localStorage.getItem('Chapter_title'));
+        const Chapter_title = $('#title').val();
         if(!($('#title').val())){
             setError("title");
             $("#err-div").html('<div id="err-info" class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">×</button><strong>Error!</strong> <span id="err-text">Please fill title ! </span></div>');
