@@ -596,17 +596,15 @@ def upsertPackage(request):
 
 def save_file_to_s3(file):
     s3_client = boto3.client(
-        's3',
-        aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
-        aws_secret_access_key="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",
-        region_name="ap-south-1"
-    )
+                's3',
+                region_name="ap-south-1"
+            )
 
     file_name = file.name
 
-    s3_client.upload_fileobj(file, "pharma-gyan-test-media", file_name, ExtraArgs={'ACL': 'public-read'})
+    s3_client.upload_fileobj(file, "pharma-gyan-prod-media", file_name, ExtraArgs={'ACL': 'public-read'})
 
-    s3_url = f"https://pharma-gyan-test-media.s3.ap-south-1.amazonaws.com/{file_name}"
+    s3_url = f"https://pharma-gyan-prod-media.s3.ap-south-1.amazonaws.com/{file_name}"
     return s3_url
 
 @csrf_exempt
