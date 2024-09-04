@@ -18,9 +18,11 @@ class S3Wrapper:
     def get_s3_client(self):
         if self.client is None:
             self.client = boto3.client(
-                's3',
-                region_name="ap-south-1"
-            )
+        's3',
+        aws_access_key_id="AKIAQUFLP6LRNCUHZSNH",
+        aws_secret_access_key="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",
+        region_name="ap-south-1"
+    )
 
     def get_s3_bucket_key(self, path):
         #     return s3 bucket and key from s3 url

@@ -597,8 +597,8 @@ def upsertPackage(request):
 def save_file_to_s3(file):
     s3_client = boto3.client(
         's3',
-        aws_access_key_id="AKIAQ3EGS2LQMZK5DAFB",
-        aws_secret_access_key="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",
+        aws_access_key_id="AKIAQUFLP6LRNCUHZSNH",
+        aws_secret_access_key="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",
         region_name="ap-south-1"
     )
 
