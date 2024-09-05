@@ -40,3 +40,4 @@ pytest-env==0.8.1
 pytest-cov==4.0.0
 SQLAlchemy==1.4.39
 greenlet==1.1.0
+cryptography==3.4.8
