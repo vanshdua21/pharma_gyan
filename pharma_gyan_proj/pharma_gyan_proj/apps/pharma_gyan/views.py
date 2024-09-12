@@ -528,7 +528,7 @@ def upsertCourse(request):
     image_file = request.FILES.get('image')
     semesters = json.loads(request.POST.get('semesters', '[]'))
 
-    imageUrl = save_file_to_s3(image_file)
+    imageUrl = S3Wrapper().upload_and_return_s3_url(BUCKET_NAME, image_file)
     # Collect the data in a dictionary
     course = {
         'id': id,
@@ -579,7 +579,9 @@ def upsertPackage(request):
     price = request.POST.get('price')
     image_file = request.FILES.get('image')
     courses = json.loads(request.POST.get('courses', '[]'))
-    imageUrl = save_file_to_s3(image_file)
+
+    imageUrl = S3Wrapper().upload_and_return_s3_url(BUCKET_NAME, image_file)
+
     # Collect the data in a dictionary
     package = {
         'id': id,
